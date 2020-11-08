@@ -1,8 +1,10 @@
 import React from 'react';
-import { Text, View, SafeAreaView, ActivityIndicator, Image, StyleSheet, TextInput, Button } from 'react-native';
+import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { Text, Input, Button } from 'react-native-elements';
 import { graphql, gql } from '@apollo/react-hoc';
 import { registrationSchema } from '../utils/validationSchema';
-import { formatYupError } from '../utils/formatError';
+import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 
 const defaultState = {
   values: {
@@ -28,24 +30,28 @@ class Signup extends React.PureComponent {
     try {
       await registrationSchema.validate(this.state.values, { abortEarly: false })
     } catch (err) {
-      this.setState({ errors: formatYupError(err) })
-      console.log("STATE: ", formatYupError(err))
+      this.setState({ errors: formatYupErrors(err) })
     }
 
-    this.setState({ isSubmitting: true })
-    const { name, email, password } = this.state.values
+    const { errors } = this.state
 
-    const { data: { errors, user, token } } = await this.props.mutate({ variables: { name, email, password } })
-
-
-    if (errors) {
+    if (Object.keys(errors).length !== 0) {
       this.setState({ errors, isSubmitting: false })
       return
+    } else {
+      this.setState({ isSubmitting: true })
+      const { name, email, password } = this.state.values
+
+      const { data: { signup: { errors, user, token } } } = await this.props.mutate({ variables: { name, email, password } })
+
+      if (errors) {
+        this.setState({ errors: formatServerErrors(errors) })
+        return
+      }
+      console.log("Resp: ", user, token)
     }
 
-    console.log("Resp: ", user, token)
     this.setState(defaultState)
-
   }
 
   onChangeText = (key, value) => {
@@ -58,13 +64,14 @@ class Signup extends React.PureComponent {
         ...state.values,
         [key]: value
       },
-      errors
+      errors,
+      isSubmitting: false
     }))
   }
 
   render() {
     const { values: { name, email, password, confirmPassword }, loading, isSubmitting, errors } = this.state
-    console.log("DDD: ", errors.name)
+
     if (loading) {
       return (
         <SafeAreaView style={styles.loadingContainer}>
@@ -75,17 +82,30 @@ class Signup extends React.PureComponent {
 
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Signup</Text>
+        <Text style={styles.title} h2>Signup</Text>
         <View style={styles.signupContainer}>
-          <TextInput value={name} onChangeText={text => this.onChangeText('name', text)} style={styles.textInput} placeholder="Name" errorStyle={{ color: 'red' }}
-            errorMessage={errors.name && 'ENTER A VALID ERROR HERE'} />
-          <TextInput value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" style={styles.textInput} placeholder="Email" errorStyle={{ color: 'red' }}
-            errorMessage={errors.email && 'ENTER A VALID ERROR HERE'} />
-          <TextInput secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} style={styles.textInput} placeholder="Password" errorStyle={{ color: 'red' }}
-            errorMessage={errors.password && 'ENTER A VALID ERROR HERE'} />
-          <TextInput secureTextEntry={true} value={confirmPassword} onChangeText={text => this.onChangeText('confirmPassword', text)} style={styles.textInput} placeholder="Confirm password" errorStyle={{ color: 'red' }}
-            errorMessage={errors.confirmPassword && 'ENTER A VALID ERROR HERE'} />
-          <Button title="Sign up" onPress={this.submit} />
+          <Input value={name} onChangeText={text => this.onChangeText('name', text)} placeholder="Name" errorStyle={{ color: 'red' }}
+            errorMessage={errors.name} />
+          <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: 'red' }}
+            errorMessage={errors.email} />
+          <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: 'red' }}
+            errorMessage={errors.password} />
+          <Input secureTextEntry={true} value={confirmPassword} onChangeText={text => this.onChangeText('confirmPassword', text)} placeholder="Confirm password" errorStyle={{ color: 'red' }}
+            errorMessage={errors.confirmPassword} />
+          <Button
+            style={{ marginTop: 20 }}
+            icon={
+              <Icon
+                name="check-circle"
+                size={20}
+                color="white"
+                style={{ marginRight: 10 }}
+              />
+            }
+            onPress={this.submit} disabled={isSubmitting}
+            title="Sign up"
+          />
+
         </View>
       </View>
     )
@@ -107,15 +127,7 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
   title: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  textInput: {
-    fontSize: 16,
-    marginBottom: 10,
-    paddingTop: 10,
-    paddingBottom: 10,
-    borderBottomWidth: 1
+    textAlign: 'center',
   }
 });
 

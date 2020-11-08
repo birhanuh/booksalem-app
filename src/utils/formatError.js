@@ -1,16 +1,17 @@
-export const normalizeErrors = (errors) => {
+export const formatServerErrors = (errors) => {
   const errMap = {};
 
   errMap[errors.path] = errors.message;
 
-  return { errMap };
+  return errMap;
 };
 
-export const formatYupError = (err) => {
-  const errors = {};
-  err.inner.forEach((e) => {
-    errors[e.path] = e.message
+export const formatYupErrors = (errors) => {
+  const formatedErrors = {};
+
+  errors.inner.forEach((err) => {
+    formatedErrors[err.path] = err.message
   });
 
-  return errors;
+  return formatedErrors;
 };

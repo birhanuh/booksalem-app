@@ -20,6 +20,9 @@ export const registrationSchema = yup.object().shape({
     .min(3, "Confirm Password must be at least 3 characters")
     .max(255)
     .required("Confirm password is required")
+    .test('passwords-match', "Passwords don't match", function (value) {
+      return this.parent.password === value;
+    })
 });
 
 export const forgotPasswordResetRequestSchema = yup.object().shape({
@@ -43,15 +46,6 @@ export const passwordResetchema = yup.object().shape({
     .max(255)
     .required("Confirm password is required")
 });
-
-// if (data.password && data.confirmPassword) {
-//   if (data.password !== data.confirmPassword) {
-//     errors["password"] = "Password and confirm password does not match";
-//     errors["confirmPassword"] = T.translate(
-//       "Password and confirm password does not match"
-//     );
-//   }
-// }
 
 export const loginSchema = yup.object().shape({
   email: yup
