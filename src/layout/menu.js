@@ -1,8 +1,9 @@
 import React from 'react';
 import { withRouter } from "react-router-native";
 import { View, StyleSheet } from 'react-native';
-import { ListItem } from 'react-native-elements';
+import { ListItem, Button, Divider } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 
 const Menu = ({ history }) => {
   const redirectToUserPage = () => {
@@ -15,6 +16,19 @@ const Menu = ({ history }) => {
 
   const redirectToSigninPage = () => {
     history.push('/login')
+  }
+
+  const signout = () => {
+    // Remove token from async storage
+    try {
+      useAsyncStorage.removeItem('@kemetsehaftalem/token')
+      return true;
+    }
+    catch (exception) {
+      return false;
+    }
+
+    history.push('/')
   }
 
   const list = [
@@ -49,6 +63,23 @@ const Menu = ({ history }) => {
           </ListItem>
         ))
       }
+
+      <Divider style={{ marginTop: 30, marginBottom: 10 }} />
+
+      <Button
+        type="outline"
+        style={{ marginTop: 20 }}
+        icon={
+          <Icon
+            size={20}
+            color="white"
+            style={{ marginRight: 10 }}
+          />
+        }
+        onPress={signout}
+        title="Sign out"
+      />
+
     </View>
   )
 }

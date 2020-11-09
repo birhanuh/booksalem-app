@@ -1,17 +1,19 @@
 import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
 // import { onError } from "@apollo/client/link/error";
-// import { setContext } from '@apollo/link-context';
+import { setContext } from '@apollo/link-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GRAPHQL_API_URL = 'http://localhost:4000/';
 
-/*
+/**
 uncomment the code below in case you are using a GraphQL API that requires some form of
 authentication. asyncAuthLink will run every time your request is made and use the token
 you provide while making the request.
+*/
 
-
-const TOKEN = '';
 const asyncAuthLink = setContext(async () => {
+  const TOKEN = await AsyncStorage.getItem('@kemetsehaftalem/token') ? await AsyncStorage.getItem('@kemetsehaftalem/token') : '';
+
   return {
     headers: {
       Authorization: TOKEN,
@@ -19,7 +21,7 @@ const asyncAuthLink = setContext(async () => {
   };
 });
 
-*/
+
 
 // const link = onError(({ graphQLErrors, networkError }) => {
 //   if (graphQLErrors)
@@ -42,6 +44,6 @@ const httpLink = new HttpLink({
 
 export const apolloClient = new ApolloClient({
   cache: new InMemoryCache(),
-  link: httpLink,
-  // link: asyncAuthLink.concat(httpLink), 
+  // link: httpLink,
+  link: asyncAuthLink.concat(httpLink),
 });

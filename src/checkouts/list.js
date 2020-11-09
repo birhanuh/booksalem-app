@@ -2,9 +2,9 @@ import React from 'react';
 import { Text, View, SafeAreaView, ActivityIndicator, Image, StyleSheet } from 'react-native';
 import { useQuery, gql } from '@apollo/client';
 
-const GET_BOOKS = gql`
+const GET_CHECKOUTS = gql`
   query {
-    getAvailableBooks {
+    getCheckouts {
       title
       author
       condition
@@ -26,8 +26,8 @@ const GET_BOOKS = gql`
   }
 `
 
-const Books = () => {
-  const { data, loading, error } = useQuery(GET_BOOKS);
+const Checkouts = () => {
+  const { data, loading, error } = useQuery(GET_CHECKOUTS);
 
   if (error) { console.error('error', error) };
   if (loading) {
@@ -38,30 +38,30 @@ const Books = () => {
     );
   };
 
-  // const { getAvailableBooks } = data;
-  const getAvailableBooks = [];
-  console.log("BOOKS: ", getAvailableBooks);
+  // const { getCheckouts } = [];
+  const getCheckouts = [];
+  console.log("CHECKOUTS: ", getCheckouts);
   return (
     <View style={styles.container}>
-      {getAvailableBooks.map(book => (
+      {getCheckouts.map(checkout => (
         <>
           <View style={styles.authorContainer}>
             <Image
-              source={{ uri: book.converImageUrl }}
+              source={{ uri: checkout.converImageUrl }}
               style={styles.image}
             />
             <View style={styles.details}>
               <Text style={styles.name}>
-                {book.author.name}
+                {checkout.author.name}
               </Text>
-              <Text style={styles.numberOfBooks}>
-                {book.numberOfBooks}
+              <Text style={styles.numberOfCheckouts}>
+                {checkout.numberOfCheckouts}
               </Text>
             </View>
           </View>
-          <View style={styles.bookContainer}>
-            <Text style={styles.book}>
-              {book.title}
+          <View style={styles.checkoutContainer}>
+            <Text style={styles.checkout}>
+              {checkout.title}
             </Text>
           </View>
         </>
@@ -97,15 +97,15 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold'
   },
-  numberOfBooks: {
+  numberOfCheckouts: {
     color: 'gray'
   },
-  bookContainer: {
+  checkoutContainer: {
     marginTop: 10
   },
-  book: {
+  checkout: {
     fontSize: 16
   }
 });
 
-export default Books
+export default Checkouts

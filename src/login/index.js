@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
-import { useAsyncStorage } from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Divider } from 'react-native-elements';
 import { graphql, gql } from '@apollo/react-hoc';
@@ -42,9 +42,9 @@ class Login extends React.PureComponent {
       if (errors) {
         this.setState({ errors: formatServerErrors(errors) })
       } else {
-        useAsyncStorage.setItem('@kemetsehaftalem/token', token)
+        AsyncStorage.setItem('@kemetsehaftalem/token', token)
         console.log("Resp: ", user, token)
-        this.props.history.push('/books')
+        this.props.history.push('/')
       }
     }
   }
@@ -147,6 +147,7 @@ const LOGIN_MUTATION = gql`
       user {
         name
         email
+        phone
       }
       errors {
         path

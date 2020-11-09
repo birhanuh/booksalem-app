@@ -9,6 +9,10 @@ const Footer = ({ history }) => {
     history.push('/menu')
   }
 
+  const redirectToAddBookPage = () => {
+    history.push('/book/add')
+  }
+
   const redirectToOrdersPage = () => {
     history.push('/orders')
   }
@@ -29,6 +33,17 @@ const Footer = ({ history }) => {
       }
       onPress={redirectToHomePage}
     />
+      <Button
+        type="clear"
+        icon={
+          <Icon
+            name="plus-circle"
+            size={20}
+            color='steelblue'
+          />
+        }
+        onPress={redirectToAddBookPage}
+      />
       <Button
         type="clear"
         icon={

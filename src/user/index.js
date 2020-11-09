@@ -92,12 +92,12 @@ class User extends React.PureComponent {
           <Input value={phone} onChangeText={text => this.onChangeText('phone', text)} autoCapitalize="none" placeholder="Phone" errorStyle={{ color: 'red' }}
             errorMessage={errors.phone} />
           <Button
+            type="outline"
             style={{ marginTop: 20 }}
             icon={
               <Icon
                 name="user-plus"
                 size={20}
-                color="white"
                 style={{ marginRight: 10 }}
               />
             }
@@ -112,12 +112,12 @@ class User extends React.PureComponent {
           <Input secureTextEntry={true} value={confirmPassword} onChangeText={text => this.onChangeText('confirmPassword', text)} placeholder="Confirm password" errorStyle={{ color: 'red' }}
             errorMessage={errors.confirmPassword} />
           <Button
+            type="outline"
             style={{ marginTop: 20 }}
             icon={
               <Icon
                 name="user-plus"
                 size={20}
-                color="white"
                 style={{ marginRight: 10 }}
               />
             }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
-import { useAsyncStorage } from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Divider } from 'react-native-elements';
 import { graphql, gql } from '@apollo/react-hoc';
@@ -30,6 +30,7 @@ class Signup extends React.PureComponent {
     try {
       await signupSchema.validate(this.state.values, { abortEarly: false })
     } catch (err) {
+      console.log("Resp: ", formatYupErrors(err))
       this.setState({ errors: formatYupErrors(err) })
     }
 
@@ -45,7 +46,7 @@ class Signup extends React.PureComponent {
       if (errors) {
         this.setState({ errors: formatServerErrors(errors) })
       } else {
-        useAsyncStorage.setItem('@kemetsehaftalem/token', token)
+        AsyncStorage.setItem('@kemetsehaftalem/token', token)
         console.log("Resp: ", user, token)
         this.props.history.push('/')
       }
@@ -150,12 +151,13 @@ const styles = StyleSheet.create({
 });
 
 const SIGNUP_MUTATION = gql`
-  mutation($name: String!, $email: String!, $password: String!) {
-    signup(name: $name, email: $email, password: $password) {
+  mutation($name: String!, $email: String!, $password: String!, $phone: String) {
+    signup(name: $name, email: $email, password: $password, phone: $phone) {
       token
       user {
         name
         email
+        phone
       }
       errors {
         path

@@ -1,5 +1,7 @@
 import * as yup from 'yup';
 
+const phoneRegExp = /^$|^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/
+
 export const signupSchema = yup.object().shape({
   name: yup
     .string()
@@ -22,7 +24,8 @@ export const signupSchema = yup.object().shape({
     .required("Confirm password is required")
     .test('passwords-match', "Passwords don't match", function (value) {
       return this.parent.password === value;
-    })
+    }),
+  phone: yup.string().matches(phoneRegExp, 'Phone number is not valid')
 });
 
 export const forgotPasswordResetRequestSchema = yup.object().shape({
