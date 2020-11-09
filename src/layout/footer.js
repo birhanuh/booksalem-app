@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { withRouter } from "react-router-native";
 import { View, StyleSheet } from 'react-native';
-import { Button, OverOverlay } from 'react-native-elements';
+import { Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 const Footer = ({ history }) => {
-  const [isVisible, setIsVisible] = useState(false);
-
   const menu = () => {
     history.push('/menu')
   }

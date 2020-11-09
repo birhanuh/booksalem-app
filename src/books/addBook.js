@@ -138,8 +138,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 50,
-    paddingVertical: 200
+    paddingHorizontal: 20,
+    paddingVertical: 100
   },
   signupContainer: {
     marginTop: 10
