@@ -7,7 +7,7 @@ import { graphql, gql } from '@apollo/react-hoc';
 import { signupSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 
-class Signup extends React.PureComponent {
+class AddBook extends React.PureComponent {
   state = {
     values: {
       name: '',
@@ -84,7 +84,7 @@ class Signup extends React.PureComponent {
 
     return (
       <View style={styles.container}>
-        <Text style={styles.title} h2>Signup</Text>
+        <Text style={styles.title} h2>AddBook</Text>
         <View style={styles.signupContainer}>
           <Input value={name} onChangeText={text => this.onChangeText('name', text)} placeholder="Name" errorStyle={{ color: 'red' }}
             errorMessage={errors.name} />
@@ -165,4 +165,4 @@ const SIGNUP_MUTATION = gql`
   } 
 `;
 
-export default graphql(SIGNUP_MUTATION)(Signup);
+export default graphql(SIGNUP_MUTATION)(AddBook);

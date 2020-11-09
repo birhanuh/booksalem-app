@@ -7,14 +7,14 @@ import { graphql, gql } from '@apollo/react-hoc';
 import { signupSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 
-class Signup extends React.PureComponent {
+class User extends React.PureComponent {
   state = {
     values: {
       name: '',
       email: '',
       password: '',
       confirmPassword: '',
-      phone: ''
+      phone: '',
     },
     errors: {},
     isSubmitting: false,
@@ -40,14 +40,12 @@ class Signup extends React.PureComponent {
     } else {
       this.setState({ isSubmitting: true })
 
-      const { data: { signup: { errors, user, token } } } = await this.props.mutate({ variables: { name, email, password, phone } })
+      const { data: { updateUser: { errors, user } } } = await this.props.mutate({ variables: { name, email, password, phone } })
 
       if (errors) {
         this.setState({ errors: formatServerErrors(errors) })
       } else {
-        useAsyncStorage.setItem('@kemetsehaftalem/token', token)
         console.log("Resp: ", user, token)
-        this.props.history.push('/')
       }
     }
   }
@@ -84,16 +82,13 @@ class Signup extends React.PureComponent {
 
     return (
       <View style={styles.container}>
-        <Text style={styles.title} h2>Signup</Text>
+        <Text style={styles.title} h2>User page</Text>
         <View style={styles.signupContainer}>
+          <Text style={styles.title} h4>Profile</Text>
           <Input value={name} onChangeText={text => this.onChangeText('name', text)} placeholder="Name" errorStyle={{ color: 'red' }}
             errorMessage={errors.name} />
           <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: 'red' }}
             errorMessage={errors.email} />
-          <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: 'red' }}
-            errorMessage={errors.password} />
-          <Input secureTextEntry={true} value={confirmPassword} onChangeText={text => this.onChangeText('confirmPassword', text)} placeholder="Confirm password" errorStyle={{ color: 'red' }}
-            errorMessage={errors.confirmPassword} />
           <Input value={phone} onChangeText={text => this.onChangeText('phone', text)} autoCapitalize="none" placeholder="Phone" errorStyle={{ color: 'red' }}
             errorMessage={errors.phone} />
           <Button
@@ -107,22 +102,29 @@ class Signup extends React.PureComponent {
               />
             }
             onPress={this.submit} disabled={isSubmitting}
-            title="Sign up"
+            title="Update profile"
           />
+
           <Divider style={{ marginTop: 20, marginBottom: 20 }} />
+          <Text style={styles.title} h4>Password</Text>
+          <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: 'red' }}
+            errorMessage={errors.password} />
+          <Input secureTextEntry={true} value={confirmPassword} onChangeText={text => this.onChangeText('confirmPassword', text)} placeholder="Confirm password" errorStyle={{ color: 'red' }}
+            errorMessage={errors.confirmPassword} />
           <Button
-            type="outline"
+            style={{ marginTop: 20 }}
             icon={
               <Icon
-                name="sign-in"
+                name="user-plus"
                 size={20}
+                color="white"
                 style={{ marginRight: 10 }}
-                color='steelblue'
               />
             }
-            onPress={this.redirectToLoginPage}
-            title="Login"
+            onPress={this.submit} disabled={isSubmitting}
+            title="Update password"
           />
+
         </View>
       </View>
     )
@@ -139,7 +141,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 50,
-    paddingVertical: 200
+    paddingVertical: 100
   },
   signupContainer: {
     marginTop: 10
@@ -149,10 +151,9 @@ const styles = StyleSheet.create({
   }
 });
 
-const SIGNUP_MUTATION = gql`
+const USER_UPDATE_MUTATION = gql`
   mutation($name: String!, $email: String!, $password: String!) {
-    signup(name: $name, email: $email, password: $password) {
-      token
+    user(name: $name, email: $email, password: $password) {
       user {
         name
         email
@@ -165,4 +166,4 @@ const SIGNUP_MUTATION = gql`
   } 
 `;
 
-export default graphql(SIGNUP_MUTATION)(Signup);
+export default graphql(USER_UPDATE_MUTATION)(User);

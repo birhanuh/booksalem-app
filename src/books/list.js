@@ -4,13 +4,23 @@ import { useQuery, gql } from '@apollo/client';
 
 const GET_BOOKS = gql`
   query {
-    books {
+    getAvailableBooks {
       title
-      description
+      author
+      condition
+      language
+      price
       status
-      author {
+      published_date
+      isbn
+      categories {
         name
-        numberOfBooks
+      }
+      orders {
+        users {
+          id
+          name
+        }
       }
     }
   }
@@ -27,11 +37,12 @@ const Books = () => {
       </SafeAreaView>
     );
   };
-  const { books } = data.books;
 
+  const { getAvailableBooks } = data;
+  console.log("BOOKS: ", getAvailableBooks);
   return (
     <View style={styles.container}>
-      {books.map(book => (
+      {getAvailableBooks.map(book => (
         <>
           <View style={styles.authorContainer}>
             <Image

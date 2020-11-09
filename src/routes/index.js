@@ -1,18 +1,36 @@
 import React from "react";
 import { NativeRouter, Route, Switch } from "react-router-native";
+import { View, ScrollView } from 'react-native';
+
+import Footer from "../layout/footer";
+import Menu from "../layout/menu";
 
 import Signup from "../signup";
 import Login from "../login";
-import Books from "../books";
+import Books from "../books/list";
+import AddBook from "../books/addBook";
 import Book from "../book";
+import User from "../user";
+import Orders from "../orders";
 
 export default () => (
   <NativeRouter>
-    <Switch>
-      <Route exact path="/" component={Signup} />
-      <Route exact path="/login" component={Login} />
-      <Route exact path="/books" component={Books} />
-      <Route exact path="/book" component={Book} />
-    </Switch>
+    <View style={{ flex: 1 }}>
+      <ScrollView style={{ flex: 2 }}>
+        <Switch>
+          <Route exact path="/" component={Books} />
+          <Route exact path="/signup" component={Signup} />
+          <Route exact path="/login" component={Login} />
+          <Route exact path="/book-view" component={Book} />
+          <Route exact path="/book-add" component={AddBook} />
+          <Route exact path="/user" component={User} />
+          <Route exact path="/orders" component={Orders} />
+          <Route exact path="/menu" component={Menu} />
+        </Switch>
+      </ScrollView>
+      {/* Footer  */}
+      <Footer />
+    </View>
   </NativeRouter>
 )
+
