@@ -69,10 +69,13 @@ const Menu = ({ history }) => {
       <Button
         type="outline"
         style={{ marginTop: 20 }}
+        titleStyle={{ color: '#EC3C3E' }}
+        buttonStyle={{ borderColor: '#EC3C3E' }}
         icon={
           <Icon
             size={20}
-            color="white"
+            name='sign-out'
+            color='#EC3C3E'
             style={{ marginRight: 10 }}
           />
         }

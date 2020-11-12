@@ -22,19 +22,26 @@ const Footer = ({ history }) => {
   }
 
   return (
-    <View style={styles.container}><Button
-      type="clear"
-      icon={
-        <Icon
-          name="home"
-          size={20}
-          color='steelblue'
-        />
-      }
-      onPress={redirectToHomePage}
-    />
+    <View style={styles.container}>
       <Button
         type="clear"
+        title="Home"
+        buttonStyle={styles.button}
+        titleStyle={styles.title}
+        icon={
+          <Icon
+            name="home"
+            size={20}
+            color='steelblue'
+          />
+        }
+        onPress={redirectToHomePage}>
+      </Button>
+      <Button
+        type="clear"
+        title="Add book"
+        buttonStyle={{ display: 'flex', flexWrap: 'wrap', width: 78 }}
+        titleStyle={styles.title}
         icon={
           <Icon
             name="plus-circle"
@@ -46,6 +53,9 @@ const Footer = ({ history }) => {
       />
       <Button
         type="clear"
+        title="Orders"
+        buttonStyle={styles.button}
+        titleStyle={styles.title}
         icon={
           <Icon
             name="th-list"
@@ -57,6 +67,9 @@ const Footer = ({ history }) => {
       />
       <Button
         type="clear"
+        title="Settings"
+        buttonStyle={styles.button}
+        titleStyle={styles.title}
         icon={
           <Icon
             name="ellipsis-v"
@@ -72,15 +85,23 @@ const Footer = ({ history }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#e1e8ee',
-    borderTopColor: '#bdc6cf',
+    backgroundColor: 'powderblue',
+    borderTopColor: 'skyblue',
     borderTopWidth: 1,
-    flex: 4,
+    flex: 1,
     justifyContent: 'space-evenly',
     alignItems: 'center',
     flexDirection: 'row',
     maxHeight: 80
   },
+  button: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    width: 70
+  },
+  title: {
+    fontSize: 14
+  }
 });
 
 export default withRouter(Footer)

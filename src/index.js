@@ -10,7 +10,10 @@ const theme = {
   colors: {
     primary: 'steelblue',
     secondary: 'skyblue',
-    divider: 'powderblue'
+    divider: 'powderblue',
+    success: '#49BD78',
+    error: '#EC3C3E',
+    warning: '#F7AA33'
   }
 };
 

@@ -84,9 +84,9 @@ class Login extends React.PureComponent {
         <Text style={styles.title} h2>Login</Text>
         <View style={styles.loginContainer}>
           <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: 'red' }}
-            errorMessage={errors.email} leftIcon={{ type: 'font-awesome', name: 'envelope', size: 15 }} />
+            errorMessage={errors.email} leftIcon={{ type: 'font-awesome', name: 'envelope', size: 15, marginRight: 10 }} />
           <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: 'red' }}
-            errorMessage={errors.password} leftIcon={{ type: 'font-awesome', name: 'lock', size: 20 }} />
+            errorMessage={errors.password} leftIcon={{ type: 'font-awesome', name: 'lock', size: 20, marginRight: 10 }} />
           <Button
             style={{ marginTop: 20 }}
             icon={
@@ -100,7 +100,7 @@ class Login extends React.PureComponent {
             onPress={this.submit} disabled={isSubmitting}
             title="Sign up"
           />
-          <Divider style={{ backgroundColor: 'blue', marginTop: 20, marginBottom: 20 }} />
+          <Divider style={{ marginTop: 30, marginBottom: 30 }} />
           <Button
             type="outline"
             icon={

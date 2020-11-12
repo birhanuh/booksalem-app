@@ -18,20 +18,20 @@ import ViewCheckout from "../checkouts/viewCheckout";
 
 export default () => (
   <NativeRouter>
-    <View style={{ flex: 1 }}>
-      <ScrollView style={{ flex: 2 }}>
+    <View style={{ flex: 1, backgroundColor: '#F0F7FE' }}>
+      <ScrollView>
         {/* Switch  */}
         <Switch>
           <Route exact path="/" component={Books} />
           <Route exact path="/signup" component={Signup} />
           <Route exact path="/login" component={Login} />
-          <Route exact path="/book/view" component={ViewBook} />
+          <Route exact path="/book/view/:id" component={ViewBook} />
           <Route exact path="/book/add" component={AddBook} />
           <Route exact path="/user" component={User} />
           <Route exact path="/orders" component={Orders} />
-          <Route exact path="/order/view" component={ViewOrder} />
+          <Route exact path="/order/view/:id" component={ViewOrder} />
           <Route exact path="/checkouts" component={Checkouts} />
-          <Route exact path="/checkout/view" component={ViewCheckout} />
+          <Route exact path="/checkout/view/:id" component={ViewCheckout} />
           <Route exact path="/menu" component={Menu} />
         </Switch>
       </ScrollView>

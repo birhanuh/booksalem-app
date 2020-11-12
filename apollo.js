@@ -21,8 +21,6 @@ const asyncAuthLink = setContext(async () => {
   };
 });
 
-
-
 // const link = onError(({ graphQLErrors, networkError }) => {
 //   if (graphQLErrors)
 //     graphQLErrors.map(({ message, locations, path }) =>
