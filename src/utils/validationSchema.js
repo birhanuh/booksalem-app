@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 
 const phoneRegExp = /^$|^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/
-const FILE_SIZE = 160 * 1024;
+// const isLt2M = file.size / 1024 / 1024 < 2;
 
 export const signupSchema = yup.object().shape({
   name: yup
@@ -95,14 +95,14 @@ export const addBookSchema = yup.object().shape({
     .integer("ISBN is required"),
   publishedDate: yup
     .string(),
-  coverFile: yup
-    .mixed()
-    .required("A file is required")
-    .test(
-      "fileSize",
-      "File too large",
-      value => value && value.size <= FILE_SIZE
-    )
+  // coverFile: yup
+  //   .mixed()
+  //   .required("A file is required")
+  //   .test(
+  //     "fileSize",
+  //     "File too large",
+  //     value => value && value.size / 1024 < 2
+  //   )
 });
 
 export const checkoutSchema = yup.object().shape({

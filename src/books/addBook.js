@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, TextInput, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { useAsyncStorage } from '@react-native-async-storage/async-storage';
+import { launchImageLibraryAsync } from 'expo-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { Text, Input, Button, Divider, colors } from 'react-native-elements';
+import { Text, Input, Button, Divider, Image, colors } from 'react-native-elements';
 import { graphql, gql } from '@apollo/react-hoc';
 import compose from "lodash.flowright";
-import { signupSchema } from '../utils/validationSchema';
+import { addBookSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 
 class AddBook extends React.PureComponent {
@@ -15,13 +15,14 @@ class AddBook extends React.PureComponent {
       title: '',
       author: '',
       published_date: '',
-      status: '',
-      condition: '',
-      isbn: undefined,
-      category: '',
-      language: '',
+      status: 'available',
+      condition: 'new',
+      isbn: null,
+      categoryId: 1,
+      languageId: 1,
       price: '',
-      description: ''
+      description: '',
+      coverFile: null
     },
     errors: {},
     isSubmitting: false,
@@ -39,25 +40,24 @@ class AddBook extends React.PureComponent {
     } catch (err) {
       this.setState({ errors: formatYupErrors(err) })
     }
-
-    const { values: { title, author, published_date, status, condition, isbn, category, language, price, description }, errors } = this.state
+    console.log("STATE: ", this.state)
+    const { values: { title, author, published_date, status, condition, isbn, categoryId, languageId, price, description, coverFile }, errors } = this.state
 
     if (Object.keys(errors).length !== 0) {
       this.setState({ errors, isSubmitting: false })
     } else {
       this.setState({ isSubmitting: true })
 
-      /** 
-      const { data: { addBook: { books: { id, title }, errors } } } = await this.props.addBookMutation({ variables: { title, author, published_date, status, condition, isbn, category, language, price, description } })
 
+      const { data: { addBook: { book, errors } } } = await this.props.addBookMutation({ variables: { title, author, published_date, status, condition, isbn: parseInt(isbn), categoryId, languageId, price: parseFloat(price), description, coverFile } })
+      console.log("Resp data: ", book, errors)
       if (errors) {
         this.setState({ errors: formatServerErrors(errors) })
       } else {
-        useAsyncStorage.setItem('@kemetsehaftalem/token', token)
-        console.log("Resp: ", user, token)
-        this.props.history.push('/')
+        console.log("Resp: ", id, title)
+        this.props.history.push(`/book/view/${book.id}`)
       }
-      */
+
     }
   }
 
@@ -84,8 +84,16 @@ class AddBook extends React.PureComponent {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
+  pickImage = async () => {
+    let result = await launchImageLibraryAsync({ allowsEditing: true, aspect: [4, 3] });
+    console.log("File: ", result)
+    if (!result.cancelled) {
+      this.setState({ values: { ...this.state.values, coverFile: result } })
+    }
+  }
+
   render() {
-    const { values: { title, author, published_date, status, condition, isbn, category, language, price, description }, loading, isSubmitting, errors } = this.state
+    const { values: { title, author, published_date, status, condition, isbn, categoryId, languageId, price, description, coverFile }, loading, isSubmitting, errors } = this.state
     const { getCategoriesQuery: { getCategories }, getLanguagesQuery: { getLanguages } } = this.props
 
     if (loading) {
@@ -98,14 +106,14 @@ class AddBook extends React.PureComponent {
 
     return (
       <View style={styles.container}>
-        <Text style={styles.title} h2>Add b ook</Text>
+        <Text style={styles.title} h2>Add book</Text>
         {/* Error message */}
-        {errors.addBook && <View style={{ backgroundColor: '#EC3C3E' }}><Text color="white">{errors.addBook}</Text></View>}
+        {errors.addBook && <View style={{ backgroundColor: colors.error }}><Text color="white">{errors.addBook}</Text></View>}
 
         <View style={styles.signupContainer}>
-          <Input value={title} onChangeText={text => this.onChangeText('title', text)} placeholder="Title" errorStyle={{ color: 'red' }}
+          <Input value={title} onChangeText={text => this.onChangeText('title', text)} placeholder="Title" errorStyle={{ color: colors.error }}
             errorMessage={errors.title} />
-          <Input value={author} onChangeText={text => this.onChangeText('author', text)} placeholder="Author" errorStyle={{ color: 'red' }}
+          <Input value={author} onChangeText={text => this.onChangeText('author', text)} placeholder="Author" errorStyle={{ color: colors.error }}
             errorMessage={errors.author} />
           <View>
             <Text style={styles.pickerTitle}>Status</Text>
@@ -113,7 +121,7 @@ class AddBook extends React.PureComponent {
               itemStyle={styles.picker}
               selectedValue={status}
               onValueChange={(itemValue, itemIndex) =>
-                this.setState({ values: { status: itemValue } })
+                this.setState({ values: { ...this.state.values, status: itemValue } })
               }>
               <Picker.Item label="Available" value="available" />
               <Picker.Item label="Ordered" value="ordered" />
@@ -127,64 +135,85 @@ class AddBook extends React.PureComponent {
               itemStyle={styles.picker}
               selectedValue={condition}
               onValueChange={(itemValue, itemIndex) =>
-                this.setState({ values: { condition: itemValue } })
+                this.setState({ values: { ...this.state.values, condition: itemValue } })
               }>
               <Picker.Item label="New" value="new" />
               <Picker.Item label="Used" value="used" />
               <Picker.Item label="Old" value="old" />
             </Picker>
           </View>
-          <Input value={published_date} onChangeText={text => this.onChangeText('published_date', text)} placeholder="Published date ( 01.12.2016 )" errorStyle={{ color: 'red' }}
+          <Input value={published_date} onChangeText={text => this.onChangeText('published_date', text)} placeholder="Published date ( Optional )" errorStyle={{ color: colors.error }}
             errorMessage={errors.published_date} />
-          <Input value={isbn} onChangeText={text => this.onChangeText('isbn', text)} placeholder="ISBN" errorStyle={{ color: 'red' }}
+          <Input value={isbn} onChangeText={text => this.onChangeText('isbn', text)} placeholder="ISBN" errorStyle={{ color: colors.error }}
             errorMessage={errors.isbn} />
           <View>
             <Text style={styles.pickerTitle}>Category</Text>
             <Picker
               itemStyle={styles.picker}
-              selectedValue={category}
+              selectedValue={categoryId}
               onValueChange={(itemValue, itemIndex) =>
-                this.setState({ values: { category: itemValue } })
+                this.setState({ values: { ...this.state.values, categoryId: itemValue } })
               }>
-              {getCategories.map(category =>
+              {getCategories && getCategories.map(category =>
                 <Picker.Item key={category.id} label={this.capitalizeFirstLetter(category.name)} value={category.id} />)}
             </Picker>
+            {errors.categoryId && <Text style={styles.cutomeTextError}>{errors.categoryId}</Text>}
           </View>
           <View>
             <Text style={styles.pickerTitle}>Language</Text>
             <Picker
               itemStyle={styles.picker}
-              selectedValue={language}
+              selectedValue={languageId}
               onValueChange={(itemValue, itemIndex) =>
-                this.setState({ values: { language: itemValue } })
+                this.setState({ values: { ...this.state.values, languageId: itemValue } })
               }>
-              {getLanguages.map(language =>
+              {getLanguages && getLanguages.map(language =>
                 <Picker.Item key={language.id} label={this.capitalizeFirstLetter(language.name)} value={language.id} />)}
             </Picker>
+            {errors.languageId && <Text style={styles.cutomeTextError}>{errors.languageId}</Text>}
           </View>
-          <Input value={price} onChangeText={text => this.onChangeText('price', text)} placeholder="price" errorStyle={{ color: 'red' }}
+          <Input value={price} onChangeText={text => this.onChangeText('price', text)} placeholder="price" errorStyle={{ color: colors.error }}
             errorMessage={errors.price} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.uploadPictureTitle}>Upload picture</Text>
+            <Button
+              type="outline"
+              icon={
+                <Icon
+                  name="picture-o"
+                  size={20}
+                  style={{ marginRight: 10 }}
+                  color={colors.primary}
+                />
+              }
+              onPress={this.pickImage}
+              title="Choose image"
+              style={{ alignSelf: 'center', marginBottom: 10 }}
+            />
+            {errors.coverFile && <Text style={styles.cutomeTextError}>{errors.coverFile}</Text>}
+            {!!coverFile && <Image source={{ uri: coverFile.uri }} style={styles.image} PlaceholderContent={<ActivityIndicator />} />}
+          </View>
           <TextInput
             style={styles.description}
             value={description}
             multiline={true}
             numberOfLines={4}
-            onChangeText={text => this.onChangeText('description', text)} placeholder="Description" errorStyle={{ color: 'red' }} />
+            onChangeText={text => this.onChangeText('description', text)} placeholder="Description" errorStyle={{ color: colors.error }} />
 
           <Divider style={{ marginTop: 20, marginBottom: 20 }} />
 
           <Button
-            type="outline"
+            title="Add"
             icon={
               <Icon
                 name="plus-circle"
                 size={20}
                 style={{ marginRight: 10 }}
-                color='steelblue'
+                color={colors.white}
               />
             }
-            onPress={this.redirectToLoginPage}
-            title="Add"
+            onPress={this.submit}
+            disabled={isSubmitting}
           />
         </View>
       </View>
@@ -216,6 +245,13 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     marginRight: 10
   },
+  uploadPictureTitle: {
+    fontSize: 18,
+    color: colors.grey3,
+    marginLeft: 10,
+    marginRight: 10,
+    marginBottom: 10
+  },
   description: {
     fontSize: 18,
     color: colors.grey3,
@@ -228,13 +264,25 @@ const styles = StyleSheet.create({
     height: 160,
     marginLeft: 10,
     marginRight: 10
+  },
+  image: {
+    minWidth: 360,
+    height: 200,
+    marginBottom: 10
+  },
+  cutomeTextError: {
+    color: colors.error,
+    fontSize: 14,
+    alignSelf: 'center',
+    marginBottom: 10,
+    marginTop: -5
   }
 });
 
 const ADD_BOOK_MUTATION = gql`
-  mutation($title: String!, $author: String!, $published_date: DateTime!, $status: String!, $condition: String!, $isbn: Int, $categoryId: Int!, $languageId: Int!, $price: Float!, $cover_url: String!, $description: String) {
-    addBook(title: $title, author: $author, published_date: $published_date, status: $status, condition: $condition, isbn: $isbn, categoryId: $categoryId, languageId: $languageId, price: $price, cover_url: $cover_url, description: $description) {
-    books {
+  mutation($title: String!, $author: String!, $published_date: String, $status: String!, $condition: String!, $isbn: Int, $categoryId: Int!, $languageId: Int!, $price: Float!, $coverFile: Upload, $description: String) {
+    addBook(title: $title, author: $author, published_date: $published_date, status: $status, condition: $condition, isbn: $isbn, categoryId: $categoryId, languageId: $languageId, price: $price, coverFile: $coverFile, description: $description) {
+    book {
       id
       title
     }

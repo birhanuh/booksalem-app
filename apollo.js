@@ -12,11 +12,11 @@ you provide while making the request.
 */
 
 const asyncAuthLink = setContext(async () => {
-  const TOKEN = await AsyncStorage.getItem('@kemetsehaftalem/token') ? await AsyncStorage.getItem('@kemetsehaftalem/token') : '';
-
+  const TOKEN = await AsyncStorage.getItem('@kemetsehaftalem/token');
+  console.log("TPLEM_ ", TOKEN)
   return {
     headers: {
-      Authorization: TOKEN,
+      Authorization: `Bearer ${TOKEN}`,
     },
   };
 });

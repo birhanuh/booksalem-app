@@ -1,7 +1,7 @@
 import React from 'react';
 import { withRouter } from "react-router-native";
 import { View, StyleSheet } from 'react-native';
-import { ListItem, Button, Divider } from 'react-native-elements';
+import { ListItem, Button, Divider, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 
@@ -69,13 +69,13 @@ const Menu = ({ history }) => {
       <Button
         type="outline"
         style={{ marginTop: 20 }}
-        titleStyle={{ color: '#EC3C3E' }}
-        buttonStyle={{ borderColor: '#EC3C3E' }}
+        titleStyle={{ color: colors.error }}
+        buttonStyle={{ borderColor: colors.error }}
         icon={
           <Icon
             size={20}
             name='sign-out'
-            color='#EC3C3E'
+            color={colors.error}
             style={{ marginRight: 10 }}
           />
         }

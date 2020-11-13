@@ -18,7 +18,7 @@ import ViewCheckout from "../checkouts/viewCheckout";
 
 export default () => (
   <NativeRouter>
-    <View style={{ flex: 1, backgroundColor: '#F0F7FE' }}>
+    <View style={{ flex: 9, backgroundColor: '#F0F7FE' }}>
       <ScrollView>
         {/* Switch  */}
         <Switch>
@@ -35,9 +35,9 @@ export default () => (
           <Route exact path="/menu" component={Menu} />
         </Switch>
       </ScrollView>
-      {/* Footer  */}
-      <Footer />
     </View>
+    {/* Footer  */}
+    <Footer />
   </NativeRouter>
 )
 

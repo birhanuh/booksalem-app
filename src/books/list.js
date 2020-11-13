@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from "react-router-native";
 import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
-import { Text, Card, Divider } from 'react-native-elements';
+import { Text, Card, Divider, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
 
@@ -35,7 +35,7 @@ const Books = () => {
     );
   };
 
-  const { getAvailableBooks } = data
+  const { getAvailableBooks } = data && data
 
   return (
     <View style={styles.container}>
@@ -99,12 +99,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between'
   },
   priceContainer: {
-    display: 'flex',
+    flex: 1,
     flexDirection: 'row',
-    alignSelf: 'flex-end'
+    alignSelf: 'flex-end',
+    justifyContent: 'flex-end'
   },
   card: {
-    shadowColor: 'powderblue',
+    shadowColor: colors.divider,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -131,8 +132,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   link: {
+    flex: 1,
+    alignItems: 'center',
     padding: 10,
-    backgroundColor: 'steelblue',
+    backgroundColor: colors.primary,
   },
   linkText: {
     textAlign: 'center',

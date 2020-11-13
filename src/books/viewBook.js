@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Card, Button, Text } from 'react-native-elements';
+import { Card, Button, Text, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
 import { withRouter } from 'react-router-native';
@@ -100,12 +100,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between'
   },
   priceContainer: {
-    display: 'flex',
+    flex: 1,
     flexDirection: 'row',
-    alignSelf: 'flex-end'
+    alignSelf: 'flex-end',
+    justifyContent: 'flex-end'
   },
   card: {
-    shadowColor: 'powderblue',
+    shadowColor: colors.divider,
     shadowOffset: {
       width: 0,
       height: 2,

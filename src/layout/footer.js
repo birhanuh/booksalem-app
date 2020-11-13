@@ -1,7 +1,7 @@
 import React from 'react';
 import { withRouter } from "react-router-native";
 import { View, StyleSheet } from 'react-native';
-import { Button } from 'react-native-elements';
+import { Button, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 const Footer = ({ history }) => {
@@ -32,7 +32,7 @@ const Footer = ({ history }) => {
           <Icon
             name="home"
             size={20}
-            color='steelblue'
+            color={colors.primary}
           />
         }
         onPress={redirectToHomePage}>
@@ -40,13 +40,13 @@ const Footer = ({ history }) => {
       <Button
         type="clear"
         title="Add book"
-        buttonStyle={{ display: 'flex', flexWrap: 'wrap', width: 78 }}
+        buttonStyle={styles.button}
         titleStyle={styles.title}
         icon={
           <Icon
             name="plus-circle"
             size={20}
-            color='steelblue'
+            color={colors.primary}
           />
         }
         onPress={redirectToAddBookPage}
@@ -60,7 +60,7 @@ const Footer = ({ history }) => {
           <Icon
             name="th-list"
             size={20}
-            color='steelblue'
+            color={colors.primary}
           />
         }
         onPress={redirectToOrdersPage}
@@ -74,7 +74,7 @@ const Footer = ({ history }) => {
           <Icon
             name="ellipsis-v"
             size={20}
-            color='steelblue'
+            color={colors.primary}
           />
         }
         onPress={menu}
@@ -85,19 +85,16 @@ const Footer = ({ history }) => {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: 'powderblue',
     borderTopColor: 'skyblue',
     borderTopWidth: 1,
-    flex: 1,
     justifyContent: 'space-evenly',
     alignItems: 'center',
     flexDirection: 'row',
-    maxHeight: 80
   },
   button: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    width: 70
+    flexDirection: 'column'
   },
   title: {
     fontSize: 14

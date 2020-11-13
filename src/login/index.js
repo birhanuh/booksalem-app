@@ -2,7 +2,7 @@ import React from 'react';
 import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { Text, Input, Button, Divider } from 'react-native-elements';
+import { Text, Input, Button, Divider, colors } from 'react-native-elements';
 import { graphql, gql } from '@apollo/react-hoc';
 import { loginSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
@@ -83,9 +83,9 @@ class Login extends React.PureComponent {
       <View style={styles.container}>
         <Text style={styles.title} h2>Login</Text>
         <View style={styles.loginContainer}>
-          <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: 'red' }}
+          <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: colors.error }}
             errorMessage={errors.email} leftIcon={{ type: 'font-awesome', name: 'envelope', size: 15, marginRight: 10 }} />
-          <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: 'red' }}
+          <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: colors.error }}
             errorMessage={errors.password} leftIcon={{ type: 'font-awesome', name: 'lock', size: 20, marginRight: 10 }} />
           <Button
             style={{ marginTop: 20 }}
@@ -108,7 +108,7 @@ class Login extends React.PureComponent {
                 name="user-plus"
                 size={20}
                 style={{ marginRight: 10 }}
-                color='steelblue'
+                color={colors.primary}
               />
             }
             onPress={this.redirectToSignupPage}
