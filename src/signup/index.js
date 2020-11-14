@@ -110,7 +110,9 @@ class Signup extends React.PureComponent {
             onPress={this.submit} disabled={isSubmitting}
             title="Sign up"
           />
-          <Divider style={{ marginTop: 20, marginBottom: 20 }} />
+
+          <Divider style={{ marginTop: 30, marginBottom: 30 }} />
+
           <Button
             type="outline"
             icon={

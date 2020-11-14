@@ -1,6 +1,7 @@
 import * as yup from 'yup';
 
 const phoneRegExp = /^$|^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/
+// const isLt2M = file.size / 1024 / 1024 < 2;
 
 export const signupSchema = yup.object().shape({
   name: yup
@@ -64,21 +65,22 @@ export const loginSchema = yup.object().shape({
     .required("Password is required")
 });
 
-export const checkoutAddressSchema = yup.object().shape({
+export const addBookSchema = yup.object().shape({
   title: yup
     .string()
     .required("Title is required"),
   author: yup
     .string()
     .required("Author is required"),
-  language: yup
-    .string()
+  languageId: yup
+    .number()
     .required("Language is required"),
-  category: yup
-    .string()
+  categoryId: yup
+    .number()
     .required("Category is required"),
   price: yup
-    .string()
+    .number()
+    .positive()
     .required("Price is required"),
   status: yup
     .string()
@@ -92,7 +94,31 @@ export const checkoutAddressSchema = yup.object().shape({
     .positive()
     .integer("ISBN is required"),
   publishedDate: yup
-    .date()
-    .default(() => (new Date()))
+    .string(),
+  coverFile: yup
+    .mixed()
+    .required("A file is required")
+  // .test(
+  //   "fileSize",
+  //   "File too large",
+  //   value => value && value.size / 1024 / 1024 > 2
+  // )
 });
 
+export const checkoutSchema = yup.object().shape({
+  chekcoutType: yup
+    .string()
+    .required("Checkout type is required"),
+  userId: yup
+    .number()
+    .required("User is required"),
+  bookId: yup
+    .number()
+    .required("Book is required"),
+  checkoutDate: yup
+    .date()
+    .default(() => (new Date())),
+  returnDate: yup
+    .date()
+    .required("Book is required"),
+});

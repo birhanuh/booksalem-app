@@ -1,4 +1,5 @@
-import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
+import { ApolloClient, InMemoryCache } from '@apollo/client';
+import { createUploadLink } from "apollo-upload-client";
 // import { onError } from "@apollo/client/link/error";
 import { setContext } from '@apollo/link-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,16 +13,14 @@ you provide while making the request.
 */
 
 const asyncAuthLink = setContext(async () => {
-  const TOKEN = await AsyncStorage.getItem('@kemetsehaftalem/token') ? await AsyncStorage.getItem('@kemetsehaftalem/token') : '';
+  const TOKEN = await AsyncStorage.getItem('@kemetsehaftalem/token');
 
   return {
     headers: {
-      Authorization: TOKEN,
+      Authorization: TOKEN ? `Bearer ${TOKEN}` : '',
     },
   };
 });
-
-
 
 // const link = onError(({ graphQLErrors, networkError }) => {
 //   if (graphQLErrors)
@@ -38,7 +37,7 @@ const asyncAuthLink = setContext(async () => {
 //   console.log('networkError', networkError)
 // }
 
-const httpLink = new HttpLink({
+const httpLink = new createUploadLink({
   uri: GRAPHQL_API_URL
 });
 
