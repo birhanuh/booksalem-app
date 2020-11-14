@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from "react-router-native";
-import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
 import { Text, Card, Divider, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
@@ -36,48 +36,52 @@ const Books = () => {
   };
 
   const { getAvailableBooks } = data && data
-
+  console.log("ddd", `/book/view/${getAvailableBooks[0].id}`)
   return (
     <View style={styles.container}>
-      {getAvailableBooks.map(book => (
-        // implemented with Text and Button as children
-        <Card key={book.id} style={styles.card}>
-          <Card.Title>{book.title}</Card.Title>
-          <Card.Divider />
-          <Card.Image source={{ uri: book.cover_url }} />
-          <View style={styles.bookInfoPriceContainer}>
-            <View style={styles.bookInfoContainer}>
-              <Text style={styles.text}>
-                <Text style={styles.label}>Author: </Text>{book.author}
-              </Text>
-              <Text style={styles.text}>
-                <Text style={styles.label}>Language: </Text>{book.language}
-              </Text>
-              <Text style={styles.text}>
-                <Text style={styles.label}>Category: </Text>{book.category}
-              </Text>
+      <FlatList
+        data={getAvailableBooks}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          // implemented with Text and Button as children
+          <Card key={item.id.toString()} style={styles.card}>
+            <Card.Title>{item.title}</Card.Title>
+            <Card.Divider />
+            <Card.Image source={{ uri: item.cover_url }} />
+            <View style={styles.bookInfoPriceContainer}>
+              <View style={styles.bookInfoContainer}>
+                <Text style={styles.text}>
+                  <Text style={styles.label}>Author: </Text>{item.author}
+                </Text>
+                <Text style={styles.text}>
+                  <Text style={styles.label}>Language: </Text>{item.language}
+                </Text>
+                <Text style={styles.text}>
+                  <Text style={styles.label}>Category: </Text>{item.category}
+                </Text>
+              </View>
+              <View style={styles.priceContainer}>
+                <Text style={styles.price}>
+                  {item.price}
+                </Text>
+                <Text style={styles.text}>
+                  ETB
+         </Text>
+              </View>
             </View>
-            <View style={styles.priceContainer}>
-              <Text style={styles.price}>
-                {book.price}
-              </Text>
-              <Text style={styles.text}>
-                ETB
+            <Text style={styles.text}>
+              {item.description}
             </Text>
-            </View>
-          </View>
-          <Text style={styles.text}>
-            {book.description}
-          </Text>
 
-          <Divider style={{ marginTop: 10, marginBottom: 10 }} />
+            <Divider style={{ marginTop: 10, marginBottom: 10 }} />
 
-          <Link to={`/book/view/${book.id}`} style={styles.link}>
-            <Text style={styles.linkText}><Icon name='eye' color='#ffffff' size={20}
-              style={{ marginRight: 10 }} /> View</Text>
-          </Link>
-        </Card>
-      ))}
+            <Link to={`/book/view/${item.id}`} style={styles.link}>
+              <Text style={styles.linkText}><Icon name='eye' color='#ffffff' size={20}
+                style={{ marginRight: 10 }} /> View</Text>
+            </Link>
+          </Card>
+        )}
+      />
     </View>)
 }
 

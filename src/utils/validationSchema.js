@@ -95,14 +95,14 @@ export const addBookSchema = yup.object().shape({
     .integer("ISBN is required"),
   publishedDate: yup
     .string(),
-  // coverFile: yup
-  //   .mixed()
-  //   .required("A file is required")
-  //   .test(
-  //     "fileSize",
-  //     "File too large",
-  //     value => value && value.size / 1024 < 2
-  //   )
+  coverFile: yup
+    .mixed()
+    .required("A file is required")
+  // .test(
+  //   "fileSize",
+  //   "File too large",
+  //   value => value && value.size / 1024 / 1024 > 2
+  // )
 });
 
 export const checkoutSchema = yup.object().shape({

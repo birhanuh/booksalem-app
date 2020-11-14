@@ -24,6 +24,7 @@ const GET_BOOK = gql`
 `
 
 const ViewBook = ({ history }) => {
+  console.log("HIS: ", history)
   const { loading, error, data } = useQuery(GET_BOOK, {
     variables: { id },
   });
