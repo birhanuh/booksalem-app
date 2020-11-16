@@ -1,7 +1,6 @@
 import React from 'react';
-import { Link } from "react-router-native";
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
-import { Text, Card, Divider, colors } from 'react-native-elements';
+import { Text, Card, Divider, colors, Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
 
@@ -11,11 +10,10 @@ const GET_BOOKS = gql`
       id
       title
       author
-      condition
       price
       status
-      published_date
-      isbn
+      language
+      category
       cover_url
       description
       rating
@@ -23,7 +21,7 @@ const GET_BOOKS = gql`
   }
 `
 
-const Books = () => {
+const Books = ({ navigation }) => {
   const { loading, error, data } = useQuery(GET_BOOKS);
 
   if (error) { console.error('error', error) };
@@ -36,7 +34,7 @@ const Books = () => {
   };
 
   const { getAvailableBooks } = data && data
-  console.log("ddd", `/book/view/${getAvailableBooks[0].id}`)
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -44,7 +42,7 @@ const Books = () => {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           // implemented with Text and Button as children
-          <Card key={item.id.toString()} style={styles.card}>
+          <Card style={styles.card}>
             <Card.Title>{item.title}</Card.Title>
             <Card.Divider />
             <Card.Image source={{ uri: item.cover_url }} />
@@ -59,26 +57,45 @@ const Books = () => {
                 <Text style={styles.text}>
                   <Text style={styles.label}>Category: </Text>{item.category}
                 </Text>
+                <Text style={styles.text}>
+                  <Text style={styles.label}>Category: </Text>{item.status}
+                </Text>
               </View>
               <View style={styles.priceContainer}>
                 <Text style={styles.price}>
                   {item.price}
                 </Text>
-                <Text style={styles.text}>
-                  ETB
-         </Text>
+                <Text style={styles.text}>ETB</Text>
               </View>
             </View>
             <Text style={styles.text}>
               {item.description}
             </Text>
 
-            <Divider style={{ marginTop: 10, marginBottom: 10 }} />
+            <Divider style={styles.divider} />
+            <Text style={styles.rating}>
+              {item.rating}
+              <Icon id='1' name='star' style={styles.star} />
+              <Icon id='2' name='star' style={styles.star} />
+              <Icon id='3' name='star' style={styles.star} />
+              <Icon id='4' name='star' style={styles.star} />
+              <Icon id='5' name='star' style={styles.star} />
+            </Text>
 
-            <Link to={`/book/view/${item.id}`} style={styles.link}>
-              <Text style={styles.linkText}><Icon name='eye' color='#ffffff' size={20}
-                style={{ marginRight: 10 }} /> View</Text>
-            </Link>
+            <Divider style={styles.divider} />
+
+            <Button
+              title="View"
+              icon={
+                <Icon
+                  name="plus-circle"
+                  size={20}
+                  style={{ marginRight: 10 }}
+                  color={colors.white}
+                />
+              }
+              onPress={() => { navigation.push('ViewBook', { name: 'View book', id: item.id }) }}
+            />
           </Card>
         )}
       />
@@ -93,9 +110,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 50
+    justifyContent: 'center'
   },
   bookInfoPriceContainer: {
     flex: 1,
@@ -119,32 +134,29 @@ const styles = StyleSheet.create({
 
     elevation: 5,
   },
-  image: {
-    height: 50,
-    width: 50,
-    borderRadius: 100,
-  },
   price: {
     fontSize: 24,
     fontWeight: '800',
     color: '#49BD78',
   },
   text: {
-    marginTop: 10
+    marginTop: 10,
+    textTransform: 'capitalize'
+  },
+  rating: {
+    flex: 1,
+    textAlign: 'right'
+  },
+  star: {
+    fontSize: 24,
+    color: colors.disabled
+  },
+  divider: {
+    marginTop: 10,
+    marginBottom: 10
   },
   label: {
     fontWeight: '600',
-  },
-  link: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: colors.primary,
-  },
-  linkText: {
-    textAlign: 'center',
-    color: 'white',
-    fontSize: 18
   }
 });
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
-import { ListItem, Avatar } from 'react-native-elements';
+import { ListItem, Avatar, Button } from 'react-native-elements';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
 
 const GET_ORDERS = gql`
@@ -64,6 +65,11 @@ const Orders = () => {
               <ListItem.Title>{l.name}</ListItem.Title>
               <ListItem.Subtitle>{l.subtitle}</ListItem.Subtitle>
             </ListItem.Content>
+            <Button
+              icon={<Icon name='eye' color='#ffffff' size={15}
+                style={{ marginRight: 10 }} />}
+              buttonStyle={styles.button}
+              title='View' onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: l.id } }) }} />
           </ListItem>
         ))
       }
@@ -80,9 +86,8 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: 'powderblue',
     flex: 1,
-    justifyContent: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 50
+    paddingVertical: 20
   }
 });
 
