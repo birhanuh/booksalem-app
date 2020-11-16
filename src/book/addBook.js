@@ -66,7 +66,7 @@ class AddBook extends React.PureComponent {
       if (errors) {
         this.setState({ errors: formatServerErrors(errors) })
       } else {
-        this.props.history.push(`/book/view/${book.id}`)
+        this.props.navigation.push('ViewBook', { name: 'View book', id: item.id })
       }
 
     }
@@ -85,10 +85,6 @@ class AddBook extends React.PureComponent {
       errors,
       isSubmitting: false
     }))
-  }
-
-  redirectToLoginPage = () => {
-    this.props.history.push('/login')
   }
 
   capitalizeFirstLetter(string) {
@@ -120,10 +116,8 @@ class AddBook extends React.PureComponent {
     };
 
     return (
-
       <ScrollView>
         <View style={styles.container}>
-          <Text style={styles.title} h2>Add book</Text>
           {/* Error message */}
           {errors.addBook && <View style={{ backgroundColor: colors.error }}><Text color="white">{errors.addBook}</Text></View>}
 
@@ -247,15 +241,11 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 100
+    paddingVertical: 20
   },
   signupContainer: {
     marginTop: 10
-  },
-  title: {
-    textAlign: 'center',
   },
   pickerTitle: {
     fontSize: 18,

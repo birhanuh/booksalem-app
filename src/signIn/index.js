@@ -2,19 +2,16 @@ import React from 'react';
 import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { Text, Input, Button, Divider } from 'react-native-elements';
+import { Text, Input, Button, Divider, colors } from 'react-native-elements';
 import { graphql, gql } from '@apollo/react-hoc';
-import { signupSchema } from '../utils/validationSchema';
+import { loginSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 
-class Signup extends React.PureComponent {
+class SignIn extends React.PureComponent {
   state = {
     values: {
-      name: '',
       email: '',
       password: '',
-      confirmPassword: '',
-      phone: ''
     },
     errors: {},
     isSubmitting: false,
@@ -28,27 +25,26 @@ class Signup extends React.PureComponent {
 
     // Validation
     try {
-      await signupSchema.validate(this.state.values, { abortEarly: false })
+      await loginSchema.validate(this.state.values, { abortEarly: false })
     } catch (err) {
-      console.log("Resp: ", formatYupErrors(err))
       this.setState({ errors: formatYupErrors(err) })
     }
 
-    const { values: { name, email, password, phone }, errors } = this.state
+    const { values: { email, password }, errors } = this.state
 
     if (Object.keys(errors).length !== 0) {
       this.setState({ errors, isSubmitting: false })
     } else {
       this.setState({ isSubmitting: true })
 
-      const { data: { signup: { errors, user, token } } } = await this.props.mutate({ variables: { name, email, password, phone } })
+      const { data: { login: { errors, user, token } } } = await this.props.mutate({ variables: { email, password } })
 
       if (errors) {
         this.setState({ errors: formatServerErrors(errors) })
       } else {
         AsyncStorage.setItem('@kemetsehaftalem/token', token)
         console.log("Resp: ", user, token)
-        this.props.history.push('/')
+        this.props.navigation.push('Books')
       }
     }
   }
@@ -68,12 +64,8 @@ class Signup extends React.PureComponent {
     }))
   }
 
-  redirectToLoginPage = () => {
-    this.props.history.push('/login')
-  }
-
   render() {
-    const { values: { name, email, password, confirmPassword, phone }, loading, isSubmitting, errors } = this.state
+    const { values: { email, password }, loading, isSubmitting, errors } = this.state
 
     if (loading) {
       return (
@@ -85,46 +77,38 @@ class Signup extends React.PureComponent {
 
     return (
       <View style={styles.container}>
-        <Text style={styles.title} h2>Signup</Text>
-        <View style={styles.signupContainer}>
-          <Input value={name} onChangeText={text => this.onChangeText('name', text)} placeholder="Name" errorStyle={{ color: 'red' }}
-            errorMessage={errors.name} />
-          <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: 'red' }}
-            errorMessage={errors.email} />
-          <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: 'red' }}
-            errorMessage={errors.password} />
-          <Input secureTextEntry={true} value={confirmPassword} onChangeText={text => this.onChangeText('confirmPassword', text)} placeholder="Confirm password" errorStyle={{ color: 'red' }}
-            errorMessage={errors.confirmPassword} />
-          <Input value={phone} onChangeText={text => this.onChangeText('phone', text)} autoCapitalize="none" placeholder="Phone" errorStyle={{ color: 'red' }}
-            errorMessage={errors.phone} />
+        <Text style={styles.title} h2>Sign In</Text>
+        <View style={styles.loginContainer}>
+          <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: colors.error }}
+            errorMessage={errors.email} leftIcon={{ type: 'font-awesome', name: 'envelope', size: 15, marginRight: 10 }} />
+          <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: colors.error }}
+            errorMessage={errors.password} leftIcon={{ type: 'font-awesome', name: 'lock', size: 20, marginRight: 10 }} />
           <Button
             style={{ marginTop: 20 }}
             icon={
               <Icon
-                name="user-plus"
+                name="sign-in"
                 size={20}
                 color="white"
                 style={{ marginRight: 10 }}
               />
             }
             onPress={this.submit} disabled={isSubmitting}
-            title="Sign up"
+            title="Sign in"
           />
-
           <Divider style={{ marginTop: 30, marginBottom: 30 }} />
-
           <Button
             type="outline"
             icon={
               <Icon
-                name="sign-in"
+                name="user-plus"
                 size={20}
                 style={{ marginRight: 10 }}
-                color='steelblue'
+                color={colors.primary}
               />
             }
-            onPress={this.redirectToLoginPage}
-            title="Login"
+            onPress={() => { this.props.navigation.push('CreateAccount') }}
+            title="Don't have an account?"
           />
         </View>
       </View>
@@ -144,7 +128,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 50,
     paddingVertical: 200
   },
-  signupContainer: {
+  loginContainer: {
     marginTop: 10
   },
   title: {
@@ -152,9 +136,9 @@ const styles = StyleSheet.create({
   }
 });
 
-const SIGNUP_MUTATION = gql`
-  mutation($name: String!, $email: String!, $password: String!, $phone: String) {
-    signup(name: $name, email: $email, password: $password, phone: $phone) {
+const LOGIN_MUTATION = gql`
+  mutation($email: String!, $password: String!) {
+    login(email: $email, password: $password) {
       token
       user {
         name
@@ -169,4 +153,4 @@ const SIGNUP_MUTATION = gql`
   } 
 `;
 
-export default graphql(SIGNUP_MUTATION)(Signup);
+export default graphql(LOGIN_MUTATION)(SignIn);

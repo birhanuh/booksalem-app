@@ -64,6 +64,11 @@ const Orders = () => {
               <ListItem.Title>{l.name}</ListItem.Title>
               <ListItem.Subtitle>{l.subtitle}</ListItem.Subtitle>
             </ListItem.Content>
+            <Button
+              icon={<Icon name='eye' color='#ffffff' size={15}
+                style={{ marginRight: 10 }} />}
+              buttonStyle={styles.button}
+              title='View' onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: l.id } }) }} />
           </ListItem>
         ))
       }
@@ -80,9 +85,8 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: 'powderblue',
     flex: 1,
-    justifyContent: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 50
+    paddingVertical: 20
   }
 });
 

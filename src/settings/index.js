@@ -1,52 +1,43 @@
 import React from 'react';
-import { withRouter } from "react-router-native";
 import { View, StyleSheet } from 'react-native';
 import { ListItem, Button, Divider, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 
-const Menu = ({ history }) => {
-  const redirectToUserPage = () => {
-    history.push('/user')
-  }
-
-  const redirectToSignupPage = () => {
-    history.push('/signup')
-  }
-
-  const redirectToSigninPage = () => {
-    history.push('/login')
-  }
-
-  const signout = () => {
+const Settings = ({ navigation }) => {
+  const signOut = () => {
     // Remove token from async storage
     try {
       useAsyncStorage.removeItem('@kemetsehaftalem/token')
-      return true;
+      navigation.push('Books')
     }
     catch (exception) {
       return false;
     }
-
-    history.push('/')
   }
 
   const list = [
     {
       icon: 'user-circle',
       title: 'User',
-      onPress: redirectToUserPage
+      onPress: () => {
+        navigation.push('User')
+      }
     },
     {
       icon: 'sign-in',
-      title: 'Signin',
-      onPress: redirectToSigninPage
+      title: 'Sign In',
+      onPress: () => {
+        navigation.push('SignIn')
+      }
     },
     ,
     {
       icon: 'user-plus',
-      title: 'Signup',
-      onPress: redirectToSignupPage
+      title: 'Create account',
+      onPress: () => {
+        navigation.push('CreateAccount')
+      }
     },
   ];
 
@@ -79,10 +70,9 @@ const Menu = ({ history }) => {
             style={{ marginRight: 10 }}
           />
         }
-        onPress={signout}
+        onPress={signOut}
         title="Sign out"
       />
-
     </View>
   )
 }
@@ -90,13 +80,12 @@ const Menu = ({ history }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 100
+    paddingVertical: 20
   },
   listItemTitle: {
     padding: 10
   },
 });
 
-export default withRouter(Menu)
+export default Settings

@@ -64,10 +64,6 @@ class User extends React.PureComponent {
     }))
   }
 
-  redirectToLoginPage = () => {
-    this.props.history.push('/login')
-  }
-
   render() {
     const { values: { name, email, password, confirmPassword, phone }, loading, isSubmitting, errors } = this.state
 
@@ -81,53 +77,49 @@ class User extends React.PureComponent {
 
     return (
       <View style={styles.container}>
-        <Text style={styles.titlePrimary} h2>User page</Text>
-        <View style={styles.signupContainer}>
-          <Text style={styles.titleSecondary} h4>Profile</Text>
-          <Input value={name} onChangeText={text => this.onChangeText('name', text)} placeholder="Name" errorStyle={{ color: colors.error }}
-            errorMessage={errors.name} />
-          <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: colors.error }}
-            errorMessage={errors.email} />
-          <Input value={phone} onChangeText={text => this.onChangeText('phone', text)} autoCapitalize="none" placeholder="Phone" errorStyle={{ color: colors.error }}
-            errorMessage={errors.phone} />
-          <Button
-            type="outline"
-            style={{ marginTop: 20 }}
-            icon={
-              <Icon
-                name="user-plus"
-                size={20}
-                style={{ marginRight: 10 }}
-                color='steelblue'
-              />
-            }
-            onPress={this.submit} disabled={isSubmitting}
-            title="Update profile"
-          />
+        <Text style={styles.titleSecondary} h4>Profile</Text>
+        <Input value={name} onChangeText={text => this.onChangeText('name', text)} placeholder="Name" errorStyle={{ color: colors.error }}
+          errorMessage={errors.name} />
+        <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: colors.error }}
+          errorMessage={errors.email} />
+        <Input value={phone} onChangeText={text => this.onChangeText('phone', text)} autoCapitalize="none" placeholder="Phone" errorStyle={{ color: colors.error }}
+          errorMessage={errors.phone} />
+        <Button
+          type="outline"
+          style={{ marginTop: 20 }}
+          icon={
+            <Icon
+              name="user-plus"
+              size={20}
+              style={{ marginRight: 10 }}
+              color='steelblue'
+            />
+          }
+          onPress={this.submit} disabled={isSubmitting}
+          title="Update profile"
+        />
 
-          <Divider style={{ marginTop: 30, marginBottom: 20 }} />
+        <Divider style={{ marginTop: 30, marginBottom: 20 }} />
 
-          <Text style={styles.titleSecondary} h4>Password</Text>
-          <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: colors.error }}
-            errorMessage={errors.password} />
-          <Input secureTextEntry={true} value={confirmPassword} onChangeText={text => this.onChangeText('confirmPassword', text)} placeholder="Confirm password" errorStyle={{ color: colors.error }}
-            errorMessage={errors.confirmPassword} />
-          <Button
-            type="outline"
-            style={{ marginTop: 20 }}
-            icon={
-              <Icon
-                name="user-plus"
-                size={20}
-                style={{ marginRight: 10 }}
-                color='steelblue'
-              />
-            }
-            onPress={this.submit} disabled={isSubmitting}
-            title="Update password"
-          />
-
-        </View>
+        <Text style={styles.titleSecondary} h4>Password</Text>
+        <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: colors.error }}
+          errorMessage={errors.password} />
+        <Input secureTextEntry={true} value={confirmPassword} onChangeText={text => this.onChangeText('confirmPassword', text)} placeholder="Confirm password" errorStyle={{ color: colors.error }}
+          errorMessage={errors.confirmPassword} />
+        <Button
+          type="outline"
+          style={{ marginTop: 20 }}
+          icon={
+            <Icon
+              name="user-plus"
+              size={20}
+              style={{ marginRight: 10 }}
+              color='steelblue'
+            />
+          }
+          onPress={this.submit} disabled={isSubmitting}
+          title="Update password"
+        />
       </View>
     )
   }
@@ -142,14 +134,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 50,
-    paddingVertical: 100
-  },
-  signupContainer: {
-    marginTop: 10
-  },
-  titlePrimary: {
-    textAlign: 'center',
+    paddingHorizontal: 20
   },
   titleSecondary: {
     marginBottom: 10,

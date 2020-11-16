@@ -2,7 +2,7 @@ import React from 'react';
 import { ApolloProvider } from '@apollo/client';
 
 import { apolloClient } from '../apollo';
-import Routes from '../src/routes';
+import Navigation from '../src/navigation';
 
 import { ThemeProvider } from 'react-native-elements';
 
@@ -26,7 +26,7 @@ export default () => {
   return (
     <ApolloProvider client={apolloClient}>
       <ThemeProvider theme={theme}>
-        <Routes />
+        <Navigation />
       </ThemeProvider>
     </ApolloProvider>
   );

@@ -1,7 +1,6 @@
 import React from 'react';
-import { Link } from "react-router-native";
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
-import { Text, Card, Divider, colors } from 'react-native-elements';
+import { Text, Card, Divider, colors, Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
 
@@ -23,7 +22,7 @@ const GET_BOOKS = gql`
   }
 `
 
-const Books = () => {
+const Books = ({ navigation }) => {
   const { loading, error, data } = useQuery(GET_BOOKS);
 
   if (error) { console.error('error', error) };
@@ -36,7 +35,7 @@ const Books = () => {
   };
 
   const { getAvailableBooks } = data && data
-  console.log("ddd", `/book/view/${getAvailableBooks[0].id}`)
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -75,10 +74,18 @@ const Books = () => {
 
             <Divider style={{ marginTop: 10, marginBottom: 10 }} />
 
-            <Link to={`/book/view/${item.id}`} style={styles.link}>
-              <Text style={styles.linkText}><Icon name='eye' color='#ffffff' size={20}
-                style={{ marginRight: 10 }} /> View</Text>
-            </Link>
+            <Button
+              title="View"
+              icon={
+                <Icon
+                  name="plus-circle"
+                  size={20}
+                  style={{ marginRight: 10 }}
+                  color={colors.white}
+                />
+              }
+              onPress={() => { navigation.push('ViewBook', { name: 'View book', id: item.id }) }}
+            />
           </Card>
         )}
       />
@@ -93,9 +100,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 50
+    justifyContent: 'center'
   },
   bookInfoPriceContainer: {
     flex: 1,
@@ -134,17 +139,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: '600',
-  },
-  link: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: colors.primary,
-  },
-  linkText: {
-    textAlign: 'center',
-    color: 'white',
-    fontSize: 18
   }
 });
 

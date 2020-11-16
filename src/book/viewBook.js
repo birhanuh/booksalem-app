@@ -1,32 +1,34 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
 import { Card, Button, Text, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
-import { withRouter } from 'react-router-native';
+import navigation from '../navigation';
 
 const GET_BOOK = gql`
-  query GetBook($id: Int!) {
+  query($id: Int!) {
     getBook(id: $id) {
-      id
-      title
-      author
-      condition
-      price
-      status
-      published_date
-      isbn
-      cover_url
-      description
-      rating
+      book {
+        id
+        title
+        author
+        condition
+        price
+        status
+        published_date
+        isbn
+        cover_url
+        description
+        rating
+      }
     }
   }  
 `
 
-const ViewBook = ({ history }) => {
-  console.log("HIS: ", history)
+const ViewBook = ({ route }) => {
+  console.log("HIS: ", route.params.id, route.params.name)
   const { loading, error, data } = useQuery(GET_BOOK, {
-    variables: { id },
+    variables: { id: route.params.id },
   });
 
   if (error) { console.error('error', error) };
@@ -38,14 +40,14 @@ const ViewBook = ({ history }) => {
     );
   };
 
-  const { getBook: { id, title, author, condition, price, status, published_date, isbn, cover_url, description, rating } } = data
+  const { book: { id, title, author, condition, price, status, published_date, isbn, cover_url, description, rating } } = data && data.getBook
 
   return (
     <View style={styles.container}>
       <Card style={styles.card}>
         <Card.Title>{title}</Card.Title>
         <Card.Divider />
-        <Card.Image source={{ uri: book.cover_url }} />
+        <Card.Image source={{ uri: cover_url }} />
         <View style={styles.bookInfoPriceContainer}>
           <View style={styles.bookInfoContainer}>
             <Text style={styles.text}>
@@ -74,10 +76,10 @@ const ViewBook = ({ history }) => {
         <Divider style={{ marginTop: 10, marginBottom: 10 }} />
 
         <Button
-          icon={<Icon name='eye' color='#ffffff' size={15}
+          icon={<Icon name='shopping-bag' color='#ffffff' size={15}
             style={{ marginRight: 10 }} />}
           buttonStyle={styles.button}
-          title='View' />
+          title='Order' />
       </Card>
     </View>
   )
@@ -141,4 +143,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default withRouter(ViewBook)
+export default ViewBook
