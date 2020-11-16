@@ -10,11 +10,10 @@ const GET_BOOKS = gql`
       id
       title
       author
-      condition
       price
       status
-      published_date
-      isbn
+      language
+      category
       cover_url
       description
       rating
@@ -43,7 +42,7 @@ const Books = ({ navigation }) => {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           // implemented with Text and Button as children
-          <Card key={item.id.toString()} style={styles.card}>
+          <Card style={styles.card}>
             <Card.Title>{item.title}</Card.Title>
             <Card.Divider />
             <Card.Image source={{ uri: item.cover_url }} />
@@ -58,21 +57,32 @@ const Books = ({ navigation }) => {
                 <Text style={styles.text}>
                   <Text style={styles.label}>Category: </Text>{item.category}
                 </Text>
+                <Text style={styles.text}>
+                  <Text style={styles.label}>Category: </Text>{item.status}
+                </Text>
               </View>
               <View style={styles.priceContainer}>
                 <Text style={styles.price}>
                   {item.price}
                 </Text>
-                <Text style={styles.text}>
-                  ETB
-         </Text>
+                <Text style={styles.text}>ETB</Text>
               </View>
             </View>
             <Text style={styles.text}>
               {item.description}
             </Text>
 
-            <Divider style={{ marginTop: 10, marginBottom: 10 }} />
+            <Divider style={styles.divider} />
+            <Text style={styles.rating}>
+              {item.rating}
+              <Icon id='1' name='star' style={styles.star} />
+              <Icon id='2' name='star' style={styles.star} />
+              <Icon id='3' name='star' style={styles.star} />
+              <Icon id='4' name='star' style={styles.star} />
+              <Icon id='5' name='star' style={styles.star} />
+            </Text>
+
+            <Divider style={styles.divider} />
 
             <Button
               title="View"
@@ -124,18 +134,26 @@ const styles = StyleSheet.create({
 
     elevation: 5,
   },
-  image: {
-    height: 50,
-    width: 50,
-    borderRadius: 100,
-  },
   price: {
     fontSize: 24,
     fontWeight: '800',
     color: '#49BD78',
   },
   text: {
-    marginTop: 10
+    marginTop: 10,
+    textTransform: 'capitalize'
+  },
+  rating: {
+    flex: 1,
+    textAlign: 'right'
+  },
+  star: {
+    fontSize: 24,
+    color: colors.disabled
+  },
+  divider: {
+    marginTop: 10,
+    marginBottom: 10
   },
   label: {
     fontWeight: '600',

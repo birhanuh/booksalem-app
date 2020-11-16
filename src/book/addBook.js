@@ -121,112 +121,110 @@ class AddBook extends React.PureComponent {
           {/* Error message */}
           {errors.addBook && <View style={{ backgroundColor: colors.error }}><Text color="white">{errors.addBook}</Text></View>}
 
-          <View style={styles.signupContainer}>
-            <Input value={title} onChangeText={text => this.onChangeText('title', text)} placeholder="Title" errorStyle={{ color: colors.error }}
-              errorMessage={errors.title} />
-            <Input value={author} onChangeText={text => this.onChangeText('author', text)} placeholder="Author" errorStyle={{ color: colors.error }}
-              errorMessage={errors.author} />
-            <View>
-              <Text style={styles.pickerTitle}>Status</Text>
-              <Picker
-                itemStyle={styles.picker}
-                selectedValue={status}
-                onValueChange={(itemValue, itemIndex) =>
-                  this.setState({ values: { ...this.state.values, status: itemValue } })
-                }>
-                <Picker.Item label="Available" value="available" />
-                <Picker.Item label="Ordered" value="ordered" />
-                <Picker.Item label="Rented" value="rented" />
-                <Picker.Item label="Sold" value="sold" />
-              </Picker>
-            </View>
-            <View>
-              <Text style={styles.pickerTitle}>Condition</Text>
-              <Picker
-                itemStyle={styles.picker}
-                selectedValue={condition}
-                onValueChange={(itemValue, itemIndex) =>
-                  this.setState({ values: { ...this.state.values, condition: itemValue } })
-                }>
-                <Picker.Item label="New" value="new" />
-                <Picker.Item label="Used" value="used" />
-                <Picker.Item label="Old" value="old" />
-              </Picker>
-            </View>
-            <Input value={published_date} onChangeText={text => this.onChangeText('published_date', text)} placeholder="Published date ( Optional )" errorStyle={{ color: colors.error }}
-              errorMessage={errors.published_date} />
-            <Input value={isbn} onChangeText={text => this.onChangeText('isbn', text)} placeholder="ISBN" errorStyle={{ color: colors.error }}
-              errorMessage={errors.isbn} />
-            <View>
-              <Text style={styles.pickerTitle}>Category</Text>
-              <Picker
-                itemStyle={styles.picker}
-                selectedValue={categoryId}
-                onValueChange={(itemValue, itemIndex) =>
-                  this.setState({ values: { ...this.state.values, categoryId: itemValue } })
-                }>
-                {getCategories && getCategories.map(category =>
-                  <Picker.Item key={category.id} label={this.capitalizeFirstLetter(category.name)} value={category.id} />)}
-              </Picker>
-              {errors.categoryId && <Text style={styles.cutomeTextError}>{errors.categoryId}</Text>}
-            </View>
-            <View>
-              <Text style={styles.pickerTitle}>Language</Text>
-              <Picker
-                itemStyle={styles.picker}
-                selectedValue={languageId}
-                onValueChange={(itemValue, itemIndex) =>
-                  this.setState({ values: { ...this.state.values, languageId: itemValue } })
-                }>
-                {getLanguages && getLanguages.map(language =>
-                  <Picker.Item key={language.id} label={this.capitalizeFirstLetter(language.name)} value={language.id} />)}
-              </Picker>
-              {errors.languageId && <Text style={styles.cutomeTextError}>{errors.languageId}</Text>}
-            </View>
-            <Input value={price} onChangeText={text => this.onChangeText('price', text)} placeholder="price" errorStyle={{ color: colors.error }}
-              errorMessage={errors.price} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.uploadPictureTitle}>Upload picture</Text>
-              <Button
-                type="outline"
-                icon={
-                  <Icon
-                    name="picture-o"
-                    size={20}
-                    style={{ marginRight: 10 }}
-                    color={colors.primary}
-                  />
-                }
-                onPress={this.pickImage}
-                title="Choose image"
-                style={{ alignSelf: 'center', marginBottom: 10 }}
-              />
-              {errors.coverFile && <Text style={styles.cutomeTextError}>{errors.coverFile}</Text>}
-              {!!coverFile && <Image source={{ uri: coverFile.uri }} style={styles.image} PlaceholderContent={<ActivityIndicator />} />}
-            </View>
-            <TextInput
-              style={styles.description}
-              value={description}
-              multiline={true}
-              numberOfLines={4}
-              onChangeText={text => this.onChangeText('description', text)} placeholder="Description" errorStyle={{ color: colors.error }} />
-
-            <Divider style={{ marginTop: 20, marginBottom: 20 }} />
-
+          <Input value={title} onChangeText={text => this.onChangeText('title', text)} placeholder="Title" errorStyle={{ color: colors.error }}
+            errorMessage={errors.title} />
+          <Input value={author} onChangeText={text => this.onChangeText('author', text)} placeholder="Author" errorStyle={{ color: colors.error }}
+            errorMessage={errors.author} />
+          <View>
+            <Text style={styles.pickerTitle}>Status</Text>
+            <Picker
+              itemStyle={styles.picker}
+              selectedValue={status}
+              onValueChange={(itemValue, itemIndex) =>
+                this.setState({ values: { ...this.state.values, status: itemValue } })
+              }>
+              <Picker.Item label="Available" value="available" />
+              <Picker.Item label="Ordered" value="ordered" />
+              <Picker.Item label="Rented" value="rented" />
+              <Picker.Item label="Sold" value="sold" />
+            </Picker>
+          </View>
+          <View>
+            <Text style={styles.pickerTitle}>Condition</Text>
+            <Picker
+              itemStyle={styles.picker}
+              selectedValue={condition}
+              onValueChange={(itemValue, itemIndex) =>
+                this.setState({ values: { ...this.state.values, condition: itemValue } })
+              }>
+              <Picker.Item label="New" value="new" />
+              <Picker.Item label="Used" value="used" />
+              <Picker.Item label="Old" value="old" />
+            </Picker>
+          </View>
+          <Input value={published_date} onChangeText={text => this.onChangeText('published_date', text)} placeholder="Published date ( Optional )" errorStyle={{ color: colors.error }}
+            errorMessage={errors.published_date} />
+          <Input value={isbn} onChangeText={text => this.onChangeText('isbn', text)} placeholder="ISBN" errorStyle={{ color: colors.error }}
+            errorMessage={errors.isbn} />
+          <View>
+            <Text style={styles.pickerTitle}>Category</Text>
+            <Picker
+              itemStyle={styles.picker}
+              selectedValue={categoryId}
+              onValueChange={(itemValue, itemIndex) =>
+                this.setState({ values: { ...this.state.values, categoryId: itemValue } })
+              }>
+              {getCategories && getCategories.map(category =>
+                <Picker.Item key={category.id} label={this.capitalizeFirstLetter(category.name)} value={category.id} />)}
+            </Picker>
+            {errors.categoryId && <Text style={styles.cutomeTextError}>{errors.categoryId}</Text>}
+          </View>
+          <View>
+            <Text style={styles.pickerTitle}>Language</Text>
+            <Picker
+              itemStyle={styles.picker}
+              selectedValue={languageId}
+              onValueChange={(itemValue, itemIndex) =>
+                this.setState({ values: { ...this.state.values, languageId: itemValue } })
+              }>
+              {getLanguages && getLanguages.map(language =>
+                <Picker.Item key={language.id} label={this.capitalizeFirstLetter(language.name)} value={language.id} />)}
+            </Picker>
+            {errors.languageId && <Text style={styles.cutomeTextError}>{errors.languageId}</Text>}
+          </View>
+          <Input value={price} onChangeText={text => this.onChangeText('price', text)} placeholder="price" errorStyle={{ color: colors.error }}
+            errorMessage={errors.price} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.uploadPictureTitle}>Upload picture</Text>
             <Button
-              title="Add"
+              type="outline"
               icon={
                 <Icon
-                  name="plus-circle"
+                  name="picture-o"
                   size={20}
                   style={{ marginRight: 10 }}
-                  color={colors.white}
+                  color={colors.primary}
                 />
               }
-              onPress={this.submit}
-              disabled={isSubmitting}
+              onPress={this.pickImage}
+              title="Choose image"
+              style={{ alignSelf: 'center', marginBottom: 10 }}
             />
+            {errors.coverFile && <Text style={styles.cutomeTextError}>{errors.coverFile}</Text>}
+            {!!coverFile && <Image source={{ uri: coverFile.uri }} style={styles.image} PlaceholderContent={<ActivityIndicator />} />}
           </View>
+          <TextInput
+            style={styles.description}
+            value={description}
+            multiline={true}
+            numberOfLines={4}
+            onChangeText={text => this.onChangeText('description', text)} placeholder="Description" errorStyle={{ color: colors.error }} />
+
+          <Divider style={{ marginTop: 20, marginBottom: 20 }} />
+
+          <Button
+            title="Add"
+            icon={
+              <Icon
+                name="plus-circle"
+                size={20}
+                style={{ marginRight: 10 }}
+                color={colors.white}
+              />
+            }
+            onPress={this.submit}
+            disabled={isSubmitting}
+          />
         </View>
       </ScrollView>
     )
@@ -241,11 +239,11 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 20
-  },
-  signupContainer: {
-    marginTop: 10
+    backgroundColor: colors.white,
+    paddingHorizontal: 10,
+    paddingVertical: 20,
+    marginVertical: 16,
+    marginHorizontal: 16
   },
   pickerTitle: {
     fontSize: 18,
