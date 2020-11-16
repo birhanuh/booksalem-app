@@ -3,7 +3,6 @@ import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native'
 import { Card, Button, Text, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
-import navigation from '../navigation';
 
 const GET_BOOK = gql`
   query($id: Int!) {

@@ -8,8 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { AuthContext } from "../context";
 
-// import Footer from "../settings/footer";
-import Settings from "../settings";
+import { reactNavigationTheme } from '../theme';
 
 import CreateAccount from "../createAccount";
 import SignIn from "../signIn";
@@ -21,6 +20,7 @@ import Orders from "../orders";
 import ViewOrder from "../orders/viewOrder";
 import Checkouts from "../checkout/chekcouts";
 import ViewCheckout from "../checkout/viewCheckout";
+import Settings from "../settings";
 
 const AuthStack = createStackNavigator();
 const AuthStackScreen = () => (
@@ -72,6 +72,13 @@ const SettingsStackScreen = () => (
   </SettingsStack.Navigator>
 )
 
+const UserStack = createStackNavigator();
+const UserStackScreen = () => (
+  <UserStack.Navigator>
+    <UserStack.Screen name='User' component={User} />
+  </UserStack.Navigator>
+)
+
 const Tabs = createBottomTabNavigator();
 const TabsScreen = () => (
   <Tabs.Navigator>
@@ -85,14 +92,14 @@ const Drawer = createDrawerNavigator();
 const DrawerScreen = () => (
   <Drawer.Navigator initialRouteName="Books">
     <Drawer.Screen name="Books" component={TabsScreen} />
-    <Drawer.Screen name='AddBook' component={BookStackScreen} options={{ title: "Add book" }} />
+    <Drawer.Screen name='AddBook' component={AddBook} options={{ title: "Add book" }} />
     <Drawer.Screen name="Settings" component={SettingsStackScreen} />
   </Drawer.Navigator>
 );
 
 const RootStack = createStackNavigator();
 const RootStackScreen = ({ userToken }) => (
-  <RootStack.Navigator headerMode="none">
+  <RootStack.Navigator>
     <RootStack.Screen
       name="Kemetsehaft alem"
       component={DrawerScreen}
@@ -147,7 +154,7 @@ export default () => {
 
   return (
     <AuthContext.Provider value={authContext}>
-      <NavigationContainer>
+      <NavigationContainer theme={reactNavigationTheme}>
         <RootStackScreen userToken={userToken} />
       </NavigationContainer>
     </AuthContext.Provider >

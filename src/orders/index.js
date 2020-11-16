@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
-import { ListItem, Avatar } from 'react-native-elements';
+import { ListItem, Avatar, Button } from 'react-native-elements';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
 
 const GET_ORDERS = gql`
