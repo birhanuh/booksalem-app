@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Divider } from 'react-native-elements';
 import { graphql, gql } from '@apollo/react-hoc';
-import { signupSchema } from '../utils/validationSchema';
+import { createAccountSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 
 class CreateAccount extends React.PureComponent {
@@ -28,9 +28,8 @@ class CreateAccount extends React.PureComponent {
 
     // Validation
     try {
-      await signupSchema.validate(this.state.values, { abortEarly: false })
+      await createAccountSchema.validate(this.state.values, { abortEarly: false })
     } catch (err) {
-      console.log("Resp: ", formatYupErrors(err))
       this.setState({ errors: formatYupErrors(err) })
     }
 
@@ -41,7 +40,7 @@ class CreateAccount extends React.PureComponent {
     } else {
       this.setState({ isSubmitting: true })
 
-      const { data: { signup: { errors, user, token } } } = await this.props.mutate({ variables: { name, email, password, phone } })
+      const { data: { createAccount: { errors, user, token } } } = await this.props.mutate({ variables: { name, email, password, phone } })
 
       if (errors) {
         this.setState({ errors: formatServerErrors(errors) })
@@ -82,7 +81,7 @@ class CreateAccount extends React.PureComponent {
     return (
       <View style={styles.container}>
         <Text style={styles.title} h2>Create account</Text>
-        <View style={styles.signupContainer}>
+        <View style={styles.createAccountContainer}>
           <Input value={name} onChangeText={text => this.onChangeText('name', text)} placeholder="Name" errorStyle={{ color: 'red' }}
             errorMessage={errors.name} />
           <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: 'red' }}
@@ -140,7 +139,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 50,
     paddingVertical: 200
   },
-  signupContainer: {
+  createAccountContainer: {
     marginTop: 10
   },
   title: {
@@ -150,7 +149,7 @@ const styles = StyleSheet.create({
 
 const SIGNUP_MUTATION = gql`
   mutation($name: String!, $email: String!, $password: String!, $phone: String) {
-    signup(name: $name, email: $email, password: $password, phone: $phone) {
+    createAccount(name: $name, email: $email, password: $password, phone: $phone) {
       token
       user {
         name

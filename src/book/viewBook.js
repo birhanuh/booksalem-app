@@ -4,6 +4,8 @@ import { Card, Button, Text, colors, Divider } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
 
+import { MeContext } from "../context";
+
 const GET_BOOK = gql`
   query($id: Int!) {
     getBook(id: $id) {
@@ -31,6 +33,7 @@ const GET_BOOK = gql`
 `
 
 const ViewBook = ({ route }) => {
+  const me = React.useContext(MeContext);
 
   const { loading, error, data } = useQuery(GET_BOOK, {
     variables: { id: route.params.id },
@@ -82,7 +85,7 @@ const ViewBook = ({ route }) => {
               <Text style={styles.price}>
                 {price}
               </Text>
-              <Text style={styles.text}>
+              <Text style={styles.currency}>
                 ETB
               </Text>
             </View>
@@ -107,7 +110,11 @@ const ViewBook = ({ route }) => {
             icon={<Icon name='shopping-bag' color='#ffffff' size={15}
               style={{ marginRight: 10 }} />}
             buttonStyle={styles.button}
-            title='Order' />
+            title='Order' onPress={me ? () => {
+              console.log('Ordering...')
+            } : () => {
+              navigation.push('SignIn')
+            }} />
         </Card>
       </View>
     </ScrollView>
@@ -160,6 +167,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textTransform: 'capitalize'
   },
+  currency: {
+    marginTop: 10,
+    textTransform: 'uppercase'
+  },
   label: {
     fontWeight: '600',
   },
@@ -172,8 +183,8 @@ const styles = StyleSheet.create({
     color: colors.disabled
   },
   divider: {
-    marginTop: 10,
-    marginBottom: 10
+    marginTop: 8,
+    marginBottom: 8
   },
   button: {
     borderRadius: 0,

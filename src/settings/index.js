@@ -4,7 +4,11 @@ import { ListItem, Button, Divider, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 
+import { MeContext } from "../context";
+
 const Settings = ({ navigation }) => {
+  const me = React.useContext(MeContext);
+
   const signOut = () => {
     // Remove token from async storage
     try {
@@ -16,48 +20,48 @@ const Settings = ({ navigation }) => {
     }
   }
 
-  const list = [
-    {
-      icon: 'user-circle',
-      title: 'User',
-      onPress: () => {
+  const User = () => (<ListItem bottomDivider>
+    <Icon name='user-circle' />
+    <ListItem.Content>
+      <ListItem.Title style={styles.listItemTitle} onPress={() => {
         navigation.push('User')
-      }
-    },
-    {
-      icon: 'sign-in',
-      title: 'Sign In',
-      onPress: () => {
+      }}>User</ListItem.Title>
+    </ListItem.Content>
+    <ListItem.Chevron />
+  </ListItem>);
+
+  const SignIn = () => (<ListItem bottomDivider>
+    <Icon name='sign-in' />
+    <ListItem.Content>
+      <ListItem.Title style={styles.listItemTitle} onPress={() => () => {
         navigation.push('SignIn')
-      }
-    },
-    ,
-    {
-      icon: 'user-plus',
-      title: 'Create account',
-      onPress: () => {
+      }}>Sign In</ListItem.Title>
+    </ListItem.Content>
+    <ListItem.Chevron />
+  </ListItem>);
+
+  const CreateAccount = () => (<ListItem bottomDivider>
+    <Icon name='user-plus' />
+    <ListItem.Content>
+      <ListItem.Title style={styles.listItemTitle} onPress={() => {
         navigation.push('CreateAccount')
-      }
-    },
-  ];
+      }}>Create account</ListItem.Title>
+    </ListItem.Content>
+    <ListItem.Chevron />
+  </ListItem>);
+
 
   return (
     <View style={styles.container}>
-      {
-        list.map((item, i) => (
-          <ListItem key={i} bottomDivider>
-            <Icon name={item.icon} />
-            <ListItem.Content>
-              <ListItem.Title style={styles.listItemTitle} onPress={item.onPress}>{item.title}</ListItem.Title>
-            </ListItem.Content>
-            <ListItem.Chevron />
-          </ListItem>
-        ))
-      }
+      { me && <User />}
+
+      { !me && <SignIn />}
+
+      { !me && <CreateAccount />}
 
       <Divider style={{ marginTop: 30, marginBottom: 10 }} />
 
-      <Button
+      { me && <Button
         type="outline"
         style={{ marginTop: 20 }}
         titleStyle={{ color: colors.error }}
@@ -72,7 +76,7 @@ const Settings = ({ navigation }) => {
         }
         onPress={signOut}
         title="Sign out"
-      />
+      />}
     </View>
   )
 }

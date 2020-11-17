@@ -288,10 +288,10 @@ const styles = StyleSheet.create({
 const ADD_BOOK_MUTATION = gql`
   mutation($title: String!, $author: String!, $published_date: String, $status: String!, $condition: String!, $isbn: Int, $categoryId: Int!, $languageId: Int!, $price: Float!, $coverFile: Upload, $description: String) {
     addBook(title: $title, author: $author, published_date: $published_date, status: $status, condition: $condition, isbn: $isbn, categoryId: $categoryId, languageId: $languageId, price: $price, coverFile: $coverFile, description: $description) {
-    book {
-      id
-      title
-    }
+      book {
+        id
+        title
+      }
       errors {
         path
         message
@@ -318,7 +318,7 @@ const GET_CATEGORIESS_QUERY = gql`
   }
 `
 
-const MutationsQuery = compose(
+const MutationQueries = compose(
   graphql(ADD_BOOK_MUTATION, {
     name: "addBookMutation"
   }),
@@ -330,4 +330,4 @@ const MutationsQuery = compose(
   })
 )(AddBook);
 
-export default MutationsQuery;
+export default MutationQueries;
