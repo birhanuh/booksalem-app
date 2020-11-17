@@ -85,7 +85,7 @@ const ViewBook = ({ route }) => {
               <Text style={styles.price}>
                 {price}
               </Text>
-              <Text style={styles.text}>
+              <Text style={styles.currency}>
                 ETB
               </Text>
             </View>
@@ -167,6 +167,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textTransform: 'capitalize'
   },
+  currency: {
+    marginTop: 10,
+    textTransform: 'uppercase'
+  },
   label: {
     fontWeight: '600',
   },
@@ -179,8 +183,8 @@ const styles = StyleSheet.create({
     color: colors.disabled
   },
   divider: {
-    marginTop: 10,
-    marginBottom: 10
+    marginTop: 8,
+    marginBottom: 8
   },
   button: {
     borderRadius: 0,

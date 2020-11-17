@@ -65,7 +65,7 @@ const Books = ({ navigation }) => {
                 <Text style={styles.price}>
                   {item.price}
                 </Text>
-                <Text style={styles.text}>ETB</Text>
+                <Text style={styles.currency}>ETB</Text>
               </View>
             </View>
             <Text style={styles.text}>
@@ -143,6 +143,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textTransform: 'capitalize'
   },
+  currency: {
+    marginTop: 10,
+    textTransform: 'uppercase'
+  },
   rating: {
     flex: 1,
     textAlign: 'right'
@@ -152,8 +156,8 @@ const styles = StyleSheet.create({
     color: colors.disabled
   },
   divider: {
-    marginTop: 10,
-    marginBottom: 10
+    marginTop: 6,
+    marginBottom: 6
   },
   label: {
     fontWeight: '600',

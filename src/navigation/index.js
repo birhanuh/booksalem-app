@@ -1,9 +1,10 @@
 import React from "react";
-import { SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
+import { Text, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
 
 import { MeContext } from "../context";
@@ -21,10 +22,11 @@ import ViewOrder from "../orders/viewOrder";
 import Checkouts from "../checkout/chekcouts";
 import ViewCheckout from "../checkout/viewCheckout";
 import Settings from "../settings";
+import { colors } from "react-native-elements";
 
 const AuthStack = createStackNavigator();
 const AuthStackScreen = () => (
-  <AuthStack.Navigator>
+  <AuthStack.Navigator headerMode='none'>
     <AuthStack.Screen
       name="SignIn"
       component={SignIn}
@@ -69,25 +71,55 @@ const SettingsStack = createStackNavigator();
 const SettingsStackScreen = () => (
   <SettingsStack.Navigator>
     <SettingsStack.Screen name='Settings' component={Settings} />
+    <SettingsStack.Screen name='User' component={User} />
   </SettingsStack.Navigator>
-)
-
-const UserStack = createStackNavigator();
-const UserStackScreen = () => (
-  <UserStack.Navigator>
-    <UserStack.Screen name='User' component={User} />
-  </UserStack.Navigator>
 )
 
 const Tabs = createBottomTabNavigator();
 const TabsScreen = () => {
   const me = React.useContext(MeContext);
-  const isMeAdmin = me & me.is_admin
 
-  return (<Tabs.Navigator>
+  const nameThirdTab = me ? (me.is_admin ? 'Checkouts' : 'Settings') : 'CreateAccount'
+  const componentThirdTab = me ? (me.is_admin ? CheckoutStackScreen : SettingsStackScreen) : AuthStackScreen
+
+  return (<Tabs.Navigator screenOptions={({ route }) => ({
+    tabBarIcon: ({ focused, color, size }) => {
+      let iconName;
+      let iconColor;
+
+      if (route.name === 'Books') {
+        iconName = 'book';
+        iconColor = focused
+          ? colors.primary
+          : colors.grey3;
+      } else if (route.name === 'Orders') {
+        iconName = 'shopping-bag';
+        iconColor = focused
+          ? colors.primary
+          : colors.grey3;
+      } else if (route.name === 'Settings') {
+        iconName = 'cog';
+        iconColor = focused
+          ? colors.primary
+          : colors.grey3;
+      } else if (route.name === 'Checkouts') {
+        iconName = 'credit-card-alt';
+        iconColor = focused
+          ? colors.primary
+          : colors.grey3;
+      }
+
+      // You can return any component that you like here!
+      return <Icon name={iconName} size={size} color={iconColor} />;
+    },
+  })}
+    tabBarOptions={{
+      activeTintColor: colors.primary,
+      inactiveTintColor: colors.grey3,
+    }}>
     <Tabs.Screen name="Books" component={BookStackScreen} />
     <Tabs.Screen name="Orders" component={me ? OrderStackScreen : AuthStackScreen} />
-    <Tabs.Screen name={isMeAdmin ? 'Checkouts' : 'Settings'} component={isMeAdmin ? CheckoutStackScreen : SettingsStackScreen} />
+    <Tabs.Screen name={nameThirdTab} component={componentThirdTab} />
   </Tabs.Navigator>
   );
 }
@@ -122,7 +154,7 @@ const RootStackScreen = () => (
 );
 
 const GET_ME = gql`
-    query {
+  query {
       me {
       id
       name
@@ -136,7 +168,7 @@ export default () => {
   const { loading, error, data } = useQuery(GET_ME);
 
   if (error) {
-    return;
+    return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
   }
 
   if (loading) {
@@ -161,6 +193,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  error: {
+    color: colors.error,
+    fontSize: 18,
+    paddingHorizontal: 20
   }
 });
 

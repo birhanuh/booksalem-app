@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, SafeAreaView, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Divider, colors } from 'react-native-elements';
 import { graphql, gql } from '@apollo/react-hoc';
@@ -76,51 +76,53 @@ class User extends React.PureComponent {
     };
 
     return (
-      <View style={styles.container}>
-        <Text style={styles.titleSecondary} h4>Profile</Text>
-        <Input value={name} onChangeText={text => this.onChangeText('name', text)} placeholder="Name" errorStyle={{ color: colors.error }}
-          errorMessage={errors.name} />
-        <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: colors.error }}
-          errorMessage={errors.email} />
-        <Input value={phone} onChangeText={text => this.onChangeText('phone', text)} autoCapitalize="none" placeholder="Phone" errorStyle={{ color: colors.error }}
-          errorMessage={errors.phone} />
-        <Button
-          type="outline"
-          style={{ marginTop: 20 }}
-          icon={
-            <Icon
-              name="user-plus"
-              size={20}
-              style={{ marginRight: 10 }}
-              color='steelblue'
-            />
-          }
-          onPress={this.submit} disabled={isSubmitting}
-          title="Update profile"
-        />
+      <ScrollView>
+        <View style={styles.container}>
+          <Text style={styles.titleSecondary} h4>Profile</Text>
+          <Input value={name} onChangeText={text => this.onChangeText('name', text)} placeholder="Name" errorStyle={{ color: colors.error }}
+            errorMessage={errors.name} />
+          <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: colors.error }}
+            errorMessage={errors.email} />
+          <Input value={phone} onChangeText={text => this.onChangeText('phone', text)} autoCapitalize="none" placeholder="Phone" errorStyle={{ color: colors.error }}
+            errorMessage={errors.phone} />
+          <Button
+            type="outline"
+            style={{ marginTop: 20 }}
+            icon={
+              <Icon
+                name="user-plus"
+                size={20}
+                style={{ marginRight: 10 }}
+                color='steelblue'
+              />
+            }
+            onPress={this.submit} disabled={isSubmitting}
+            title="Update profile"
+          />
 
-        <Divider style={{ marginTop: 30, marginBottom: 20 }} />
+          <Divider style={{ marginTop: 30, marginBottom: 20 }} />
 
-        <Text style={styles.titleSecondary} h4>Password</Text>
-        <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: colors.error }}
-          errorMessage={errors.password} />
-        <Input secureTextEntry={true} value={confirmPassword} onChangeText={text => this.onChangeText('confirmPassword', text)} placeholder="Confirm password" errorStyle={{ color: colors.error }}
-          errorMessage={errors.confirmPassword} />
-        <Button
-          type="outline"
-          style={{ marginTop: 20 }}
-          icon={
-            <Icon
-              name="user-plus"
-              size={20}
-              style={{ marginRight: 10 }}
-              color='steelblue'
-            />
-          }
-          onPress={this.submit} disabled={isSubmitting}
-          title="Update password"
-        />
-      </View>
+          <Text style={styles.titleSecondary} h4>Password</Text>
+          <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: colors.error }}
+            errorMessage={errors.password} />
+          <Input secureTextEntry={true} value={confirmPassword} onChangeText={text => this.onChangeText('confirmPassword', text)} placeholder="Confirm password" errorStyle={{ color: colors.error }}
+            errorMessage={errors.confirmPassword} />
+          <Button
+            type="outline"
+            style={{ marginTop: 20 }}
+            icon={
+              <Icon
+                name="user-plus"
+                size={20}
+                style={{ marginRight: 10 }}
+                color='steelblue'
+              />
+            }
+            onPress={this.submit} disabled={isSubmitting}
+            title="Update password"
+          />
+        </View>
+      </ScrollView>
     )
   }
 }
@@ -133,8 +135,11 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 20
+    backgroundColor: colors.white,
+    paddingHorizontal: 10,
+    paddingVertical: 20,
+    marginVertical: 16,
+    marginHorizontal: 16
   },
   titleSecondary: {
     marginBottom: 10,
