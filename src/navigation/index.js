@@ -153,19 +153,20 @@ const RootStackScreen = () => (
   </RootStack.Navigator>
 );
 
-const GET_ME = gql`
+const GET_ME_QUERY = gql`
   query {
-      me {
+    me {
       id
       name
       email
+      phone
       is_admin
     }
   }
 `
 
 export default () => {
-  const { loading, error, data } = useQuery(GET_ME);
+  const { loading, error, data } = useQuery(GET_ME_QUERY);
 
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);

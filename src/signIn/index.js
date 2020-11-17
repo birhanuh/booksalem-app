@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Divider, colors } from 'react-native-elements';
 import { graphql, gql } from '@apollo/react-hoc';
-import { loginSchema } from '../utils/validationSchema';
+import { signInSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 
 class SignIn extends React.PureComponent {
@@ -25,7 +25,7 @@ class SignIn extends React.PureComponent {
 
     // Validation
     try {
-      await loginSchema.validate(this.state.values, { abortEarly: false })
+      await signInSchema.validate(this.state.values, { abortEarly: false })
     } catch (err) {
       this.setState({ errors: formatYupErrors(err) })
     }
@@ -37,7 +37,7 @@ class SignIn extends React.PureComponent {
     } else {
       this.setState({ isSubmitting: true })
 
-      const { data: { login: { errors, user, token } } } = await this.props.mutate({ variables: { email, password } })
+      const { data: { signIn: { errors, user, token } } } = await this.props.mutate({ variables: { email, password } })
 
       if (errors) {
         this.setState({ errors: formatServerErrors(errors) })
@@ -78,7 +78,7 @@ class SignIn extends React.PureComponent {
     return (
       <View style={styles.container}>
         <Text style={styles.title} h2>Sign In</Text>
-        <View style={styles.loginContainer}>
+        <View style={styles.signInContainer}>
           <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: colors.error }}
             errorMessage={errors.email} leftIcon={{ type: 'font-awesome', name: 'envelope', size: 15, marginRight: 10 }} />
           <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: colors.error }}
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 50,
     paddingVertical: 200
   },
-  loginContainer: {
+  signInContainer: {
     marginTop: 10
   },
   title: {
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
 
 const LOGIN_MUTATION = gql`
   mutation($email: String!, $password: String!) {
-    login(email: $email, password: $password) {
+    signIn(email: $email, password: $password) {
       token
       user {
         name
