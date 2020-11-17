@@ -4,6 +4,8 @@ import { Card, Button, Text, colors, Divider } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
 
+import { MeContext } from "../context";
+
 const GET_BOOK = gql`
   query($id: Int!) {
     getBook(id: $id) {
@@ -31,6 +33,7 @@ const GET_BOOK = gql`
 `
 
 const ViewBook = ({ route }) => {
+  const me = React.useContext(MeContext);
 
   const { loading, error, data } = useQuery(GET_BOOK, {
     variables: { id: route.params.id },
@@ -107,7 +110,11 @@ const ViewBook = ({ route }) => {
             icon={<Icon name='shopping-bag' color='#ffffff' size={15}
               style={{ marginRight: 10 }} />}
             buttonStyle={styles.button}
-            title='Order' />
+            title='Order' onPress={me ? () => {
+              console.log('Ordering...')
+            } : () => {
+              navigation.push('SignIn')
+            }} />
         </Card>
       </View>
     </ScrollView>

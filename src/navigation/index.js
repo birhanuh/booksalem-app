@@ -1,12 +1,12 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React from "react";
 import { SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useQuery, gql } from '@apollo/client';
 
-import { AuthContext } from "../context";
+import { MeContext } from "../context";
 
 import { reactNavigationTheme } from '../theme';
 
@@ -80,13 +80,17 @@ const UserStackScreen = () => (
 )
 
 const Tabs = createBottomTabNavigator();
-const TabsScreen = () => (
-  <Tabs.Navigator>
+const TabsScreen = () => {
+  const me = React.useContext(MeContext);
+  const isMeAdmin = me & me.is_admin
+
+  return (<Tabs.Navigator>
     <Tabs.Screen name="Books" component={BookStackScreen} />
-    <Tabs.Screen name="Orders" component={OrderStackScreen} />
-    <Tabs.Screen name="Checkouts" component={CheckoutStackScreen} />
+    <Tabs.Screen name="Orders" component={me ? OrderStackScreen : AuthStackScreen} />
+    <Tabs.Screen name={isMeAdmin ? 'Checkouts' : 'Settings'} component={isMeAdmin ? CheckoutStackScreen : SettingsStackScreen} />
   </Tabs.Navigator>
-);
+  );
+}
 
 const Drawer = createDrawerNavigator();
 const DrawerScreen = () => (
@@ -98,7 +102,7 @@ const DrawerScreen = () => (
 );
 
 const RootStack = createStackNavigator();
-const RootStackScreen = ({ userToken }) => (
+const RootStackScreen = () => (
   <RootStack.Navigator>
     <RootStack.Screen
       name="Kemetsehaft alem"
@@ -117,47 +121,38 @@ const RootStackScreen = ({ userToken }) => (
   </RootStack.Navigator>
 );
 
+const GET_ME = gql`
+    query {
+      me {
+      id
+      name
+      email
+      is_admin
+    }
+  }
+`
+
 export default () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [userToken, setUserToken] = useState(null);
+  const { loading, error, data } = useQuery(GET_ME);
 
-  const authContext = useMemo(async () => {
-    const TOKEN = await AsyncStorage.getItem('@kemetsehaftalem/token');
+  if (error) {
+    return;
+  }
 
-    return {
-      signIn: () => {
-        setIsLoading(false);
-        setUserToken(TOKEN);
-      },
-      signUp: () => {
-        setIsLoading(false);
-        setUserToken(TOKEN);
-      },
-      signOut: () => {
-        setIsLoading(false);
-        setUserToken(null);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-  }, []);
-
-  if (isLoading) {
+  if (loading) {
     return (<SafeAreaView style={styles.loadingContainer}>
       <ActivityIndicator />
     </SafeAreaView>);
   }
 
+  const { me } = data;
+
   return (
-    <AuthContext.Provider value={authContext}>
+    <MeContext.Provider value={me}>
       <NavigationContainer theme={reactNavigationTheme}>
-        <RootStackScreen userToken={userToken} />
+        <RootStackScreen />
       </NavigationContainer>
-    </AuthContext.Provider >
+    </MeContext.Provider >
   )
 }
 
