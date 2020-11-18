@@ -33,8 +33,6 @@ class SignIn extends React.PureComponent {
     const { values: { email, password }, errors } = this.state
 
     if (Object.keys(errors).length !== 0) {
-      this.setState({ errors, isSubmitting: false })
-    } else {
       this.setState({ isSubmitting: true })
 
       const { data: { signIn: { errors, user, token } } } = await this.props.mutate({ variables: { email, password } })

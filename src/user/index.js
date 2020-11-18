@@ -52,8 +52,6 @@ class User extends React.PureComponent {
     const { profile: { name, email, phone }, errors } = this.state
 
     if (Object.keys(errors).length !== 0) {
-      this.setState({ errors, isSubmitting: false })
-    } else {
       this.setState({ isSubmitting: true })
 
       const { data: { updateProfile: { errors, user } } } = await this.props.updateProfileMutation({ variables: { name, email, phone } })
@@ -81,8 +79,6 @@ class User extends React.PureComponent {
     const { password: { newPassword }, errors } = this.state
 
     if (Object.keys(errors).length !== 0) {
-      this.setState({ errors, isSubmitting: false })
-    } else {
       this.setState({ isSubmitting: true })
 
       const { data: { updatePassword: { errors, user } } } = await this.props.updatePasswordMutation({ variables: { password: newPassword } })

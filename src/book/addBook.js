@@ -14,7 +14,7 @@ class AddBook extends React.PureComponent {
   state = {
     values: {
       title: '',
-      author: '',
+      authorId: '',
       published_date: '',
       status: 'available',
       condition: 'new',
@@ -42,7 +42,7 @@ class AddBook extends React.PureComponent {
       this.setState({ errors: formatYupErrors(err) })
     }
 
-    const { values: { title, author, published_date, status, condition, isbn, categoryId, languageId, price, description, coverFile }, errors } = this.state
+    const { values: { title, authorId, published_date, status, condition, isbn, categoryId, languageId, price, description, coverFile }, errors } = this.state
 
     let coverFileWraped
     if (!!coverFile) {
@@ -56,12 +56,10 @@ class AddBook extends React.PureComponent {
       })
     }
 
-    if (Object.keys(errors).length !== 0) {
-      this.setState({ errors, isSubmitting: false })
-    } else {
+    if (Object.keys(errors).length === 0) {
       this.setState({ isSubmitting: true })
 
-      const { data: { addBook: { book, errors } } } = await this.props.addBookMutation({ variables: { title, author, published_date, status, condition, isbn: parseInt(isbn), categoryId, languageId, price: parseFloat(price), description, coverFile: coverFileWraped } })
+      const { data: { addBook: { book, errors } } } = await this.props.addBookMutation({ variables: { title, authorId, published_date, status, condition, isbn: parseInt(isbn), categoryId, languageId, price: parseFloat(price), description, coverFile: coverFileWraped } })
       console.log("Resp data: ", book, errors)
       if (errors) {
         this.setState({ errors: formatServerErrors(errors) })
@@ -104,8 +102,8 @@ class AddBook extends React.PureComponent {
   }
 
   render() {
-    const { values: { title, author, published_date, status, condition, isbn, categoryId, languageId, price, description, coverFile }, loading, isSubmitting, errors } = this.state
-    const { getCategoriesQuery: { getCategories }, getLanguagesQuery: { getLanguages } } = this.props
+    const { values: { title, authorId, published_date, status, condition, isbn, categoryId, languageId, price, description, coverFile }, loading, isSubmitting, errors } = this.state
+    const { getAuthorsQuery: { getAuthors }, getCategoriesQuery: { getCategories }, getLanguagesQuery: { getLanguages } } = this.props
 
     if (loading) {
       return (
@@ -123,8 +121,32 @@ class AddBook extends React.PureComponent {
 
           <Input value={title} onChangeText={text => this.onChangeText('title', text)} placeholder="Title" errorStyle={{ color: colors.error }}
             errorMessage={errors.title} />
-          <Input value={author} onChangeText={text => this.onChangeText('author', text)} placeholder="Author" errorStyle={{ color: colors.error }}
-            errorMessage={errors.author} />
+          <View style={styles.authorContainer}>
+            <Text style={styles.authorTitle}>Select author or add a new one</Text>
+            <Picker
+              itemStyle={styles.picker}
+              selectedValue={authorId}
+              onValueChange={(itemValue, itemIndex) =>
+                this.setState({ values: { ...this.state.values, authorId: itemValue } })
+              }>
+              {getAuthors && getAuthors.map(author =>
+                <Picker.Item key={author.id} label={this.capitalizeFirstLetter(author.author)} value={author.id} />)}
+            </Picker>
+            {errors.authorId && <Text style={styles.cutomeTextError}>{errors.authorId}</Text>}
+            <Button
+              title='Add author'
+              type='outline'
+              icon={
+                <Icon
+                  name="plus-circle"
+                  size={20}
+                  style={{ marginRight: 10 }}
+                  color={colors.primary}
+                />
+              }
+              onPress={() => { this.props.navigation.navigate('AddAuthor', { screen: 'AddAuthor', params: { name: 'Add author', referrer: 'AddBook' } }) }}
+            />
+          </View>
           <View>
             <Text style={styles.pickerTitle}>Status</Text>
             <Picker
@@ -165,7 +187,7 @@ class AddBook extends React.PureComponent {
                 this.setState({ values: { ...this.state.values, categoryId: itemValue } })
               }>
               {getCategories && getCategories.map(category =>
-                <Picker.Item key={category.id} label={this.capitalizeFirstLetter(category.name)} value={category.id} />)}
+                <Picker.Item key={category.id} label={this.capitalizeFirstLetter(category.category)} value={category.id} />)}
             </Picker>
             {errors.categoryId && <Text style={styles.cutomeTextError}>{errors.categoryId}</Text>}
           </View>
@@ -178,7 +200,7 @@ class AddBook extends React.PureComponent {
                 this.setState({ values: { ...this.state.values, languageId: itemValue } })
               }>
               {getLanguages && getLanguages.map(language =>
-                <Picker.Item key={language.id} label={this.capitalizeFirstLetter(language.name)} value={language.id} />)}
+                <Picker.Item key={language.id} label={this.capitalizeFirstLetter(language.language)} value={language.id} />)}
             </Picker>
             {errors.languageId && <Text style={styles.cutomeTextError}>{errors.languageId}</Text>}
           </View>
@@ -245,6 +267,22 @@ const styles = StyleSheet.create({
     marginVertical: 16,
     marginHorizontal: 16
   },
+  authorContainer: {
+    borderColor: colors.grey4,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    marginBottom: 18,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1
+  },
+  authorTitle: {
+    fontSize: 18,
+    color: colors.grey3,
+    marginHorizontal: 10,
+    marginBottom: 18
+  },
   pickerTitle: {
     fontSize: 18,
     color: colors.grey3,
@@ -286,8 +324,8 @@ const styles = StyleSheet.create({
 });
 
 const ADD_BOOK_MUTATION = gql`
-  mutation($title: String!, $author: String!, $published_date: String, $status: String!, $condition: String!, $isbn: Int, $categoryId: Int!, $languageId: Int!, $price: Float!, $coverFile: Upload, $description: String) {
-    addBook(title: $title, author: $author, published_date: $published_date, status: $status, condition: $condition, isbn: $isbn, categoryId: $categoryId, languageId: $languageId, price: $price, coverFile: $coverFile, description: $description) {
+  mutation($title: String!, $authorId: Int!, $published_date: String, $status: String!, $condition: String!, $isbn: Int, $categoryId: Int!, $languageId: Int!, $price: Float!, $coverFile: Upload, $description: String) {
+    addBook(title: $title, authorId: $authorId, published_date: $published_date, status: $status, condition: $condition, isbn: $isbn, categoryId: $categoryId, languageId: $languageId, price: $price, coverFile: $coverFile, description: $description) {
       book {
         id
         title
@@ -300,20 +338,29 @@ const ADD_BOOK_MUTATION = gql`
   }
 `;
 
-const GET_LANGUAGES_QUERY = gql`
+const GET_AUTHORS_QUERY = gql`
   query {
-    getLanguages {
+    getAuthors {
       id
-      name
+      author
     }
   }
 `
 
-const GET_CATEGORIESS_QUERY = gql`
+const GET_LANGUAGES_QUERY = gql`
+  query {
+    getLanguages {
+      id
+      language
+    }
+  }
+`
+
+const GET_CATEGORIES_QUERY = gql`
   query {
     getCategories {
       id
-      name
+      category
     }
   }
 `
@@ -322,11 +369,14 @@ const MutationQueries = compose(
   graphql(ADD_BOOK_MUTATION, {
     name: "addBookMutation"
   }),
-  graphql(GET_CATEGORIESS_QUERY, {
+  graphql(GET_CATEGORIES_QUERY, {
     name: "getCategoriesQuery"
   }),
   graphql(GET_LANGUAGES_QUERY, {
     name: "getLanguagesQuery"
+  }),
+  graphql(GET_AUTHORS_QUERY, {
+    name: "getAuthorsQuery"
   })
 )(AddBook);
 

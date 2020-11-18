@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
 import { Text, Card, Divider, colors, Button, SearchBar } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -22,9 +22,26 @@ const GET_AVAILABLE_BOOKS = gql`
 `
 
 const Books = ({ navigation }) => {
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
   const { loading, error, data } = useQuery(GET_AVAILABLE_BOOKS);
 
   if (error) { console.error('error', error) };
+
+  const handleLoadMore = async () => {
+    if (data.getAvailableBooks && data.getAvailableBooks.hasMore) {
+      setIsLoadingMore(true);
+
+      await fetchMore({
+        variables: {
+          after: data.getAvailableBooks.cursor,
+        },
+      });
+
+      setIsLoadingMore(false);
+    }
+
+  }
 
   const renderHeader = () => (
     <SearchBar placeholder='Search...' lightTheme round />
@@ -51,6 +68,8 @@ const Books = ({ navigation }) => {
         keyExtractor={(item) => item.id.toString()}
         ListHeaderComponent={renderHeader}
         ListFooterComponent={renderFooter}
+        refreshing={isLoadingMore}
+        onRefresh={handleLoadMore}
         renderItem={({ item }) => (
           // implemented with Text and Button as children
           <Card style={styles.card}>

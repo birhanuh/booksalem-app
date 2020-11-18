@@ -35,9 +35,7 @@ class CreateAccount extends React.PureComponent {
 
     const { values: { name, email, password, phone }, errors } = this.state
 
-    if (Object.keys(errors).length !== 0) {
-      this.setState({ errors, isSubmitting: false })
-    } else {
+    if (Object.keys(errors).length === 0) {
       this.setState({ isSubmitting: true })
 
       const { data: { createAccount: { errors, user, token } } } = await this.props.mutate({ variables: { name, email, password, phone } })

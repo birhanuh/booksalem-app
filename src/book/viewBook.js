@@ -12,7 +12,6 @@ const GET_BOOK = gql`
       book {
         id
         title
-        author
         condition
         price
         status
@@ -21,6 +20,9 @@ const GET_BOOK = gql`
         cover_url
         description
         rating
+        author {
+          author
+        }
         language {
           language
         }
@@ -48,7 +50,7 @@ const ViewBook = ({ route }) => {
     );
   };
 
-  const { book: { id, title, author, condition, price, status, published_date, isbn, cover_url, description, rating, language: { language }, category: { category } } } = data && data.getBook
+  const { book: { id, title, condition, price, status, published_date, isbn, cover_url, description, rating, author: { author }, language: { language }, category: { category } } } = data && data.getBook
 
   return (
     <ScrollView>
