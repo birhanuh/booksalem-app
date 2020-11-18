@@ -1,43 +1,45 @@
 import React from 'react';
-import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
-import { ListItem, Avatar, Button } from 'react-native-elements';
+import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
+import { List, ListItem, Avatar, Button, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
 
-const GET_ORDERS = gql`
+const GET_ORDERS_QUERY = gql`
   query {
     getOrders {
-      title
-      author
-      condition
-      language
-      price
+      id
+      user_id
+      book_id
       status
-      published_date
-      isbn
-      categories {
-        name
-      }
-      orders {
-        users {
-          id
-          name
-        }
-      }
+      order_date
     }
-  }
+  } 
 `
 
 const Orders = () => {
-  const { data, loading, error } = useQuery(GET_ORDERS);
+  const { data, loading, error } = useQuery(GET_ORDERS_QUERY);
 
   const list = [
     {
+      id: 1,
       name: 'Amy Farha',
       avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg',
       subtitle: 'Vice President'
     },
     {
+      id: 2,
+      name: 'Chris Jackson',
+      avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+      subtitle: 'Vice Chairman'
+    },
+    {
+      id: 3,
+      name: 'Amy Farha',
+      avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg',
+      subtitle: 'Vice President'
+    },
+    {
+      id: 4,
       name: 'Chris Jackson',
       avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
       subtitle: 'Vice Chairman'
@@ -45,25 +47,38 @@ const Orders = () => {
   ]
 
   if (error) { console.error('error', error) };
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator />
-      </SafeAreaView>
-    );
-  };
 
-  // const { getOrders } = data;
-  // console.log("ORDERS: ", getOrders);
+  const renderFooter = () => {
+    if (loading) {
+      return (
+        <SafeAreaView style={styles.loadingContainer}>
+          <ActivityIndicator size='large' />
+        </SafeAreaView>
+      );
+    } else {
+      return null
+    }
+  }
+
+  const renderSeprator = () => (
+    <View style={{ height: 1, width: '86%', backgroundColor: colors.divider, marginLeft: '14%' }} />
+  )
+
+  const { getOrders } = !!data && data;
+
   return (
     <View style={styles.container}>
-      {
-        list.map((l, i) => (
-          <ListItem key={i} bottomDivider>
-            <Avatar source={{ uri: l.avatar_url }} />
+      <FlatList
+        data={list}
+        keyExtractor={(item) => item.id.toString()}
+        ItemSeparatorComponent={renderSeprator}
+        renderItem={({ item }) => (
+          <ListItem
+            containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0 }}>
+            <Avatar source={{ uri: item.avatar_url }} />
             <ListItem.Content>
-              <ListItem.Title>{l.name}</ListItem.Title>
-              <ListItem.Subtitle>{l.subtitle}</ListItem.Subtitle>
+              <ListItem.Title>{item.name}</ListItem.Title>
+              <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
             </ListItem.Content>
             <Button
               icon={<Icon name='eye' color='#ffffff' size={15}
@@ -71,20 +86,18 @@ const Orders = () => {
               buttonStyle={styles.button}
               title='View' onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: l.id } }) }} />
           </ListItem>
-        ))
-      }
-    </View>
-  )
+        )} />
+    </View>)
 }
 
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
+    paddingVertical: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
   container: {
-    backgroundColor: 'powderblue',
     flex: 1,
     paddingHorizontal: 20,
     paddingVertical: 20

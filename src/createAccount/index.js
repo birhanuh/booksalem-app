@@ -73,7 +73,7 @@ class CreateAccount extends React.PureComponent {
     if (loading) {
       return (
         <SafeAreaView style={styles.loadingContainer}>
-          <ActivityIndicator />
+          <ActivityIndicator size='large' />
         </SafeAreaView>
       );
     };

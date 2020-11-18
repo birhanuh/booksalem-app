@@ -43,7 +43,7 @@ const ViewBook = ({ route }) => {
   if (loading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator />
+        <ActivityIndicator size='large' />
       </SafeAreaView>
     );
   };

@@ -5,7 +5,7 @@ export const reactNavigationTheme = {
   colors: {
     ...DefaultTheme.colors,
     primary: 'steelblue',
-    background: 'powderblue',
+    background: '#e1e8ee',
   },
 };
 

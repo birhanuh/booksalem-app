@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
-import { Text, Card, Divider, colors, Button } from 'react-native-elements';
+import { Text, Card, Divider, colors, Button, SearchBar } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
 
-const GET_BOOKS = gql`
+const GET_AVAILABLE_BOOKS = gql`
   query {
     getAvailableBooks {
       id
@@ -22,24 +22,35 @@ const GET_BOOKS = gql`
 `
 
 const Books = ({ navigation }) => {
-  const { loading, error, data } = useQuery(GET_BOOKS);
+  const { loading, error, data } = useQuery(GET_AVAILABLE_BOOKS);
 
   if (error) { console.error('error', error) };
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator />
-      </SafeAreaView>
-    );
-  };
 
-  const { getAvailableBooks } = data && data
+  const renderHeader = () => (
+    <SearchBar placeholder='Search...' lightTheme round />
+  )
+
+  const renderFooter = () => {
+    if (loading) {
+      return (
+        <SafeAreaView style={styles.loadingContainer}>
+          <ActivityIndicator size='large' />
+        </SafeAreaView>
+      );
+    } else {
+      return null
+    }
+  }
+
+  const { getAvailableBooks } = !!data && data
 
   return (
     <View style={styles.container}>
       <FlatList
         data={getAvailableBooks}
         keyExtractor={(item) => item.id.toString()}
+        ListHeaderComponent={renderHeader}
+        ListFooterComponent={renderFooter}
         renderItem={({ item }) => (
           // implemented with Text and Button as children
           <Card style={styles.card}>
@@ -105,6 +116,7 @@ const Books = ({ navigation }) => {
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
+    paddingVertical: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },

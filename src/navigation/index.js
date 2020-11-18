@@ -174,7 +174,7 @@ export default () => {
 
   if (loading) {
     return (<SafeAreaView style={styles.loadingContainer}>
-      <ActivityIndicator />
+      <ActivityIndicator size='large' />
     </SafeAreaView>);
   }
 
