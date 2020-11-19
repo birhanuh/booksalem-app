@@ -8,7 +8,7 @@ import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 
 let authorLoc = ''
 
-const AddAuthor = ({ mutate, navigation, route }) => {
+const AddAuthor = ({ mutate, navigation, referrer }) => {
   const [author, setAuthor] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
@@ -35,8 +35,8 @@ const AddAuthor = ({ mutate, navigation, route }) => {
       if (errors) {
         setErrors(formatServerErrors(errors))
       } else {
-        if (!!route.params.params.referrer) {
-          navigation.navigate(route.params.params.referrer, { screen: route.params.params.referrer })
+        if (!!referrer) {
+          navigation.navigate(referrer, { screen: referrer })
         }
       }
     }

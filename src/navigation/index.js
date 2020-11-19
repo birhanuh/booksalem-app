@@ -19,12 +19,12 @@ import AddBook from "../book/addBook";
 import ViewBook from "../book/viewBook";
 import EditBook from "../book/editBook";
 import User from "../user";
-import Orders from "../orders";
+import Orders from "../orders/orders";
 import ViewOrder from "../orders/viewOrder";
 import Checkouts from "../checkout/chekcouts";
 import ViewCheckout from "../checkout/viewCheckout";
 import Settings from "../settings";
-import AddAuthor from "../author/addAuthor";
+import Authors from "../author/authors";
 import { colors } from "react-native-elements";
 
 const AuthStack = createStackNavigator();
@@ -54,7 +54,7 @@ const BookStackScreen = () => (
     <BookStack.Screen name='EditBook' component={EditBook} options={({ route }) => ({
       title: route.params.name
     })} />
-    <BookStack.Screen name='AddAuthor' component={AddAuthor} options={({ route }) => ({
+    <BookStack.Screen name='Authors' component={Authors} options={({ route }) => ({
       title: route.params.name
     })} />
   </BookStack.Navigator>
@@ -138,7 +138,7 @@ const DrawerScreen = () => (
   <Drawer.Navigator initialRouteName="Books">
     <Drawer.Screen name="Books" component={TabsScreen} />
     <Drawer.Screen name='AddBook' component={AddBook} options={{ title: "Add book" }} />
-    <Drawer.Screen name='AddAuthor' component={AddAuthor} options={{ title: "Add author" }} />
+    <Drawer.Screen name='Authors' component={Authors} options={{ title: "Add author" }} />
     <Drawer.Screen name="Settings" component={SettingsStackScreen} />
   </Drawer.Navigator>
 );

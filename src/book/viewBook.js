@@ -46,6 +46,7 @@ const ViewBook = ({ navigation, route }) => {
   });
 
   if (error) { console.error('error', error) };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>

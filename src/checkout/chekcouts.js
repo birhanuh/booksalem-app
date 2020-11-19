@@ -30,6 +30,7 @@ const Checkouts = () => {
   const { data, loading, error } = useQuery(GET_CHECKOUTS);
 
   if (error) { console.error('error', error) };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
