@@ -1,5 +1,6 @@
 import React from "react";
 import { Text, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
+import { Avatar } from 'react-native-elements';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -16,6 +17,7 @@ import SignIn from "../signIn";
 import Books from "../book/books";
 import AddBook from "../book/addBook";
 import ViewBook from "../book/viewBook";
+import EditBook from "../book/editBook";
 import User from "../user";
 import Orders from "../orders";
 import ViewOrder from "../orders/viewOrder";
@@ -47,6 +49,9 @@ const BookStackScreen = () => (
     <BookStack.Screen name='Books' component={Books} />
     <BookStack.Screen name='AddBook' component={AddBook} />
     <BookStack.Screen name='ViewBook' component={ViewBook} options={({ route }) => ({
+      title: route.params.name
+    })} />
+    <BookStack.Screen name='EditBook' component={EditBook} options={({ route }) => ({
       title: route.params.name
     })} />
     <BookStack.Screen name='AddAuthor' component={AddAuthor} options={({ route }) => ({
@@ -139,13 +144,20 @@ const DrawerScreen = () => (
 );
 
 const RootStack = createStackNavigator();
-const RootStackScreen = () => (
+const RootStackScreen = ({ me }) => (
   <RootStack.Navigator>
     <RootStack.Screen
       name="Kemetsehaft alem"
       component={DrawerScreen}
       options={{
-        animationEnabled: false
+        animationEnabled: false,
+        headerRight: () => {
+          const tokens = me.name.split(' ');
+          const name = tokens[0].charAt(0) + tokens[1].charAt(0).toUpperCase();
+
+          // Avatar with Title
+          return (<Avatar containerStyle={{ position: 'absolute', top: 8, right: 8, backgroundColor: colors.grey4 }} rounded title={name} onPress={() => alert(me.name)} />)
+        }
       }}
     />
     {/* <RootStack.Screen
@@ -188,7 +200,7 @@ export default () => {
   return (
     <MeContext.Provider value={me}>
       <NavigationContainer theme={reactNavigationTheme}>
-        <RootStackScreen />
+        <RootStackScreen me={me} />
       </NavigationContainer>
     </MeContext.Provider >
   )

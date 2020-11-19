@@ -9,32 +9,36 @@ import { MeContext } from "../context";
 const GET_BOOK = gql`
   query($id: Int!) {
     getBook(id: $id) {
-      book {
+      id
+      title
+      authors {
         id
-        title
-        condition
-        price
-        status
-        published_date
-        isbn
-        cover_url
-        description
-        rating
-        author {
-          author
-        }
-        language {
-          language
-        }
-        category {
-          category
-        }
+        name
+      }
+      condition
+      price
+      status
+      published_date
+      isbn
+      cover_url
+      description
+      rating
+      languages {
+        id
+        name
+      }
+      categories {
+        id
+        name
+      }
+      users {
+        id
       }
     }
-  }  
+  }
 `
 
-const ViewBook = ({ route }) => {
+const ViewBook = ({ navigation, route }) => {
   const me = React.useContext(MeContext);
 
   const { loading, error, data } = useQuery(GET_BOOK, {
@@ -50,7 +54,11 @@ const ViewBook = ({ route }) => {
     );
   };
 
-  const { book: { id, title, condition, price, status, published_date, isbn, cover_url, description, rating, author: { author }, language: { language }, category: { category } } } = data && data.getBook
+  const createOrder = () => {
+    console.log('Ordering...')
+  }
+
+  const { getBook: { title, condition, price, status, published_date, isbn, cover_url, description, rating, authors, languages, categories, users } } = data
 
   return (
     <ScrollView>
@@ -62,13 +70,13 @@ const ViewBook = ({ route }) => {
           <View style={styles.bookInfoPriceContainer}>
             <View style={styles.bookInfoContainer}>
               <Text style={styles.text}>
-                <Text style={styles.label}>Author: </Text>{author}
+                <Text style={styles.label}>Author: </Text>{authors.name}
               </Text>
               <Text style={styles.text}>
-                <Text style={styles.label}>Language: </Text>{language}
+                <Text style={styles.label}>Language: </Text>{languages.name}
               </Text>
               <Text style={styles.text}>
-                <Text style={styles.label}>Category: </Text>{category}
+                <Text style={styles.label}>Category: </Text>{categories.name}
               </Text>
               <Text style={styles.text}>
                 <Text style={styles.label}>Condition: </Text>{condition}
@@ -109,12 +117,13 @@ const ViewBook = ({ route }) => {
           <Divider style={styles.divider} />
 
           <Button
-            icon={<Icon name='shopping-bag' color='#ffffff' size={15}
-              style={{ marginRight: 10 }} />}
+            icon={me && me.id === users.id ? <Icon name='pencil-square-o' color='#ffffff' size={15}
+              style={{ marginRight: 10 }} /> : <Icon name='shopping-bag' color='#ffffff' size={15}
+                style={{ marginRight: 10 }} />}
             buttonStyle={styles.button}
-            title='Order' onPress={me ? () => {
-              console.log('Ordering...')
-            } : () => {
+            title={me && me.id === users.id ? 'Edit' : 'Order'} onPress={me ? (me.id === users.id ? () => {
+              navigation.push('EditBook', { name: 'Edit book', book: data && data.getBook })
+            } : createOrder()) : () => {
               navigation.push('SignIn')
             }} />
         </Card>

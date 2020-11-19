@@ -9,16 +9,22 @@ const GET_AVAILABLE_BOOKS = gql`
     getAvailableBooks {
       id
       title
-      author
+      authors {
+        name
+      }
       price
       status
-      language
-      category
       cover_url
+      languages {
+        name
+      }
+      categories {
+        name
+      }
       description
       rating
     }
-  }
+  } 
 `
 
 const Books = ({ navigation }) => {
@@ -79,13 +85,13 @@ const Books = ({ navigation }) => {
             <View style={styles.bookInfoPriceContainer}>
               <View style={styles.bookInfoContainer}>
                 <Text style={styles.text}>
-                  <Text style={styles.label}>Author: </Text>{item.author}
+                  <Text style={styles.label}>Author: </Text>{item.authors.name}
                 </Text>
                 <Text style={styles.text}>
-                  <Text style={styles.label}>Language: </Text>{item.language}
+                  <Text style={styles.label}>Language: </Text>{item.languages.name}
                 </Text>
                 <Text style={styles.text}>
-                  <Text style={styles.label}>Category: </Text>{item.category}
+                  <Text style={styles.label}>Category: </Text>{item.categories.name}
                 </Text>
                 <Text style={styles.text}>
                   <Text style={styles.label}>Category: </Text>{item.status}

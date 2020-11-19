@@ -10,20 +10,21 @@ import compose from "lodash.flowright";
 import { addBookSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 
-class AddBook extends React.PureComponent {
+class EditBook extends React.PureComponent {
   state = {
     values: {
-      title: '',
-      authorId: '',
-      published_date: '',
-      status: 'available',
-      condition: 'new',
-      isbn: null,
-      categoryId: 1,
-      languageId: 1,
-      price: '',
-      description: '',
-      coverFile: null
+      id: this.props.route.params.book.id,
+      title: this.props.route.params.book.title,
+      authorId: this.props.route.params.book.authors.id,
+      published_date: this.props.route.params.book.published_date,
+      status: this.props.route.params.book.status,
+      condition: this.props.route.params.book.condition,
+      isbn: this.props.route.params.book.isbn,
+      categoryId: this.props.route.params.book.categories.id,
+      languageId: this.props.route.params.book.languages.id,
+      price: this.props.route.params.book.price,
+      description: this.props.route.params.book.description,
+      coverFile: this.props.route.params.book.cover_url
     },
     errors: {},
     isSubmitting: false,
@@ -42,10 +43,10 @@ class AddBook extends React.PureComponent {
       this.setState({ errors: formatYupErrors(err) })
     }
 
-    const { values: { title, authorId, published_date, status, condition, isbn, categoryId, languageId, price, description, coverFile }, errors } = this.state
+    const { values: { id, title, authorId, published_date, status, condition, isbn, categoryId, languageId, price, description, coverFile }, errors } = this.state
 
     let coverFileWraped
-    if (!!coverFile) {
+    if (typeof coverFile === 'object') {
       const tokens = coverFile.uri.split('/');
       const name = tokens[tokens.length - 1];
 
@@ -54,12 +55,14 @@ class AddBook extends React.PureComponent {
         type: coverFile.type,
         name
       })
+    } else if (typeof coverFile === 'string') {
+      coverFileWraped = coverFile;
     }
 
     if (Object.keys(errors).length === 0) {
       this.setState({ isSubmitting: true })
 
-      const { data: { addBook: { book, errors } } } = await this.props.addBookMutation({ variables: { title, authorId, published_date, status, condition, isbn: parseInt(isbn), categoryId, languageId, price: parseFloat(price), description, coverFile: coverFileWraped } })
+      const { data: { updateBook: { book, errors } } } = await this.props.updateBookMutation({ variables: { bookId: id, title, authorId, published_date, status, condition, isbn: parseInt(isbn), categoryId, languageId, price: parseFloat(price), description, coverFile: coverFileWraped } })
       console.log("Resp data: ", book, errors)
       if (errors) {
         this.setState({ errors: formatServerErrors(errors) })
@@ -117,7 +120,7 @@ class AddBook extends React.PureComponent {
       <ScrollView>
         <View style={styles.container}>
           {/* Error message */}
-          {errors.addBook && <View style={{ backgroundColor: colors.error }}><Text color="white">{errors.addBook}</Text></View>}
+          {errors.updateBook && <View style={{ backgroundColor: colors.error }}><Text color="white">{errors.updateBook}</Text></View>}
 
           <Input value={title} onChangeText={text => this.onChangeText('title', text)} placeholder="Title" errorStyle={{ color: colors.error }}
             errorMessage={errors.title} />
@@ -144,7 +147,7 @@ class AddBook extends React.PureComponent {
                   color={colors.primary}
                 />
               }
-              onPress={() => { this.props.navigation.navigate('AddAuthor', { screen: 'AddAuthor', params: { name: 'Add author', referrer: 'AddBook' } }) }}
+              onPress={() => { this.props.navigation.navigate('AddAuthor', { screen: 'AddAuthor', params: { name: 'Add author', referrer: 'EditBook' } }) }}
             />
           </View>
           <View>
@@ -176,7 +179,7 @@ class AddBook extends React.PureComponent {
           </View>
           <Input value={published_date} onChangeText={text => this.onChangeText('published_date', text)} placeholder="Published date ( Optional )" errorStyle={{ color: colors.error }}
             errorMessage={errors.published_date} />
-          <Input value={isbn} onChangeText={text => this.onChangeText('isbn', text)} placeholder="ISBN" errorStyle={{ color: colors.error }}
+          <Input value={isbn.toString()} onChangeText={text => this.onChangeText('isbn', text)} placeholder="ISBN" errorStyle={{ color: colors.error }}
             errorMessage={errors.isbn} />
           <View>
             <Text style={styles.pickerTitle}>Category</Text>
@@ -204,7 +207,7 @@ class AddBook extends React.PureComponent {
             </Picker>
             {errors.languageId && <Text style={styles.cutomeTextError}>{errors.languageId}</Text>}
           </View>
-          <Input value={price} onChangeText={text => this.onChangeText('price', text)} placeholder="price" errorStyle={{ color: colors.error }}
+          <Input value={price.toString()} onChangeText={text => this.onChangeText('price', text)} placeholder="price" errorStyle={{ color: colors.error }}
             errorMessage={errors.price} />
           <View style={{ flex: 1 }}>
             <Text style={styles.uploadPictureTitle}>Upload picture</Text>
@@ -219,11 +222,11 @@ class AddBook extends React.PureComponent {
                 />
               }
               onPress={this.pickImage}
-              title="Choose image"
+              title="Choose another image"
               style={{ alignSelf: 'center', marginBottom: 10 }}
             />
             {errors.coverFile && <Text style={styles.cutomeTextError}>{errors.coverFile}</Text>}
-            {!!coverFile && <Image source={{ uri: coverFile.uri }} style={styles.image} PlaceholderContent={<ActivityIndicator />} />}
+            {!!coverFile && <Image source={{ uri: coverFile.uri ? coverFile.uri : coverFile }} style={styles.image} PlaceholderContent={<ActivityIndicator />} />}
           </View>
           <TextInput
             style={styles.description}
@@ -235,10 +238,10 @@ class AddBook extends React.PureComponent {
           <Divider style={{ marginTop: 20, marginBottom: 20 }} />
 
           <Button
-            title="Add"
+            title="Edit"
             icon={
               <Icon
-                name="plus-circle"
+                name="pencil-square-o"
                 size={20}
                 style={{ marginRight: 10 }}
                 color={colors.white}
@@ -323,9 +326,9 @@ const styles = StyleSheet.create({
   }
 });
 
-const ADD_BOOK_MUTATION = gql`
-  mutation($title: String!, $authorId: Int!, $published_date: String, $status: String!, $condition: String!, $isbn: Int, $categoryId: Int!, $languageId: Int!, $price: Float!, $coverFile: Upload, $description: String) {
-    addBook(title: $title, authorId: $authorId, published_date: $published_date, status: $status, condition: $condition, isbn: $isbn, categoryId: $categoryId, languageId: $languageId, price: $price, coverFile: $coverFile, description: $description) {
+const UPDATE_BOOK_MUTATION = gql`
+  mutation($bookId: Int!, $title: String!, $authorId: Int!, $published_date: String, $status: String!, $condition: String!, $isbn: Int, $categoryId: Int!, $languageId: Int!, $price: Float!, $coverFile: Upload, $description: String) {
+    updateBook(bookId: $bookId, title: $title, authorId: $authorId, published_date: $published_date, status: $status, condition: $condition, isbn: $isbn, categoryId: $categoryId, languageId: $languageId, price: $price, coverFile: $coverFile, description: $description) {
       book {
         id
         title
@@ -366,8 +369,8 @@ const GET_CATEGORIES_QUERY = gql`
 `
 
 const MutationQueries = compose(
-  graphql(ADD_BOOK_MUTATION, {
-    name: "addBookMutation"
+  graphql(UPDATE_BOOK_MUTATION, {
+    name: "updateBookMutation"
   }),
   graphql(GET_CATEGORIES_QUERY, {
     name: "getCategoriesQuery"
@@ -378,6 +381,6 @@ const MutationQueries = compose(
   graphql(GET_AUTHORS_QUERY, {
     name: "getAuthorsQuery"
   })
-)(AddBook);
+)(EditBook);
 
 export default MutationQueries;
