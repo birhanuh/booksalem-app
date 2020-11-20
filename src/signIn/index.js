@@ -2,7 +2,7 @@ import React from 'react';
 import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { Text, Input, Button, Divider, colors } from 'react-native-elements';
+import { Text, Input, Button, Card, Divider, colors } from 'react-native-elements';
 import { graphql, gql } from '@apollo/react-hoc';
 import { signInSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
@@ -33,8 +33,6 @@ class SignIn extends React.PureComponent {
     const { values: { email, password }, errors } = this.state
 
     if (Object.keys(errors).length !== 0) {
-      this.setState({ errors, isSubmitting: false })
-    } else {
       this.setState({ isSubmitting: true })
 
       const { data: { signIn: { errors, user, token } } } = await this.props.mutate({ variables: { email, password } })
@@ -70,7 +68,7 @@ class SignIn extends React.PureComponent {
     if (loading) {
       return (
         <SafeAreaView style={styles.loadingContainer}>
-          <ActivityIndicator />
+          <ActivityIndicator size='large' />
         </SafeAreaView>
       );
     };
@@ -78,7 +76,7 @@ class SignIn extends React.PureComponent {
     return (
       <View style={styles.container}>
         <Text style={styles.title} h2>Sign In</Text>
-        <View style={styles.signInContainer}>
+        <Card style={styles.card}>
           <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: colors.error }}
             errorMessage={errors.email} leftIcon={{ type: 'font-awesome', name: 'envelope', size: 15, marginRight: 10 }} />
           <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: colors.error }}
@@ -96,7 +94,11 @@ class SignIn extends React.PureComponent {
             onPress={this.submit} disabled={isSubmitting}
             title="Sign in"
           />
-          <Divider style={{ marginTop: 30, marginBottom: 30 }} />
+        </Card>
+
+        <Divider style={{ marginTop: 30, marginBottom: 30 }} />
+
+        <View style={styles.btnContainer} >
           <Button
             type="outline"
             icon={
@@ -125,11 +127,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 50,
-    paddingVertical: 200
+    paddingVertical: 100
   },
-  signInContainer: {
-    marginTop: 10
+  btnContainer: {
+    paddingHorizontal: 16
+  },
+  card: {
+    shadowColor: colors.divider,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   title: {
     textAlign: 'center',

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { Text, Input, Button, Divider } from 'react-native-elements';
+import { Text, Input, Button, Card, Divider, colors } from 'react-native-elements';
 import { graphql, gql } from '@apollo/react-hoc';
 import { createAccountSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
@@ -35,9 +35,7 @@ class CreateAccount extends React.PureComponent {
 
     const { values: { name, email, password, phone }, errors } = this.state
 
-    if (Object.keys(errors).length !== 0) {
-      this.setState({ errors, isSubmitting: false })
-    } else {
+    if (Object.keys(errors).length === 0) {
       this.setState({ isSubmitting: true })
 
       const { data: { createAccount: { errors, user, token } } } = await this.props.mutate({ variables: { name, email, password, phone } })
@@ -73,7 +71,7 @@ class CreateAccount extends React.PureComponent {
     if (loading) {
       return (
         <SafeAreaView style={styles.loadingContainer}>
-          <ActivityIndicator />
+          <ActivityIndicator size='large' />
         </SafeAreaView>
       );
     };
@@ -81,7 +79,7 @@ class CreateAccount extends React.PureComponent {
     return (
       <View style={styles.container}>
         <Text style={styles.title} h2>Create account</Text>
-        <View style={styles.createAccountContainer}>
+        <Card style={styles.card}>
           <Input value={name} onChangeText={text => this.onChangeText('name', text)} placeholder="Name" errorStyle={{ color: 'red' }}
             errorMessage={errors.name} />
           <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: 'red' }}
@@ -106,8 +104,11 @@ class CreateAccount extends React.PureComponent {
             title="Create account"
           />
 
-          <Divider style={{ marginTop: 30, marginBottom: 30 }} />
+        </Card>
 
+        <Divider style={{ marginTop: 30, marginBottom: 30 }} />
+
+        <View style={styles.btnContainer} >
           <Button
             type="outline"
             icon={
@@ -136,11 +137,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 50,
-    paddingVertical: 200
+    paddingVertical: 100
   },
-  createAccountContainer: {
-    marginTop: 10
+  card: {
+    shadowColor: colors.divider,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  btnContainer: {
+    paddingHorizontal: 16
   },
   title: {
     textAlign: 'center',

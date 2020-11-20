@@ -1,5 +1,6 @@
 import React from "react";
 import { Text, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
+import { Avatar } from 'react-native-elements';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -16,12 +17,14 @@ import SignIn from "../signIn";
 import Books from "../book/books";
 import AddBook from "../book/addBook";
 import ViewBook from "../book/viewBook";
+import EditBook from "../book/editBook";
 import User from "../user";
-import Orders from "../orders";
+import Orders from "../orders/orders";
 import ViewOrder from "../orders/viewOrder";
 import Checkouts from "../checkout/chekcouts";
 import ViewCheckout from "../checkout/viewCheckout";
 import Settings from "../settings";
+import Authors from "../author/authors";
 import { colors } from "react-native-elements";
 
 const AuthStack = createStackNavigator();
@@ -46,6 +49,12 @@ const BookStackScreen = () => (
     <BookStack.Screen name='Books' component={Books} />
     <BookStack.Screen name='AddBook' component={AddBook} />
     <BookStack.Screen name='ViewBook' component={ViewBook} options={({ route }) => ({
+      title: route.params.name
+    })} />
+    <BookStack.Screen name='EditBook' component={EditBook} options={({ route }) => ({
+      title: route.params.name
+    })} />
+    <BookStack.Screen name='Authors' component={Authors} options={({ route }) => ({
       title: route.params.name
     })} />
   </BookStack.Navigator>
@@ -107,6 +116,11 @@ const TabsScreen = () => {
         iconColor = focused
           ? colors.primary
           : colors.grey3;
+      } else if (route.name === 'CreateAccount') {
+        iconName = 'user-plus';
+        iconColor = focused
+          ? colors.primary
+          : colors.grey3;
       }
 
       // You can return any component that you like here!
@@ -129,18 +143,30 @@ const DrawerScreen = () => (
   <Drawer.Navigator initialRouteName="Books">
     <Drawer.Screen name="Books" component={TabsScreen} />
     <Drawer.Screen name='AddBook' component={AddBook} options={{ title: "Add book" }} />
+    <Drawer.Screen name='Authors' component={Authors} options={{ title: "Add author" }} />
     <Drawer.Screen name="Settings" component={SettingsStackScreen} />
   </Drawer.Navigator>
 );
 
 const RootStack = createStackNavigator();
-const RootStackScreen = () => (
+const RootStackScreen = ({ me }) => (
   <RootStack.Navigator>
     <RootStack.Screen
       name="Kemetsehaft alem"
       component={DrawerScreen}
       options={{
-        animationEnabled: false
+        animationEnabled: false,
+        headerRight: () => {
+          let name
+
+          if (!!me) {
+            const tokens = me.name.split(' ');
+            name = tokens[0].charAt(0) + tokens[1].charAt(0).toUpperCase();
+          }
+
+          // Avatar with Title
+          return (<Avatar containerStyle={{ position: 'absolute', top: 8, right: 8, backgroundColor: colors.grey4 }} rounded title={name} onPress={() => me ? navigation.push('User') : null} />)
+        }
       }}
     />
     {/* <RootStack.Screen
@@ -166,24 +192,23 @@ const GET_ME_QUERY = gql`
 `
 
 export default () => {
-  const { loading, error, data } = useQuery(GET_ME_QUERY);
-
-  if (error) {
-    return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
-  }
+  const { loading, data } = useQuery(GET_ME_QUERY);
 
   if (loading) {
     return (<SafeAreaView style={styles.loadingContainer}>
-      <ActivityIndicator />
+      <ActivityIndicator size='large' />
     </SafeAreaView>);
   }
 
-  const { me } = data;
+  let me
+  if (data) {
+    me = data.me;
+  }
 
   return (
     <MeContext.Provider value={me}>
       <NavigationContainer theme={reactNavigationTheme}>
-        <RootStackScreen />
+        <RootStackScreen me={me} />
       </NavigationContainer>
     </MeContext.Provider >
   )
@@ -194,11 +219,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  error: {
-    color: colors.error,
-    fontSize: 18,
-    paddingHorizontal: 20
   }
 });
 

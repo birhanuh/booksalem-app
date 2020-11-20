@@ -101,8 +101,8 @@ export const addBookSchema = yup.object().shape({
   title: yup
     .string()
     .required("Title is required"),
-  author: yup
-    .string()
+  authorId: yup
+    .number()
     .required("Author is required"),
   languageId: yup
     .number()
@@ -153,4 +153,11 @@ export const checkoutSchema = yup.object().shape({
   returnDate: yup
     .date()
     .required("Book is required"),
+});
+
+export const addAuthorSchema = yup.object().shape({
+  author: yup
+    .string()
+    .max(255)
+    .required("Author is required")
 });

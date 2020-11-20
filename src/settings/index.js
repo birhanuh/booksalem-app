@@ -55,9 +55,9 @@ const Settings = ({ navigation }) => {
     <View style={styles.container}>
       { me && <User />}
 
-      { !me && <SignIn />}
+      { !!me && <SignIn />}
 
-      { !me && <CreateAccount />}
+      { !!me && <CreateAccount />}
 
       <Divider style={{ marginTop: 30, marginBottom: 10 }} />
 

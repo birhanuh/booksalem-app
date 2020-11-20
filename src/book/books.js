@@ -1,45 +1,83 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
-import { Text, Card, Divider, colors, Button } from 'react-native-elements';
+import { Text, Card, Divider, colors, Button, SearchBar } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
 
-const GET_BOOKS = gql`
+const GET_AVAILABLE_BOOKS = gql`
   query {
     getAvailableBooks {
       id
       title
-      author
+      authors {
+        name
+      }
       price
       status
-      language
-      category
       cover_url
+      languages {
+        name
+      }
+      categories {
+        name
+      }
       description
       rating
     }
-  }
+  } 
 `
 
 const Books = ({ navigation }) => {
-  const { loading, error, data } = useQuery(GET_BOOKS);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  if (error) { console.error('error', error) };
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator />
-      </SafeAreaView>
-    );
-  };
+  const { loading, error, data } = useQuery(GET_AVAILABLE_BOOKS);
 
-  const { getAvailableBooks } = data && data
+  if (error) {
+    return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
+  }
+
+  const handleLoadMore = async () => {
+    if (data.getAvailableBooks && data.getAvailableBooks.hasMore) {
+      setIsLoadingMore(true);
+
+      await fetchMore({
+        variables: {
+          after: data.getAvailableBooks.cursor,
+        },
+      });
+
+      setIsLoadingMore(false);
+    }
+
+  }
+
+  const renderHeader = () => (
+    <SearchBar placeholder='Search...' lightTheme round />
+  )
+
+  const renderFooter = () => {
+    if (loading) {
+      return (
+        <SafeAreaView style={styles.loadingContainer}>
+          <ActivityIndicator size='large' />
+        </SafeAreaView>
+      );
+    } else {
+      return null
+    }
+  }
+
+  const { getAvailableBooks } = !!data && data
 
   return (
     <View style={styles.container}>
       <FlatList
         data={getAvailableBooks}
         keyExtractor={(item) => item.id.toString()}
+        ListHeaderComponent={renderHeader}
+        ListFooterComponent={renderFooter}
+        refreshing={isLoadingMore}
+        onRefresh={handleLoadMore}
         renderItem={({ item }) => (
           // implemented with Text and Button as children
           <Card style={styles.card}>
@@ -49,13 +87,13 @@ const Books = ({ navigation }) => {
             <View style={styles.bookInfoPriceContainer}>
               <View style={styles.bookInfoContainer}>
                 <Text style={styles.text}>
-                  <Text style={styles.label}>Author: </Text>{item.author}
+                  <Text style={styles.label}>Author: </Text>{item.authors.name}
                 </Text>
                 <Text style={styles.text}>
-                  <Text style={styles.label}>Language: </Text>{item.language}
+                  <Text style={styles.label}>Language: </Text>{item.languages.name}
                 </Text>
                 <Text style={styles.text}>
-                  <Text style={styles.label}>Category: </Text>{item.category}
+                  <Text style={styles.label}>Category: </Text>{item.categories.name}
                 </Text>
                 <Text style={styles.text}>
                   <Text style={styles.label}>Category: </Text>{item.status}
@@ -105,8 +143,14 @@ const Books = ({ navigation }) => {
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
+    paddingVertical: 20,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  error: {
+    color: colors.error,
+    fontSize: 18,
+    paddingHorizontal: 20
   },
   container: {
     flex: 1,
@@ -131,7 +175,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-
     elevation: 5,
   },
   price: {

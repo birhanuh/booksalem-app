@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, SafeAreaView, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { Text, Input, Button, Divider, colors } from 'react-native-elements';
+import { Text, Input, Button, Card, colors } from 'react-native-elements';
 import { graphql, gql } from '@apollo/react-hoc';
 import compose from "lodash.flowright";
 import { profileSchema, passwordSchema } from '../utils/validationSchema';
@@ -52,8 +52,6 @@ class User extends React.PureComponent {
     const { profile: { name, email, phone }, errors } = this.state
 
     if (Object.keys(errors).length !== 0) {
-      this.setState({ errors, isSubmitting: false })
-    } else {
       this.setState({ isSubmitting: true })
 
       const { data: { updateProfile: { errors, user } } } = await this.props.updateProfileMutation({ variables: { name, email, phone } })
@@ -81,8 +79,6 @@ class User extends React.PureComponent {
     const { password: { newPassword }, errors } = this.state
 
     if (Object.keys(errors).length !== 0) {
-      this.setState({ errors, isSubmitting: false })
-    } else {
       this.setState({ isSubmitting: true })
 
       const { data: { updatePassword: { errors, user } } } = await this.props.updatePasswordMutation({ variables: { password: newPassword } })
@@ -155,14 +151,14 @@ class User extends React.PureComponent {
     if (loading) {
       return (
         <SafeAreaView style={styles.loadingContainer}>
-          <ActivityIndicator />
+          <ActivityIndicator size='large' />
         </SafeAreaView>
       );
     };
 
     return (
       <ScrollView>
-        <View style={styles.container}>
+        <Card style={styles.card}>
           <Text style={styles.titleSecondary} h4>Profile</Text>
           <Input value={name} onChangeText={text => this.onChangeProfile('name', text)} placeholder="Name" errorStyle={{ color: colors.error }}
             errorMessage={errors.name} />
@@ -184,9 +180,9 @@ class User extends React.PureComponent {
             onPress={this.updateProfile} disabled={isSubmitting}
             title="Update profile"
           />
+        </Card>
 
-          <Divider style={{ marginTop: 30, marginBottom: 20 }} />
-
+        <Card style={styles.card}>
           <Text style={styles.titleSecondary} h4>Password</Text>
           <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangePasword('password', text)} placeholder="Current password" errorStyle={{ color: colors.error }}
             errorMessage={errors.password} />
@@ -208,7 +204,7 @@ class User extends React.PureComponent {
             onPress={this.updatePassword} disabled={isSubmitting || disablePasswordChange}
             title="Update password"
           />
-        </View>
+        </Card>
       </ScrollView>
     )
   }
@@ -220,13 +216,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  container: {
-    flex: 1,
-    backgroundColor: colors.white,
-    paddingHorizontal: 10,
-    paddingVertical: 20,
-    marginVertical: 16,
-    marginHorizontal: 16
+  card: {
+    shadowColor: colors.divider,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   titleSecondary: {
     marginBottom: 10,

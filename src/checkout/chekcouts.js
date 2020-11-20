@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, View, SafeAreaView, ActivityIndicator, Image, StyleSheet } from 'react-native';
+import { View, SafeAreaView, ActivityIndicator, Image, StyleSheet } from 'react-native';
+import { Text, colors } from 'react-native-elements';
 import { useQuery, gql } from '@apollo/client';
 
 const GET_CHECKOUTS = gql`
@@ -29,11 +30,14 @@ const GET_CHECKOUTS = gql`
 const Checkouts = () => {
   const { data, loading, error } = useQuery(GET_CHECKOUTS);
 
-  if (error) { console.error('error', error) };
+  if (error) {
+    return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
+  }
+
   if (loading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator />
+        <ActivityIndicator size='large' />
       </SafeAreaView>
     );
   };
@@ -75,6 +79,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  error: {
+    color: colors.error,
+    fontSize: 18,
+    paddingHorizontal: 20
   },
   container: {
     flex: 1,
