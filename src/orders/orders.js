@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
-import { List, ListItem, Avatar, Button, colors } from 'react-native-elements';
+import { Text, ListItem, Avatar, Button, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
 
@@ -46,7 +46,9 @@ const Orders = () => {
     }
   ]
 
-  if (error) { console.error('error', error) };
+  if (error) {
+    return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
+  }
 
   const renderFooter = () => {
     if (loading) {
@@ -96,6 +98,11 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  error: {
+    color: colors.error,
+    fontSize: 18,
+    paddingHorizontal: 20
   },
   container: {
     flex: 1,

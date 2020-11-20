@@ -45,7 +45,9 @@ const ViewBook = ({ navigation, route }) => {
     variables: { id: route.params.id },
   });
 
-  if (error) { console.error('error', error) };
+  if (error) {
+    return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
+  }
 
   if (loading) {
     return (
@@ -138,6 +140,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  error: {
+    color: colors.error,
+    fontSize: 18,
+    paddingHorizontal: 20
   },
   container: {
     flex: 1,

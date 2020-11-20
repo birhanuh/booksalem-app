@@ -35,8 +35,8 @@ const AddAuthor = ({ mutate, navigation, referrer }) => {
       if (errors) {
         setErrors(formatServerErrors(errors))
       } else {
-        if (!!referrer) {
-          navigation.navigate(referrer, { screen: referrer })
+        if (referrer) {
+          navigation.push(referrer)
         }
       }
     }

@@ -16,7 +16,9 @@ const GET_AUTHORS = gql`
 const Orders = ({ route }) => {
   const { data, loading, error } = useQuery(GET_AUTHORS);
 
-  if (error) { console.error('error', error) };
+  if (error) {
+    return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
+  }
 
   if (loading) {
     return (
@@ -30,7 +32,7 @@ const Orders = ({ route }) => {
 
   return (
     <View style={styles.container}>
-      <AddAuthor referrer={route.params.params.referrer} />
+      <AddAuthor referrer={route.params.referrer} />
 
       <Card style={styles.card}>
         <Card.Title>Authors</Card.Title>
@@ -55,6 +57,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  error: {
+    color: colors.error,
+    fontSize: 18,
+    paddingHorizontal: 20
   },
   card: {
     shadowColor: colors.divider,

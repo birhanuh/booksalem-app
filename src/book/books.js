@@ -32,7 +32,9 @@ const Books = ({ navigation }) => {
 
   const { loading, error, data } = useQuery(GET_AVAILABLE_BOOKS);
 
-  if (error) { console.error('error', error) };
+  if (error) {
+    return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
+  }
 
   const handleLoadMore = async () => {
     if (data.getAvailableBooks && data.getAvailableBooks.hasMore) {
@@ -144,6 +146,11 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  error: {
+    color: colors.error,
+    fontSize: 18,
+    paddingHorizontal: 20
   },
   container: {
     flex: 1,

@@ -147,7 +147,7 @@ class EditBook extends React.PureComponent {
                   color={colors.primary}
                 />
               }
-              onPress={() => { this.props.navigation.navigate('AddAuthor', { screen: 'AddAuthor', params: { name: 'Add author', referrer: 'EditBook' } }) }}
+              onPress={() => { this.props.navigation.push('AddAuthor', { name: 'Add author', referrer: 'EditBook' }) }}
             />
           </View>
           <View>

@@ -116,6 +116,11 @@ const TabsScreen = () => {
         iconColor = focused
           ? colors.primary
           : colors.grey3;
+      } else if (route.name === 'CreateAccount') {
+        iconName = 'user-plus';
+        iconColor = focused
+          ? colors.primary
+          : colors.grey3;
       }
 
       // You can return any component that you like here!
@@ -152,11 +157,15 @@ const RootStackScreen = ({ me }) => (
       options={{
         animationEnabled: false,
         headerRight: () => {
-          const tokens = me.name.split(' ');
-          const name = tokens[0].charAt(0) + tokens[1].charAt(0).toUpperCase();
+          let name
+
+          if (!!me) {
+            const tokens = me.name.split(' ');
+            name = tokens[0].charAt(0) + tokens[1].charAt(0).toUpperCase();
+          }
 
           // Avatar with Title
-          return (<Avatar containerStyle={{ position: 'absolute', top: 8, right: 8, backgroundColor: colors.grey4 }} rounded title={name} onPress={() => alert(me.name)} />)
+          return (<Avatar containerStyle={{ position: 'absolute', top: 8, right: 8, backgroundColor: colors.grey4 }} rounded title={name} onPress={() => me ? navigation.push('User') : null} />)
         }
       }}
     />
@@ -183,11 +192,7 @@ const GET_ME_QUERY = gql`
 `
 
 export default () => {
-  const { loading, error, data } = useQuery(GET_ME_QUERY);
-
-  if (error) {
-    return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
-  }
+  const { loading, data } = useQuery(GET_ME_QUERY);
 
   if (loading) {
     return (<SafeAreaView style={styles.loadingContainer}>
@@ -195,7 +200,10 @@ export default () => {
     </SafeAreaView>);
   }
 
-  const { me } = data;
+  let me
+  if (data) {
+    me = data.me;
+  }
 
   return (
     <MeContext.Provider value={me}>
@@ -211,11 +219,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  error: {
-    color: colors.error,
-    fontSize: 18,
-    paddingHorizontal: 20
   }
 });
 
