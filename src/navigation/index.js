@@ -216,6 +216,10 @@ const GET_ME_QUERY = gql`
       phone
       is_admin
     }
+    getMeState @client {
+      id
+      name
+    }
   }
 `
 
@@ -227,7 +231,7 @@ export default () => {
       <ActivityIndicator size='large' />
     </SafeAreaView>);
   }
-
+  console.log('APP: ', data)
   let me
   if (data) {
     me = data.me;

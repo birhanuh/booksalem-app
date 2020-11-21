@@ -3,6 +3,7 @@ import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Card, Divider, colors } from 'react-native-elements';
+import compose from "lodash.flowright";
 import { graphql, gql } from '@apollo/react-hoc';
 import { signInSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
@@ -35,12 +36,13 @@ class SignIn extends React.PureComponent {
     if (Object.keys(errors).length !== 0) {
       this.setState({ isSubmitting: true })
     } else {
-      const { data: { signIn: { errors, user, token } } } = await this.props.mutate({ variables: { email, password } })
+      const { data: { signIn: { errors, user, token } } } = await this.props.signInMutation({ variables: { email, password } })
       if (errors) {
         this.setState({ errors: formatServerErrors(errors) })
       } else {
         AsyncStorage.setItem('@kemetsehaftalem/token', token)
         console.log("Resp: ", user, token)
+        await this.props.addMeStateMutation({ variables: { user } })
         this.props.navigation.navigate('Books', { screen: 'Books', params: { me: user } })
       }
     }
@@ -151,9 +153,11 @@ const LOGIN_MUTATION = gql`
     signIn(email: $email, password: $password) {
       token
       user {
+        id
         name
         email
         phone
+        is_admin
       }
       errors {
         path
@@ -163,4 +167,19 @@ const LOGIN_MUTATION = gql`
   } 
 `;
 
-export default graphql(LOGIN_MUTATION)(SignIn);
+const ADD_ME_STATE_MUTATION = gql`
+  mutation($id: String!, $email: String!, $phone: String, $is_admin: Boolean!) {
+    addMeState(id: $id, email: $email, phone: $phone, is_admin: $is_admin) @client
+  } 
+`;
+
+const Mutations = compose(
+  graphql(LOGIN_MUTATION, {
+    name: 'signInMutation'
+  }),
+  graphql(ADD_ME_STATE_MUTATION, {
+    name: 'addMeStateMutation'
+  })
+)(SignIn)
+
+export default Mutations;
