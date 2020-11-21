@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PureComponent } from 'react';
 import { View, TextInput, SafeAreaView, ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
 import { ReactNativeFile } from "apollo-upload-client";
 import { Picker } from '@react-native-picker/picker';
@@ -10,7 +10,7 @@ import compose from "lodash.flowright";
 import { addBookSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 
-class AddBook extends React.PureComponent {
+class AddBook extends PureComponent {
   state = {
     values: {
       title: '',

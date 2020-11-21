@@ -1,49 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, SafeAreaView, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
-import { Card, Button, Text, colors, Divider } from 'react-native-elements';
+import { Card, Button, Text, colors, Divider, Badge } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useQuery, gql } from '@apollo/client';
+import { graphql, gql } from '@apollo/react-hoc';
+import compose from "lodash.flowright";
 
 import { MeContext } from "../context";
+import { colorsLocal } from '../theme';
 
-const GET_BOOK = gql`
-  query($id: Int!) {
-    getBook(id: $id) {
-      id
-      title
-      authors {
-        id
-        name
-      }
-      condition
-      price
-      status
-      published_date
-      isbn
-      cover_url
-      description
-      rating
-      languages {
-        id
-        name
-      }
-      categories {
-        id
-        name
-      }
-      users {
-        id
-      }
-    }
-  }
-`
-
-const ViewBook = ({ navigation, route }) => {
+const ViewBook = ({ navigation, route, getBookQuery, createOrderMutation }) => {
   const me = React.useContext(MeContext);
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { loading, error, data } = useQuery(GET_BOOK, {
-    variables: { id: route.params.id },
-  });
+  const { loading, error, getBook } = getBookQuery;
 
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
@@ -57,15 +27,44 @@ const ViewBook = ({ navigation, route }) => {
     );
   };
 
-  const createOrder = () => {
-    console.log('Ordering...')
+  const createOrder = async (bookId) => {
+    if (!!isSubmitting) {
+      setIsSubmitting(true)
+    }
+
+    const { data: { order, errors } } = await createOrderMutation({ variables: { bookId } })
+    console.log("Resp data: ", order, errors)
+    if (errors) {
+      setErrors(formatServerErrors(errors));
+    } else {
+      navigation.navigate('Orders', { screen: 'Orders' })
+    }
+
+    setIsSubmitting(false)
   }
 
-  const { getBook: { title, condition, price, status, published_date, isbn, cover_url, description, rating, authors, languages, categories, users } } = data
+  const { id, title, condition, price, status, published_date, isbn, cover_url, description, rating, authors, languages, categories, users } = getBook
 
+  let badgeStatus
+  switch (status) {
+    case 'active':
+      badgeStatus = 'primary'
+      break;
+    case 'pending':
+      badgeStatus = 'warnning'
+      break;
+    case 'resolved':
+      badgeStatus = 'sucess'
+      break;
+    default:
+      break;
+  }
   return (
     <ScrollView>
       <View style={styles.container}>
+        {Object.keys(errors).length !== 0 && <View style={styles.errorMsgContainer}>
+          <Text style={styles.error}>{errors.message}</Text>
+        </View>}
         <Card style={styles.card}>
           <Card.Title>{title}</Card.Title>
           <Card.Divider />
@@ -85,7 +84,11 @@ const ViewBook = ({ navigation, route }) => {
                 <Text style={styles.label}>Condition: </Text>{condition}
               </Text>
               <Text style={styles.text}>
-                <Text style={styles.label}>Status: </Text>{status}
+                <Text style={styles.label}>Status: </Text><Badge
+                  status={badgeStatus}
+                  value={status}
+                  containerStyle={{ marginTop: -4 }}
+                />
               </Text>
               <Text style={styles.text}>
                 <Text style={styles.label}>Published date: </Text>{published_date}
@@ -124,9 +127,10 @@ const ViewBook = ({ navigation, route }) => {
               style={{ marginRight: 10 }} /> : <Icon name='shopping-bag' color='#ffffff' size={15}
                 style={{ marginRight: 10 }} />}
             buttonStyle={styles.button}
+            disabled={isSubmitting}
             title={me && me.id === users.id ? 'Edit' : 'Order'} onPress={me ? (me.id === users.id ? () => {
-              navigation.push('EditBook', { name: 'Edit book', book: data && data.getBook })
-            } : createOrder()) : () => {
+              navigation.push('EditBook', { name: 'Edit book', book: getBook })
+            } : () => createOrder(id)) : () => {
               navigation.push('SignIn')
             }} />
         </Card>
@@ -149,6 +153,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center'
+  },
+  errorMsgContainer: {
+    backgroundColor: colorsLocal.errorBg,
+    marginBottom: 26,
+    paddingHorizontal: 12,
+    paddingVertical: 12
+  },
+  error: {
+    color: colors.error,
+    fontSize: 18,
+    lineHeight: 25,
+    paddingHorizontal: 20
   },
   bookInfoPriceContainer: {
     flex: 1,
@@ -213,4 +229,68 @@ const styles = StyleSheet.create({
   }
 });
 
-export default ViewBook
+const GET_BOOK_QUERY = gql`
+  query($id: Int!) {
+    getBook(id: $id) {
+      id
+      title
+      authors {
+        id
+        name
+      }
+      condition
+      price
+      status
+      published_date
+      isbn
+      cover_url
+      description
+      rating
+      languages {
+        id
+        name
+      }
+      categories {
+        id
+        name
+      }
+      users {
+        id
+      }
+    }
+  }
+`
+
+const CREATE_ORDER_MUTATION = gql`
+  mutation($bookId: Int!) {
+    createOrder(bookId: $bookId) {
+      order {
+        id
+        book_id
+        user_id
+        order_date
+        status
+      }
+      errors {
+        path
+        message
+      }
+    }
+  } 
+`;
+
+const MutationQuery = compose(
+  graphql(GET_BOOK_QUERY, {
+    name: "getBookQuery",
+    options: props => ({
+      variables: {
+        id: props.route.params.id
+      }
+    })
+  }),
+  graphql(CREATE_ORDER_MUTATION, {
+    name: "createOrderMutation"
+  })
+)(ViewBook);
+
+export default MutationQuery;

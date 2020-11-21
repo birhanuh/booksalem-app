@@ -97,22 +97,22 @@ const TabsScreen = () => {
       if (route.name === 'Books') {
         iconName = 'book';
         iconColor = focused
-          ? colors.primary
+          ? color
           : colors.grey3;
       } else if (route.name === 'Orders') {
         iconName = 'shopping-bag';
         iconColor = focused
-          ? colors.primary
+          ? color
           : colors.grey3;
       } else if (route.name === 'Settings') {
         iconName = 'cog';
         iconColor = focused
-          ? colors.primary
+          ? color
           : colors.grey3;
       } else if (route.name === 'Checkouts') {
         iconName = 'credit-card-alt';
         iconColor = focused
-          ? colors.primary
+          ? color
           : colors.grey3;
       }
 
@@ -120,7 +120,7 @@ const TabsScreen = () => {
     },
   })}
     tabBarOptions={{
-      activeTintColor: colors.primary,
+      activeTintColor: '#4682B4',
       inactiveTintColor: colors.grey3,
     }}>
     <Tabs.Screen name="Books" component={BookStackScreen} />
@@ -139,17 +139,17 @@ const UnAuthTabsScreen = () => (<UnAuthTabs.Navigator screenOptions={({ route })
     if (route.name === 'Books') {
       iconName = 'book';
       iconColor = focused
-        ? colors.primary
+        ? color
         : colors.grey3;
     } else if (route.name === 'Orders') {
       iconName = 'shopping-bag';
       iconColor = focused
-        ? colors.primary
+        ? color
         : colors.grey3;
     } else if (route.name === 'CreateAccount') {
       iconName = 'user-plus';
       iconColor = focused
-        ? colors.primary
+        ? color
         : colors.grey3;
     }
 
@@ -157,7 +157,7 @@ const UnAuthTabsScreen = () => (<UnAuthTabs.Navigator screenOptions={({ route })
   },
 })}
   tabBarOptions={{
-    activeTintColor: colors.primary,
+    activeTintColor: color,
     inactiveTintColor: colors.grey3,
   }}>
   <UnAuthTabs.Screen name="Books" component={BookStackScreen} />

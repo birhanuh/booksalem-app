@@ -1,19 +1,27 @@
 import React from 'react';
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
-import { Text, ListItem, Avatar, Button, colors, Card } from 'react-native-elements';
+import { Text, ListItem, Avatar, Button, Badge, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
+import { colorsLocal } from '../theme';
+import moment from "moment";
 
 const GET_ORDERS_QUERY = gql`
   query {
     getOrders {
       id
+      order_date
+      status
       user_id
       book_id
-      status
-      order_date
+      books {
+        id
+        title
+        cover_url
+        price
+      }
     }
-  } 
+} 
 `
 
 const Orders = ({ navigation }) => {
@@ -43,8 +51,8 @@ const Orders = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      { getOrders && getOrders.length === 0 && <><View style={styles.errorMsgContainer}>
-        <Text style={styles.error}>You don't haver orders placed yet. Go to Books screen, select the Book you wish like to order and place your order by clicking the 'Order' button.</Text>
+      { getOrders && getOrders.length === 0 && <><View style={styles.infoMsgContainer}>
+        <Text style={styles.info}>You don't haver orders placed yet. Go to Books screen, select the Book you wish like to order and place your order by clicking the 'Order' button.</Text>
       </View>
         <Button
           icon={<Icon name='book' color='#ffffff' size={15}
@@ -55,21 +63,42 @@ const Orders = ({ navigation }) => {
         data={getOrders}
         keyExtractor={(item) => item.id.toString()}
         ItemSeparatorComponent={renderSeprator}
-        renderItem={({ item }) => (
-          <ListItem
-            containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0 }}>
-            <Avatar source={{ uri: item.avatar_url }} />
+        renderItem={({ item }) => {
+          let badgeStatus
+          switch (item.status) {
+            case 'active':
+              badgeStatus = 'primary'
+              break;
+            case 'pending':
+              badgeStatus = 'warnning'
+              break;
+            case 'resolved':
+              badgeStatus = 'sucess'
+              break;
+            default:
+              break;
+          }
+          return (<ListItem
+            containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0 }}
+            onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: item.books.id } }) }}>
+            <Avatar source={{ uri: item.books.cover_url }} />
             <ListItem.Content>
-              <ListItem.Title>{item.name}</ListItem.Title>
-              <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
+              <ListItem.Title>{item.books.title}</ListItem.Title>
+              <ListItem.Subtitle>{item.books.price} <Text style={styles.currency}>ETB</Text></ListItem.Subtitle>
             </ListItem.Content>
-            <Button
-              icon={<Icon name='eye' color='#ffffff' size={15}
-                style={{ marginRight: 10 }} />}
-              buttonStyle={styles.button}
-              title='View' onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: l.id } }) }} />
+            <ListItem.Content>
+              <ListItem.Subtitle>{moment(item.order_date).format('ll')}</ListItem.Subtitle>
+            </ListItem.Content>
+            <ListItem.Content>
+              <Badge
+                status={badgeStatus}
+                value={item.status}
+              />
+            </ListItem.Content>
           </ListItem>
-        )} />
+          )
+        }
+        } />
     </View>)
 }
 
@@ -85,18 +114,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 20
   },
-  errorMsgContainer: {
-    backgroundColor: colors.white,
+  infoMsgContainer: {
+    backgroundColor: colorsLocal.infoBg,
     marginBottom: 26,
     paddingHorizontal: 12,
     paddingVertical: 12
   },
-  error: {
-    color: colors.error,
+  info: {
+    color: colorsLocal.info,
     fontSize: 18,
     lineHeight: 25,
     paddingHorizontal: 20
   },
+  currency: {
+    fontSize: 12
+  }
 });
 
 export default Orders
