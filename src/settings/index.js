@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ListItem, Button, Divider, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useAsyncStorage } from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { MeContext } from "../context";
 
@@ -12,10 +12,11 @@ const Settings = ({ navigation }) => {
   const signOut = () => {
     // Remove token from async storage
     try {
-      useAsyncStorage.removeItem('@kemetsehaftalem/token')
-      navigation.push('Books')
+      AsyncStorage.removeItem('@kemetsehaftalem/token')
+      navigation.navigate('Books')
     }
     catch (exception) {
+
       return false;
     }
   }
@@ -34,7 +35,7 @@ const Settings = ({ navigation }) => {
     <Icon name='sign-in' />
     <ListItem.Content>
       <ListItem.Title style={styles.listItemTitle} onPress={() => () => {
-        navigation.push('SignIn')
+        navigation.navigate('SignIn')
       }}>Sign In</ListItem.Title>
     </ListItem.Content>
     <ListItem.Chevron />
@@ -44,7 +45,7 @@ const Settings = ({ navigation }) => {
     <Icon name='user-plus' />
     <ListItem.Content>
       <ListItem.Title style={styles.listItemTitle} onPress={() => {
-        navigation.push('CreateAccount')
+        navigation.navigate('CreateAccount')
       }}>Create account</ListItem.Title>
     </ListItem.Content>
     <ListItem.Chevron />
@@ -55,9 +56,9 @@ const Settings = ({ navigation }) => {
     <View style={styles.container}>
       { me && <User />}
 
-      { !!me && <SignIn />}
+      { !me && <SignIn />}
 
-      { !!me && <CreateAccount />}
+      { !me && <CreateAccount />}
 
       <Divider style={{ marginTop: 30, marginBottom: 10 }} />
 

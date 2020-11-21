@@ -34,15 +34,14 @@ class SignIn extends React.PureComponent {
 
     if (Object.keys(errors).length !== 0) {
       this.setState({ isSubmitting: true })
-
+    } else {
       const { data: { signIn: { errors, user, token } } } = await this.props.mutate({ variables: { email, password } })
-
       if (errors) {
         this.setState({ errors: formatServerErrors(errors) })
       } else {
         AsyncStorage.setItem('@kemetsehaftalem/token', token)
         console.log("Resp: ", user, token)
-        this.props.navigation.push('Books')
+        this.props.navigation.navigate('Books', { screen: 'Books', params: { me: user } })
       }
     }
   }

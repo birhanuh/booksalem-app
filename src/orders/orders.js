@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
-import { Text, ListItem, Avatar, Button, colors } from 'react-native-elements';
+import { Text, ListItem, Avatar, Button, colors, Card } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
 
@@ -16,35 +16,8 @@ const GET_ORDERS_QUERY = gql`
   } 
 `
 
-const Orders = () => {
+const Orders = ({ navigation }) => {
   const { data, loading, error } = useQuery(GET_ORDERS_QUERY);
-
-  const list = [
-    {
-      id: 1,
-      name: 'Amy Farha',
-      avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg',
-      subtitle: 'Vice President'
-    },
-    {
-      id: 2,
-      name: 'Chris Jackson',
-      avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-      subtitle: 'Vice Chairman'
-    },
-    {
-      id: 3,
-      name: 'Amy Farha',
-      avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg',
-      subtitle: 'Vice President'
-    },
-    {
-      id: 4,
-      name: 'Chris Jackson',
-      avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-      subtitle: 'Vice Chairman'
-    }
-  ]
 
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
@@ -70,8 +43,16 @@ const Orders = () => {
 
   return (
     <View style={styles.container}>
+      { getOrders && getOrders.length === 0 && <><View style={styles.errorMsgContainer}>
+        <Text style={styles.error}>You don't haver orders placed yet. Go to Books screen, select the Book you wish like to order and place your order by clicking the 'Order' button.</Text>
+      </View>
+        <Button
+          icon={<Icon name='book' color='#ffffff' size={15}
+            style={{ marginRight: 10 }} />}
+          buttonStyle={styles.button}
+          title='Books' onPress={() => { navigation.navigate('Books', { screen: 'Books' }) }} /></>}
       <FlatList
-        data={list}
+        data={getOrders}
         keyExtractor={(item) => item.id.toString()}
         ItemSeparatorComponent={renderSeprator}
         renderItem={({ item }) => (
@@ -99,16 +80,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  error: {
-    color: colors.error,
-    fontSize: 18,
-    paddingHorizontal: 20
-  },
   container: {
     flex: 1,
     paddingHorizontal: 20,
     paddingVertical: 20
-  }
+  },
+  errorMsgContainer: {
+    backgroundColor: colors.white,
+    marginBottom: 26,
+    paddingHorizontal: 12,
+    paddingVertical: 12
+  },
+  error: {
+    color: colors.error,
+    fontSize: 18,
+    lineHeight: 25,
+    paddingHorizontal: 20
+  },
 });
 
 export default Orders

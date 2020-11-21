@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
 import { Text, Card, Divider, colors, Button, SearchBar } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -27,7 +27,7 @@ const GET_AVAILABLE_BOOKS = gql`
   } 
 `
 
-const Books = ({ navigation }) => {
+const Books = ({ route, navigation }) => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const { loading, error, data } = useQuery(GET_AVAILABLE_BOOKS);
