@@ -28,6 +28,9 @@ const cache = new InMemoryCache()
 
 const stateLink = withClientState({
   cache,
+  defaults: {
+    getMeState: null,
+  },
   resolvers: {
     Mutation: {
       addMeState: (_, { id, name, email, phone, is_admin }, { cache }) => {
