@@ -8,12 +8,17 @@ import compose from "lodash.flowright";
 import { MeContext } from "../context";
 import { colorsLocal } from '../theme';
 
-const ViewBook = ({ navigation, route, getBookQuery, createOrderMutation }) => {
+const ViewBook = ({ navigation, getBookQuery, createOrderMutation, getOrdersQuery, cancelOrderMutation }) => {
   const me = React.useContext(MeContext);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { loading, error, getBook } = getBookQuery;
+
+  const { id, title, condition, price, status, published_date, isbn, cover_url, description, rating, authors, languages, categories, users } = !!getBook && getBook
+
+  const { getOrders } = getOrdersQuery;
+  const isAlreadyOrdered = getOrders && getOrders.filter(order => order.book_id === id);
 
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
@@ -43,7 +48,76 @@ const ViewBook = ({ navigation, route, getBookQuery, createOrderMutation }) => {
     setIsSubmitting(false)
   }
 
-  const { id, title, condition, price, status, published_date, isbn, cover_url, description, rating, authors, languages, categories, users } = getBook
+  const cancelOrder = async (bookId) => {
+    if (!!isSubmitting) {
+      setIsSubmitting(true)
+    }
+
+    const { data: { order, errors } } = await cancelOrderMutation({ variables: { bookId } })
+    console.log("Resp data: ", order, errors)
+    if (errors) {
+      setErrors(formatServerErrors(errors));
+    } else {
+      navigation.navigate('Orders', { screen: 'Orders' })
+    }
+
+    setIsSubmitting(false)
+  }
+
+  const deleteBook = async (bookId) => {
+    console.log('Delete book...')
+    if (!!isSubmitting) {
+      setIsSubmitting(true)
+    }
+
+    const { data: { book, errors } } = await deleteBookMutation({ variables: { bookId } })
+    console.log("Resp data: ", book, errors)
+    if (errors) {
+      setErrors(formatServerErrors(errors));
+    } else {
+      navigation.push('Books')
+    }
+
+    setIsSubmitting(false)
+  }
+
+  const onPressConditioned = (bookId) => {
+    if (me) {
+      if (me.id === users.id) {
+        avigation.push('EditBook', { name: 'Edit book', book: getBook })
+      } else if (isAlreadyOrdered && isAlreadyOrdered.length > 0 && Object.keys(isAlreadyOrdered[0]).length !== 0) {
+        cancelOrder(bookId);
+      } else if ((me.id !== users.id)) {
+        createOrder(bookId);
+      }
+    } else {
+      navigation.push('SignIn')
+    }
+  }
+
+  const titleConditioned = () => {
+    if (me) {
+      if (me.id === users.id) {
+        return 'Edit';
+      }
+      if (isAlreadyOrdered && isAlreadyOrdered.length > 0 && Object.keys(isAlreadyOrdered[0]).length !== 0) {
+        return 'Cancel order'
+      }
+    }
+    return 'Order';
+  }
+
+  const iconConditioned = () => {
+    if (me) {
+      if (me.id === users.id) {
+        return 'pencil-square-o';
+      }
+      if (isAlreadyOrdered && isAlreadyOrdered.length > 0 && Object.keys(isAlreadyOrdered[0]).length !== 0) {
+        return 'minus-circle'
+      }
+    }
+    return 'shopping-bag';
+  }
 
   let badgeStatus
   switch (status) {
@@ -59,6 +133,7 @@ const ViewBook = ({ navigation, route, getBookQuery, createOrderMutation }) => {
     default:
       break;
   }
+
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -123,17 +198,30 @@ const ViewBook = ({ navigation, route, getBookQuery, createOrderMutation }) => {
           <Divider style={styles.divider} />
 
           <Button
-            icon={me && me.id === users.id ? <Icon name='pencil-square-o' color='#ffffff' size={15}
-              style={{ marginRight: 10 }} /> : <Icon name='shopping-bag' color='#ffffff' size={15}
-                style={{ marginRight: 10 }} />}
+            icon={<Icon name={iconConditioned()} color='#ffffff' size={15}
+              style={{ marginRight: 10 }} />}
             buttonStyle={styles.button}
             disabled={isSubmitting}
-            title={me && me.id === users.id ? 'Edit' : 'Order'} onPress={me ? (me.id === users.id ? () => {
-              navigation.push('EditBook', { name: 'Edit book', book: getBook })
-            } : () => createOrder(id)) : () => {
-              navigation.push('SignIn')
-            }} />
+            title={titleConditioned()} onPress={() => onPressConditioned(id)} />
         </Card>
+
+        <Divider style={styles.divider} />
+
+        {me && me.id === users.id && <View style={styles.deleteBtnContainer}><Button
+          type="outline"
+          titleStyle={{ color: colors.error }}
+          buttonStyle={{ borderColor: colors.error }}
+          icon={
+            <Icon
+              size={20}
+              name='trash-o'
+              color={colors.error}
+              style={{ marginRight: 10 }}
+            />
+          }
+          onPress={deleteBook}
+          title="Delete book"
+        /></View>}
       </View>
     </ScrollView>
   )
@@ -226,7 +314,12 @@ const styles = StyleSheet.create({
     marginLeft: 0,
     marginRight: 0,
     marginBottom: 0
-  }
+  },
+  deleteBtnContainer: {
+    marginBottom: 26,
+    paddingHorizontal: 14,
+    paddingVertical: 14
+  },
 });
 
 const GET_BOOK_QUERY = gql`
@@ -261,6 +354,14 @@ const GET_BOOK_QUERY = gql`
   }
 `
 
+const GET_ORDERS_QUERY = gql`
+  query {
+    getOrders {
+      book_id
+    }
+  } 
+`
+
 const CREATE_ORDER_MUTATION = gql`
   mutation($bookId: Int!) {
     createOrder(bookId: $bookId) {
@@ -279,7 +380,25 @@ const CREATE_ORDER_MUTATION = gql`
   } 
 `;
 
-const MutationQuery = compose(
+const CANCEL_ORDER_MUTATION = gql`
+  mutation($bookId: Int!) {
+    cancelOrder(bookId: $bookId) {
+      order {
+        id
+        book_id
+        user_id
+        order_date
+        status
+      }
+      errors {
+        path
+        message
+      }
+    }
+  }
+`;
+
+const MutationsQueries = compose(
   graphql(GET_BOOK_QUERY, {
     name: "getBookQuery",
     options: props => ({
@@ -288,9 +407,16 @@ const MutationQuery = compose(
       }
     })
   }),
+
+  graphql(GET_ORDERS_QUERY, {
+    name: "getOrdersQuery"
+  }),
   graphql(CREATE_ORDER_MUTATION, {
     name: "createOrderMutation"
+  }),
+  graphql(CANCEL_ORDER_MUTATION, {
+    name: "cancelOrderMutation"
   })
 )(ViewBook);
 
-export default MutationQuery;
+export default MutationsQueries;

@@ -6,14 +6,14 @@ import { graphql, gql } from '@apollo/react-hoc';
 import { addAuthorSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 
-let authorLoc = ''
+let nameLoc = ''
 
-const AddAuthor = ({ mutate, navigation, referrer }) => {
-  const [author, setAuthor] = useState('');
+const AddAuthor = ({ mutate, navigateToAddBook }) => {
+  const [name, setAuthor] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
-  submit = async () => {
+  const submit = async () => {
     if (isSubmitting) {
       return
     }
@@ -21,7 +21,7 @@ const AddAuthor = ({ mutate, navigation, referrer }) => {
     // Validation
     let errorsLoc = {}
     try {
-      await addAuthorSchema.validate({ author }, { abortEarly: false })
+      await addAuthorSchema.validate({ name }, { abortEarly: false })
     } catch (err) {
       errorsLoc = err
       setErrors(formatYupErrors(err))
@@ -30,14 +30,12 @@ const AddAuthor = ({ mutate, navigation, referrer }) => {
     if (Object.keys(errorsLoc).length === 0) {
       setIsSubmitting(true)
 
-      const { data: { addAuthor: { author, errors } } } = await mutate({ variables: { author: authorLoc } })
+      const { data: { addAuthor: { author, errors } } } = await mutate({ variables: { name: nameLoc } })
       console.log("Resp data: ", author, errors)
       if (errors) {
         setErrors(formatServerErrors(errors))
       } else {
-        if (referrer) {
-          navigation.push(referrer)
-        }
+        navigateToAddBook();
       }
     }
   }
@@ -47,7 +45,7 @@ const AddAuthor = ({ mutate, navigation, referrer }) => {
     let errors = Object.assign({}, errors);
     delete errors[key];
 
-    authorLoc = value
+    nameLoc = value
 
     setErrors(errors)
     setAuthor(value)
@@ -59,8 +57,8 @@ const AddAuthor = ({ mutate, navigation, referrer }) => {
       {/* Error message */}
       {errors.addAuthor && <View style={{ backgroundColor: colors.error }}><Text color="white">{errors.addAuthor}</Text></View>}
 
-      <Input value={author} onChangeText={text => onChangeText('author', text)} placeholder="Author" errorStyle={{ color: colors.error }}
-        errorMessage={errors.author} />
+      <Input value={name} onChangeText={text => onChangeText('name', text)} placeholder="Author" errorStyle={{ color: colors.error }}
+        errorMessage={errors.name} />
 
       <Button
         title="Add"
@@ -80,10 +78,10 @@ const AddAuthor = ({ mutate, navigation, referrer }) => {
 }
 
 const ADD_AUTHOR_MUTATION = gql`
-  mutation($author: String!) {
-    addAuthor(author: $author) {
+  mutation($name: String!) {
+    addAuthor(name: $name) {
       author {
-        author
+        name
       }
       errors {
         path

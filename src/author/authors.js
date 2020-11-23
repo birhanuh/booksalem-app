@@ -13,7 +13,7 @@ const GET_AUTHORS = gql`
   }
 `
 
-const Orders = ({ route }) => {
+const Orders = ({ route, navigation }) => {
   const { data, loading, error } = useQuery(GET_AUTHORS);
 
   if (error) {
@@ -28,11 +28,17 @@ const Orders = ({ route }) => {
     );
   };
 
+  const navigateToAddBook = () => {
+    if (route.params.params.referrer) {
+      navigation.navigate(route.params.params.referrer)
+    }
+  }
+
   const { getAuthors } = data;
 
   return (
     <View style={styles.container}>
-      <AddAuthor referrer={route.referrer} />
+      <AddAuthor navigateToAddBook={navigateToAddBook} />
 
       <Card style={styles.card}>
         <Card.Title>Authors</Card.Title>

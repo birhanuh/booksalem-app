@@ -64,7 +64,7 @@ class AddBook extends PureComponent {
       if (errors) {
         this.setState({ errors: formatServerErrors(errors) })
       } else {
-        this.props.navigation.push('ViewBook', { name: 'View book', id: book.id })
+        this.props.navigation.navigate('ViewBook', { name: 'View book', id: book.id })
       }
 
     }
@@ -144,7 +144,7 @@ class AddBook extends PureComponent {
                   color={colors.primary}
                 />
               }
-              onPress={() => { this.props.navigation.push('Authors', { name: 'Add author', referrer: 'AddBook' }) }}
+              onPress={() => { this.props.navigation.navigate('Authors', { params: { name: 'Add author', referrer: 'AddBook' } }) }}
             />
           </View>
           <View>
@@ -376,7 +376,10 @@ const MutationQueries = compose(
     name: "getLanguagesQuery"
   }),
   graphql(GET_AUTHORS_QUERY, {
-    name: "getAuthorsQuery"
+    name: "getAuthorsQuery",
+    options: () => ({
+      fetchPolicy: "network-only"
+    })
   })
 )(AddBook);
 

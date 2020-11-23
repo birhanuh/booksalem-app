@@ -21,7 +21,7 @@ const GET_ORDERS_QUERY = gql`
         price
       }
     }
-} 
+  } 
 `
 
 const Orders = ({ navigation }) => {
