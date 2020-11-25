@@ -8,7 +8,7 @@ import moment from "moment";
 
 const GET_ORDERS_QUERY = gql`
   query {
-    getOrders {
+    getUsersOrders {
       id
       order_date
       status
@@ -47,11 +47,11 @@ const Orders = ({ navigation }) => {
     <View style={{ height: 1, width: '86%', backgroundColor: colors.divider, marginLeft: '14%' }} />
   )
 
-  const { getOrders } = !!data && data;
+  const { getUsersOrders } = !!data && data;
 
   return (
     <View style={styles.container}>
-      { getOrders && getOrders.length === 0 && <><View style={styles.infoMsgContainer}>
+      { getUsersOrders && getUsersOrders.length === 0 && <><View style={styles.infoMsgContainer}>
         <Text style={styles.info}>You don't haver orders placed yet. Go to Books screen, select the Book you wish like to order and place your order by clicking the 'Order' button.</Text>
       </View>
         <Button
@@ -60,7 +60,7 @@ const Orders = ({ navigation }) => {
           buttonStyle={styles.button}
           title='Books' onPress={() => { navigation.navigate('Books', { screen: 'Books' }) }} /></>}
       <FlatList
-        data={getOrders}
+        data={getUsersOrders}
         keyExtractor={(item) => item.id.toString()}
         ItemSeparatorComponent={renderSeprator}
         renderItem={({ item }) => {
@@ -84,7 +84,7 @@ const Orders = ({ navigation }) => {
             <Avatar source={{ uri: item.books.cover_url }} />
             <ListItem.Content>
               <ListItem.Title>{item.books.title}</ListItem.Title>
-              <ListItem.Subtitle>{item.books.price} <Text style={styles.currency}>ETB</Text></ListItem.Subtitle>
+              <ListItem.Subtitle>{item.books.price} <Text style={styles.currency + '\u0020'}>ETB</Text></ListItem.Subtitle>
             </ListItem.Content>
             <ListItem.Content>
               <ListItem.Subtitle>{moment(item.order_date).format('ll')}</ListItem.Subtitle>
@@ -108,6 +108,11 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  error: {
+    color: colors.error,
+    fontSize: 18,
+    paddingHorizontal: 20
   },
   container: {
     flex: 1,

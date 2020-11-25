@@ -13,7 +13,7 @@ const Settings = ({ navigation }) => {
     // Remove token from async storage
     try {
       AsyncStorage.removeItem('@kemetsehaftalem/token')
-      navigation.navigate('Books')
+      navigation.navigate('Books', { screen: 'Books' })
     }
     catch (exception) {
 

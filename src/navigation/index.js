@@ -19,8 +19,9 @@ import AddBook from "../book/addBook";
 import ViewBook from "../book/viewBook";
 import EditBook from "../book/editBook";
 import User from "../user";
-import Orders from "../orders/orders";
-import ViewOrder from "../orders/viewOrder";
+import UsersOrders from "../orders/usersOrders";
+import UsersOrdersAdmin from "../orders/usersOrdersAdmin";
+import ViewUserOrdersAdmin from "../orders/viewUserOrdersAdmin";
 import Checkouts from "../checkout/chekcouts";
 import ViewCheckout from "../checkout/viewCheckout";
 import Settings from "../settings";
@@ -63,9 +64,17 @@ const BookStackScreen = () => (
 const OrderStack = createStackNavigator();
 const OrderStackScreen = () => (
   <OrderStack.Navigator>
-    <OrderStack.Screen name='Orders' component={Orders} />
-    <OrderStack.Screen name='ViewOrder' component={ViewOrder} />
+    <OrderStack.Screen name='UsersOrders' component={UsersOrders} />
+    {/* <OrderStack.Screen name='ViewUserOrders' component={ViewUserOrders} /> */}
   </OrderStack.Navigator>
+)
+
+const OrderAdminStack = createStackNavigator();
+const OrderAdminStackScreen = () => (
+  <OrderAdminStack.Navigator>
+    <OrderAdminStack.Screen name='UsersOrdersAdmin' component={UsersOrdersAdmin} options={{ title: "Users orders (Admin view)" }} />
+    <OrderAdminStack.Screen name='ViewUserOrdersAdmin' component={ViewUserOrdersAdmin} options={{ title: "User orders (Admin view)" }} />
+  </OrderAdminStack.Navigator>
 )
 
 const CheckoutStack = createStackNavigator();
@@ -99,7 +108,7 @@ const TabsScreen = () => {
         iconColor = focused
           ? color
           : colors.grey3;
-      } else if (route.name === 'Orders') {
+      } else if (route.name === 'UsersOrders') {
         iconName = 'shopping-bag';
         iconColor = focused
           ? color
@@ -124,7 +133,7 @@ const TabsScreen = () => {
       inactiveTintColor: colors.grey3,
     }}>
     <Tabs.Screen name="Books" component={BookStackScreen} />
-    <Tabs.Screen name="Orders" component={OrderStackScreen} />
+    <Tabs.Screen name="UsersOrders" component={me.is_admin ? OrderAdminStackScreen : OrderStackScreen} />
     <Tabs.Screen name={me.is_admin ? 'Checkouts' : 'Settings'} component={me.is_admin ? CheckoutStackScreen : SettingsStackScreen} />
   </Tabs.Navigator>
   );
@@ -141,7 +150,7 @@ const UnAuthTabsScreen = () => (<UnAuthTabs.Navigator screenOptions={({ route })
       iconColor = focused
         ? color
         : colors.grey3;
-    } else if (route.name === 'Orders') {
+    } else if (route.name === 'UsersOrders') {
       iconName = 'shopping-bag';
       iconColor = focused
         ? color
@@ -157,11 +166,11 @@ const UnAuthTabsScreen = () => (<UnAuthTabs.Navigator screenOptions={({ route })
   },
 })}
   tabBarOptions={{
-    activeTintColor: color,
+    activeTintColor: '#4682B4',
     inactiveTintColor: colors.grey3,
   }}>
   <UnAuthTabs.Screen name="Books" component={BookStackScreen} />
-  <UnAuthTabs.Screen name="Orders" component={OrderStackScreen} />
+  <UnAuthTabs.Screen name="UsersOrders" component={AuthStackScreen} />
   <UnAuthTabs.Screen name="CreateAccount" component={AuthStackScreen} />
 </UnAuthTabs.Navigator>
 );
@@ -170,17 +179,24 @@ const Drawer = createDrawerNavigator();
 const DrawerScreen = () => (
   <Drawer.Navigator initialRouteName="Books">
     <Drawer.Screen name="Books" component={TabsScreen} />
-    <Drawer.Screen name='AddBook' component={AddBook} options={{ title: "Add book" }} />
-    <Drawer.Screen name='Authors' component={Authors} options={{ title: "Add author" }} />
     <Drawer.Screen name="Settings" component={SettingsStackScreen} />
   </Drawer.Navigator>);
+
+const DrawerAdmin = createDrawerNavigator();
+const DrawerAdminScreen = () => (
+  <DrawerAdmin.Navigator initialRouteName="Books">
+    <DrawerAdmin.Screen name="Books" component={TabsScreen} />
+    <DrawerAdmin.Screen name='AddBook' component={AddBook} options={{ title: "Add book" }} />
+    <DrawerAdmin.Screen name='Authors' component={Authors} options={{ title: "Add author" }} />
+    <DrawerAdmin.Screen name="Settings" component={SettingsStackScreen} />
+  </DrawerAdmin.Navigator>);
 
 const RootStack = createStackNavigator();
 const RootStackScreen = ({ me }) => (
   <RootStack.Navigator>
     {me ? (<RootStack.Screen
       name="Kemetsehaft alem"
-      component={DrawerScreen}
+      component={me.is_admin ? DrawerAdminScreen : DrawerScreen}
       options={({ navigation }) => ({
         animationEnabled: false,
         headerRight: () => {

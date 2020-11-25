@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, SafeAreaView, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
-import { Card, Button, Text, colors, Divider, Badge } from 'react-native-elements';
+import { Card, Button, Text, colors, Divider, Badge, Overlay } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { graphql, gql } from '@apollo/react-hoc';
 import compose from "lodash.flowright";
@@ -8,17 +8,18 @@ import compose from "lodash.flowright";
 import { MeContext } from "../context";
 import { colorsLocal } from '../theme';
 
-const ViewBook = ({ navigation, getBookQuery, createOrderMutation, getOrdersQuery, cancelOrderMutation }) => {
+const ViewBook = ({ navigation, getBookQuery, createOrderMutation, getUsersOrdersQuery, cancelOrderMutation }) => {
   const me = React.useContext(MeContext);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [visible, setVisible] = useState(false);
 
   const { loading, error, getBook } = getBookQuery;
 
   const { id, title, condition, price, status, published_date, isbn, cover_url, description, rating, authors, languages, categories, users } = !!getBook && getBook
 
-  const { getOrders } = getOrdersQuery;
-  const isAlreadyOrdered = getOrders && getOrders.filter(order => order.book_id === id);
+  const { getUsersOrders } = getUsersOrdersQuery;
+  const isAlreadyOrdered = getUsersOrders && getUsersOrders.filter(order => order.book_id === id);
 
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
@@ -30,6 +31,10 @@ const ViewBook = ({ navigation, getBookQuery, createOrderMutation, getOrdersQuer
         <ActivityIndicator size='large' />
       </SafeAreaView>
     );
+  };
+
+  const toggleOverlay = () => {
+    setVisible(!visible);
   };
 
   const createOrder = async (bookId) => {
@@ -84,7 +89,7 @@ const ViewBook = ({ navigation, getBookQuery, createOrderMutation, getOrdersQuer
   const onPressConditioned = (bookId) => {
     if (me) {
       if (me.id === users.id) {
-        avigation.push('EditBook', { name: 'Edit book', book: getBook })
+        navigation.push('EditBook', { name: 'Edit book', book: getBook })
       } else if (isAlreadyOrdered && isAlreadyOrdered.length > 0 && Object.keys(isAlreadyOrdered[0]).length !== 0) {
         cancelOrder(bookId);
       } else if ((me.id !== users.id)) {
@@ -134,8 +139,8 @@ const ViewBook = ({ navigation, getBookQuery, createOrderMutation, getOrdersQuer
       break;
   }
 
-  return (
-    <ScrollView>
+  return [
+    <ScrollView key='scrollview'>
       <View style={styles.container}>
         {Object.keys(errors).length !== 0 && <View style={styles.errorMsgContainer}>
           <Text style={styles.error}>{errors.message}</Text>
@@ -176,7 +181,7 @@ const ViewBook = ({ navigation, getBookQuery, createOrderMutation, getOrdersQuer
               <Text style={styles.price}>
                 {price}
               </Text>
-              <Text style={styles.currency}>
+              <Text style={styles.currency + '\u0020'}>
                 ETB
               </Text>
             </View>
@@ -219,12 +224,31 @@ const ViewBook = ({ navigation, getBookQuery, createOrderMutation, getOrdersQuer
               style={{ marginRight: 10 }}
             />
           }
-          onPress={deleteBook}
+          onPress={toggleOverlay}
           title="Delete book"
         /></View>}
       </View>
-    </ScrollView>
-  )
+    </ScrollView>,
+    <Overlay key='overlay' isVisible={visible} onBackdropPress={toggleOverlay}>
+      <View style={styles.deleteBtnContainer}>
+        <Text style={styles.errorModal}>Are you sure you want delete Book?!</Text>
+        <Button
+          type="outline"
+          titleStyle={{ color: colors.error }}
+          buttonStyle={{ borderColor: colors.error }}
+          icon={
+            <Icon
+              size={20}
+              name='trash-o'
+              color={colors.error}
+              style={{ marginRight: 10 }}
+            />
+          }
+          onPress={deleteBook}
+          title="Delete book"
+        /></View>
+    </Overlay>
+  ]
 }
 
 const styles = StyleSheet.create({
@@ -315,10 +339,15 @@ const styles = StyleSheet.create({
     marginRight: 0,
     marginBottom: 0
   },
+  errorModal: {
+    color: colors.error,
+    fontSize: 18,
+    marginBottom: 30
+  },
   deleteBtnContainer: {
     marginBottom: 26,
     paddingHorizontal: 14,
-    paddingVertical: 14
+    marginVertical: 14
   },
 });
 
@@ -356,7 +385,7 @@ const GET_BOOK_QUERY = gql`
 
 const GET_ORDERS_QUERY = gql`
   query {
-    getOrders {
+    getUsersOrders {
       book_id
     }
   } 
@@ -409,7 +438,7 @@ const MutationsQueries = compose(
   }),
 
   graphql(GET_ORDERS_QUERY, {
-    name: "getOrdersQuery"
+    name: "getUsersOrdersQuery"
   }),
   graphql(CREATE_ORDER_MUTATION, {
     name: "createOrderMutation"
