@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PureComponent } from 'react';
 import { View, TextInput, SafeAreaView, ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
 import { ReactNativeFile } from "apollo-upload-client";
 import { Picker } from '@react-native-picker/picker';
@@ -10,7 +10,7 @@ import compose from "lodash.flowright";
 import { addBookSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 
-class AddBook extends React.PureComponent {
+class AddBook extends PureComponent {
   state = {
     values: {
       title: '',
@@ -64,7 +64,7 @@ class AddBook extends React.PureComponent {
       if (errors) {
         this.setState({ errors: formatServerErrors(errors) })
       } else {
-        this.props.navigation.push('ViewBook', { name: 'View book', id: book.id })
+        this.props.navigation.navigate('ViewBook', { name: 'View book', id: book.id })
       }
 
     }
@@ -144,7 +144,7 @@ class AddBook extends React.PureComponent {
                   color={colors.primary}
                 />
               }
-              onPress={() => { this.props.navigation.push('Authors', { name: 'Add author', referrer: 'AddBook' }) }}
+              onPress={() => { this.props.navigation.navigate('Authors', { params: { name: 'Add author', referrer: 'AddBook' } }) }}
             />
           </View>
           <View>
@@ -376,7 +376,10 @@ const MutationQueries = compose(
     name: "getLanguagesQuery"
   }),
   graphql(GET_AUTHORS_QUERY, {
-    name: "getAuthorsQuery"
+    name: "getAuthorsQuery",
+    options: () => ({
+      fetchPolicy: "network-only"
+    })
   })
 )(AddBook);
 

@@ -37,12 +37,12 @@ const asyncAuthLink = setContext(async () => {
 //   console.log('networkError', networkError)
 // }
 
-const httpLink = new createUploadLink({
+const uploadLink = new createUploadLink({
   uri: GRAPHQL_API_URL
 });
 
 export const apolloClient = new ApolloClient({
   cache: new InMemoryCache(),
-  // link: httpLink,
-  link: asyncAuthLink.concat(httpLink),
+  // link: uploadLink,
+  link: asyncAuthLink.concat(uploadLink),
 });

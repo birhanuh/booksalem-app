@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
-import { Divider, ListItem, Card, colors } from 'react-native-elements';
+import { Text, ListItem, Card, colors } from 'react-native-elements';
 import { useQuery, gql } from '@apollo/client';
 import AddAuthor from './addAuthor';
 
@@ -13,7 +13,7 @@ const GET_AUTHORS = gql`
   }
 `
 
-const Orders = ({ route }) => {
+const Orders = ({ route, navigation }) => {
   const { data, loading, error } = useQuery(GET_AUTHORS);
 
   if (error) {
@@ -28,11 +28,17 @@ const Orders = ({ route }) => {
     );
   };
 
+  const navigateToAddBook = () => {
+    if (route.params.params.referrer) {
+      navigation.navigate(route.params.params.referrer)
+    }
+  }
+
   const { getAuthors } = data;
 
   return (
     <View style={styles.container}>
-      <AddAuthor referrer={route.params.referrer} />
+      <AddAuthor navigateToAddBook={navigateToAddBook} />
 
       <Card style={styles.card}>
         <Card.Title>Authors</Card.Title>

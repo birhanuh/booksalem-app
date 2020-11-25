@@ -1,49 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, SafeAreaView, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
-import { Card, Button, Text, colors, Divider } from 'react-native-elements';
+import { Card, Button, Text, colors, Divider, Badge, Overlay } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useQuery, gql } from '@apollo/client';
+import { graphql, gql } from '@apollo/react-hoc';
+import compose from "lodash.flowright";
 
 import { MeContext } from "../context";
+import { colorsLocal } from '../theme';
 
-const GET_BOOK = gql`
-  query($id: Int!) {
-    getBook(id: $id) {
-      id
-      title
-      authors {
-        id
-        name
-      }
-      condition
-      price
-      status
-      published_date
-      isbn
-      cover_url
-      description
-      rating
-      languages {
-        id
-        name
-      }
-      categories {
-        id
-        name
-      }
-      users {
-        id
-      }
-    }
-  }
-`
-
-const ViewBook = ({ navigation, route }) => {
+const ViewBook = ({ navigation, getBookQuery, createOrderMutation, getUsersOrdersQuery, cancelOrderMutation }) => {
   const me = React.useContext(MeContext);
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [visible, setVisible] = useState(false);
 
-  const { loading, error, data } = useQuery(GET_BOOK, {
-    variables: { id: route.params.id },
-  });
+  const { loading, error, getBook } = getBookQuery;
+
+  const { id, title, condition, price, status, published_date, isbn, cover_url, description, rating, authors, languages, categories, users } = !!getBook && getBook
+
+  const { getUsersOrders } = getUsersOrdersQuery;
+  const isAlreadyOrdered = getUsersOrders && getUsersOrders.filter(order => order.book_id === id);
 
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
@@ -57,15 +33,118 @@ const ViewBook = ({ navigation, route }) => {
     );
   };
 
-  const createOrder = () => {
-    console.log('Ordering...')
+  const toggleOverlay = () => {
+    setVisible(!visible);
+  };
+
+  const createOrder = async (bookId) => {
+    if (!!isSubmitting) {
+      setIsSubmitting(true)
+    }
+
+    const { data: { order, errors } } = await createOrderMutation({ variables: { bookId } })
+    console.log("Resp data: ", order, errors)
+    if (errors) {
+      setErrors(formatServerErrors(errors));
+    } else {
+      navigation.navigate('Orders', { screen: 'Orders' })
+    }
+
+    setIsSubmitting(false)
   }
 
-  const { getBook: { title, condition, price, status, published_date, isbn, cover_url, description, rating, authors, languages, categories, users } } = data
+  const cancelOrder = async (bookId) => {
+    if (!!isSubmitting) {
+      setIsSubmitting(true)
+    }
 
-  return (
-    <ScrollView>
+    const { data: { order, errors } } = await cancelOrderMutation({ variables: { bookId } })
+    console.log("Resp data: ", order, errors)
+    if (errors) {
+      setErrors(formatServerErrors(errors));
+    } else {
+      navigation.navigate('Orders', { screen: 'Orders' })
+    }
+
+    setIsSubmitting(false)
+  }
+
+  const deleteBook = async (bookId) => {
+    console.log('Delete book...')
+    if (!!isSubmitting) {
+      setIsSubmitting(true)
+    }
+
+    const { data: { book, errors } } = await deleteBookMutation({ variables: { bookId } })
+    console.log("Resp data: ", book, errors)
+    if (errors) {
+      setErrors(formatServerErrors(errors));
+    } else {
+      navigation.push('Books')
+    }
+
+    setIsSubmitting(false)
+  }
+
+  const onPressConditioned = (bookId) => {
+    if (me) {
+      if (me.id === users.id) {
+        navigation.push('EditBook', { name: 'Edit book', book: getBook })
+      } else if (isAlreadyOrdered && isAlreadyOrdered.length > 0 && Object.keys(isAlreadyOrdered[0]).length !== 0) {
+        cancelOrder(bookId);
+      } else if ((me.id !== users.id)) {
+        createOrder(bookId);
+      }
+    } else {
+      navigation.push('SignIn')
+    }
+  }
+
+  const titleConditioned = () => {
+    if (me) {
+      if (me.id === users.id) {
+        return 'Edit';
+      }
+      if (isAlreadyOrdered && isAlreadyOrdered.length > 0 && Object.keys(isAlreadyOrdered[0]).length !== 0) {
+        return 'Cancel order'
+      }
+    }
+    return 'Order';
+  }
+
+  const iconConditioned = () => {
+    if (me) {
+      if (me.id === users.id) {
+        return 'pencil-square-o';
+      }
+      if (isAlreadyOrdered && isAlreadyOrdered.length > 0 && Object.keys(isAlreadyOrdered[0]).length !== 0) {
+        return 'minus-circle'
+      }
+    }
+    return 'shopping-bag';
+  }
+
+  let badgeStatus
+  switch (status) {
+    case 'active':
+      badgeStatus = 'primary'
+      break;
+    case 'pending':
+      badgeStatus = 'warnning'
+      break;
+    case 'resolved':
+      badgeStatus = 'sucess'
+      break;
+    default:
+      break;
+  }
+
+  return [
+    <ScrollView key='scrollview'>
       <View style={styles.container}>
+        {Object.keys(errors).length !== 0 && <View style={styles.errorMsgContainer}>
+          <Text style={styles.error}>{errors.message}</Text>
+        </View>}
         <Card style={styles.card}>
           <Card.Title>{title}</Card.Title>
           <Card.Divider />
@@ -85,7 +164,11 @@ const ViewBook = ({ navigation, route }) => {
                 <Text style={styles.label}>Condition: </Text>{condition}
               </Text>
               <Text style={styles.text}>
-                <Text style={styles.label}>Status: </Text>{status}
+                <Text style={styles.label}>Status: </Text><Badge
+                  status={badgeStatus}
+                  value={status}
+                  containerStyle={{ marginTop: -4 }}
+                />
               </Text>
               <Text style={styles.text}>
                 <Text style={styles.label}>Published date: </Text>{published_date}
@@ -98,7 +181,7 @@ const ViewBook = ({ navigation, route }) => {
               <Text style={styles.price}>
                 {price}
               </Text>
-              <Text style={styles.currency}>
+              <Text style={styles.currency + '\u0020'}>
                 ETB
               </Text>
             </View>
@@ -120,19 +203,52 @@ const ViewBook = ({ navigation, route }) => {
           <Divider style={styles.divider} />
 
           <Button
-            icon={me && me.id === users.id ? <Icon name='pencil-square-o' color='#ffffff' size={15}
-              style={{ marginRight: 10 }} /> : <Icon name='shopping-bag' color='#ffffff' size={15}
-                style={{ marginRight: 10 }} />}
+            icon={<Icon name={iconConditioned()} color='#ffffff' size={15}
+              style={{ marginRight: 10 }} />}
             buttonStyle={styles.button}
-            title={me && me.id === users.id ? 'Edit' : 'Order'} onPress={me ? (me.id === users.id ? () => {
-              navigation.push('EditBook', { name: 'Edit book', book: data && data.getBook })
-            } : createOrder()) : () => {
-              navigation.push('SignIn')
-            }} />
+            disabled={isSubmitting}
+            title={titleConditioned()} onPress={() => onPressConditioned(id)} />
         </Card>
+
+        <Divider style={styles.divider} />
+
+        {me && me.id === users.id && <View style={styles.deleteBtnContainer}><Button
+          type="outline"
+          titleStyle={{ color: colors.error }}
+          buttonStyle={{ borderColor: colors.error }}
+          icon={
+            <Icon
+              size={20}
+              name='trash-o'
+              color={colors.error}
+              style={{ marginRight: 10 }}
+            />
+          }
+          onPress={toggleOverlay}
+          title="Delete book"
+        /></View>}
       </View>
-    </ScrollView>
-  )
+    </ScrollView>,
+    <Overlay key='overlay' isVisible={visible} onBackdropPress={toggleOverlay}>
+      <View style={styles.deleteBtnContainer}>
+        <Text style={styles.errorModal}>Are you sure you want delete Book?!</Text>
+        <Button
+          type="outline"
+          titleStyle={{ color: colors.error }}
+          buttonStyle={{ borderColor: colors.error }}
+          icon={
+            <Icon
+              size={20}
+              name='trash-o'
+              color={colors.error}
+              style={{ marginRight: 10 }}
+            />
+          }
+          onPress={deleteBook}
+          title="Delete book"
+        /></View>
+    </Overlay>
+  ]
 }
 
 const styles = StyleSheet.create({
@@ -149,6 +265,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center'
+  },
+  errorMsgContainer: {
+    backgroundColor: colorsLocal.errorBg,
+    marginBottom: 26,
+    paddingHorizontal: 12,
+    paddingVertical: 12
+  },
+  error: {
+    color: colors.error,
+    fontSize: 18,
+    lineHeight: 25,
+    paddingHorizontal: 20
   },
   bookInfoPriceContainer: {
     flex: 1,
@@ -210,7 +338,114 @@ const styles = StyleSheet.create({
     marginLeft: 0,
     marginRight: 0,
     marginBottom: 0
-  }
+  },
+  errorModal: {
+    color: colors.error,
+    fontSize: 18,
+    marginBottom: 30
+  },
+  deleteBtnContainer: {
+    marginBottom: 26,
+    paddingHorizontal: 14,
+    marginVertical: 14
+  },
 });
 
-export default ViewBook
+const GET_BOOK_QUERY = gql`
+  query($id: Int!) {
+    getBook(id: $id) {
+      id
+      title
+      authors {
+        id
+        name
+      }
+      condition
+      price
+      status
+      published_date
+      isbn
+      cover_url
+      description
+      rating
+      languages {
+        id
+        name
+      }
+      categories {
+        id
+        name
+      }
+      users {
+        id
+      }
+    }
+  }
+`
+
+const GET_ORDERS_QUERY = gql`
+  query {
+    getUsersOrders {
+      book_id
+    }
+  } 
+`
+
+const CREATE_ORDER_MUTATION = gql`
+  mutation($bookId: Int!) {
+    createOrder(bookId: $bookId) {
+      order {
+        id
+        book_id
+        user_id
+        order_date
+        status
+      }
+      errors {
+        path
+        message
+      }
+    }
+  } 
+`;
+
+const CANCEL_ORDER_MUTATION = gql`
+  mutation($bookId: Int!) {
+    cancelOrder(bookId: $bookId) {
+      order {
+        id
+        book_id
+        user_id
+        order_date
+        status
+      }
+      errors {
+        path
+        message
+      }
+    }
+  }
+`;
+
+const MutationsQueries = compose(
+  graphql(GET_BOOK_QUERY, {
+    name: "getBookQuery",
+    options: props => ({
+      variables: {
+        id: props.route.params.id
+      }
+    })
+  }),
+
+  graphql(GET_ORDERS_QUERY, {
+    name: "getUsersOrdersQuery"
+  }),
+  graphql(CREATE_ORDER_MUTATION, {
+    name: "createOrderMutation"
+  }),
+  graphql(CANCEL_ORDER_MUTATION, {
+    name: "cancelOrderMutation"
+  })
+)(ViewBook);
+
+export default MutationsQueries;

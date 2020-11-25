@@ -156,8 +156,8 @@ export const checkoutSchema = yup.object().shape({
 });
 
 export const addAuthorSchema = yup.object().shape({
-  author: yup
+  name: yup
     .string()
     .max(255)
-    .required("Author is required")
+    .required("Name is required")
 });
