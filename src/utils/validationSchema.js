@@ -137,19 +137,23 @@ export const addBookSchema = yup.object().shape({
   // )
 });
 
-export const checkoutSchema = yup.object().shape({
-  chekcoutType: yup
+export const createCheckoutSchema = yup.object().shape({
+  orderId: yup
+    .number()
+    .required("Order ID is required"),
+  price: yup
+    .number()
+    .positive()
+    .required("Price is required"),
+  orderStatus: yup
     .string()
-    .required("Checkout type is required"),
-  userId: yup
-    .number()
-    .required("User is required"),
-  bookId: yup
-    .number()
-    .required("Book is required"),
-  checkoutDate: yup
-    .date()
-    .default(() => (new Date())),
+    .required("Order status is required"),
+  bookStatus: yup
+    .string()
+    .required("Book status is required"),
+  // checkoutDate: yup
+  //   .date()
+  //   .default(() => (new Date())),
   returnDate: yup
     .date()
     .required("Book is required"),

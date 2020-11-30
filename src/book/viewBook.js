@@ -47,7 +47,7 @@ const ViewBook = ({ navigation, getBookQuery, createOrderMutation, getUsersOrder
     if (errors) {
       setErrors(formatServerErrors(errors));
     } else {
-      navigation.navigate('Orders', { screen: 'Orders' })
+      navigation.navigate('UsersOrders', { screen: 'UsersOrders' })
     }
 
     setIsSubmitting(false)
@@ -63,7 +63,7 @@ const ViewBook = ({ navigation, getBookQuery, createOrderMutation, getUsersOrder
     if (errors) {
       setErrors(formatServerErrors(errors));
     } else {
-      navigation.navigate('Orders', { screen: 'Orders' })
+      navigation.navigate('UsersOrders', { screen: 'UsersOrders' })
     }
 
     setIsSubmitting(false)
@@ -179,9 +179,9 @@ const ViewBook = ({ navigation, getBookQuery, createOrderMutation, getUsersOrder
             </View>
             <View style={styles.priceContainer}>
               <Text style={styles.price}>
-                {price}
+                {price + '\u0020'}
               </Text>
-              <Text style={styles.currency + '\u0020'}>
+              <Text style={styles.currency}>
                 ETB
               </Text>
             </View>

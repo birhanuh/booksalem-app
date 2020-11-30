@@ -27,7 +27,7 @@ const GET_ORDER_ADMIN_QUERY = gql`
   }
 `
 
-const ViewUserOrdersAdmin = ({ route }) => {
+const ViewUserOrdersAdmin = ({ route, navigation }) => {
   const { loading, error, data } = useQuery(GET_ORDER_ADMIN_QUERY, { variables: { userId: route.params.id } });
 
   if (error) {
@@ -71,7 +71,7 @@ const ViewUserOrdersAdmin = ({ route }) => {
               default:
                 break;
             }
-            return (<><ListItem key={index} bottomDivider>
+            return (<View key={index}><ListItem>
               <Avatar source={{ uri: order.books.cover_url }} />
               <ListItem.Content>
                 <ListItem.Subtitle>{order.books.title}</ListItem.Subtitle>
@@ -81,7 +81,7 @@ const ViewUserOrdersAdmin = ({ route }) => {
                 />
               </ListItem.Content>
               <ListItem.Content>
-                <ListItem.Title>{order.books.price + '\u0020'}<Text style={styles.currency + '\u0020'}>ETB</Text></ListItem.Title>
+                <ListItem.Title>{order.books.price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Title>
               </ListItem.Content>
               <ListItem.Content>
                 <ListItem.Subtitle>{moment(order.order_date).format('ll')}</ListItem.Subtitle>
@@ -92,11 +92,13 @@ const ViewUserOrdersAdmin = ({ route }) => {
                   value={order.status} />
               </ListItem.Content>
             </ListItem>
-              <View>
-                <Button
-                  title='Checkout order'
-                  icon={<Icon name='credit-card-alt' color='#ffffff' style={{ marginRight: 10 }} />} />
-              </View></>)
+              <Button
+                title='Checkout order'
+                buttonStyle={styles.button}
+                icon={<Icon name='credit-card-alt' color='#ffffff' style={{ marginRight: 10 }} />}
+                onPress={() => { navigation.navigate('Checkouts', { screen: 'FormCheckout', params: { name: 'Checkout', id: order.id } }) }} />
+              <Divider />
+            </View>)
           })
         }
       </Card>
@@ -133,6 +135,11 @@ const styles = StyleSheet.create({
   label: {
     fontWeight: '600',
   },
+  button: {
+    marginVertical: 10,
+    paddingHorizontal: 5,
+    width: '50%'
+  }
 });
 
 export default ViewUserOrdersAdmin

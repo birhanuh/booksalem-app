@@ -107,7 +107,7 @@ const Orders = ({ navigation }) => {
                   <ListItem.Subtitle>{moment(order.order_date).format('ll')}</ListItem.Subtitle>
                 </ListItem.Content>
                 <ListItem.Content>
-                  <ListItem.Title>{order.books.price + '\u0020'}<Text style={styles.currency + '\u0020'}>ETB</Text></ListItem.Title>
+                  <ListItem.Title>{order.books.price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Title>
                 </ListItem.Content>
                 <ListItem.Content>
 

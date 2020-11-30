@@ -15,7 +15,7 @@ class AddBook extends PureComponent {
     values: {
       title: '',
       authorId: '',
-      published_date: '',
+      publishedDate: '',
       status: 'available',
       condition: 'new',
       isbn: null,
@@ -42,7 +42,7 @@ class AddBook extends PureComponent {
       this.setState({ errors: formatYupErrors(err) })
     }
 
-    const { values: { title, authorId, published_date, status, condition, isbn, categoryId, languageId, price, description, coverFile }, errors } = this.state
+    const { values: { title, authorId, publishedDate, status, condition, isbn, categoryId, languageId, price, description, coverFile }, errors } = this.state
 
     let coverFileWraped
     if (!!coverFile) {
@@ -59,7 +59,7 @@ class AddBook extends PureComponent {
     if (Object.keys(errors).length === 0) {
       this.setState({ isSubmitting: true })
 
-      const { data: { addBook: { book, errors } } } = await this.props.addBookMutation({ variables: { title, authorId, published_date, status, condition, isbn: parseInt(isbn), categoryId, languageId, price: parseFloat(price), description, coverFile: coverFileWraped } })
+      const { data: { addBook: { book, errors } } } = await this.props.addBookMutation({ variables: { title, authorId, publishedDate, status, condition, isbn: parseInt(isbn), categoryId, languageId, price: parseFloat(price), description, coverFile: coverFileWraped } })
       console.log("Resp data: ", book, errors)
       if (errors) {
         this.setState({ errors: formatServerErrors(errors) })
@@ -102,7 +102,7 @@ class AddBook extends PureComponent {
   }
 
   render() {
-    const { values: { title, authorId, published_date, status, condition, isbn, categoryId, languageId, price, description, coverFile }, loading, isSubmitting, errors } = this.state
+    const { values: { title, authorId, publishedDate, status, condition, isbn, categoryId, languageId, price, description, coverFile }, loading, isSubmitting, errors } = this.state
     const { getAuthorsQuery: { getAuthors }, getCategoriesQuery: { getCategories }, getLanguagesQuery: { getLanguages } } = this.props
 
     if (loading) {
@@ -132,7 +132,7 @@ class AddBook extends PureComponent {
               {getAuthors && getAuthors.map(author =>
                 <Picker.Item key={author.id} label={this.capitalizeFirstLetter(author.name)} value={author.id} />)}
             </Picker>
-            {errors.authorId && <Text style={styles.cutomeTextError}>{errors.authorId}</Text>}
+            {errors.authorId && <Text style={styles.customTextError}>{errors.authorId}</Text>}
             <Button
               title='Add author'
               type='outline'
@@ -174,8 +174,8 @@ class AddBook extends PureComponent {
               <Picker.Item label="Old" value="old" />
             </Picker>
           </View>
-          <Input value={published_date} onChangeText={text => this.onChangeText('published_date', text)} placeholder="Published date ( Optional )" errorStyle={{ color: colors.error }}
-            errorMessage={errors.published_date} />
+          <Input value={publishedDate} onChangeText={text => this.onChangeText('publishedDate', text)} placeholder="Published date ( Optional )" errorStyle={{ color: colors.error }}
+            errorMessage={errors.publishedDate} />
           <Input value={isbn} onChangeText={text => this.onChangeText('isbn', text)} placeholder="ISBN" errorStyle={{ color: colors.error }}
             errorMessage={errors.isbn} />
           <View>
@@ -189,7 +189,7 @@ class AddBook extends PureComponent {
               {getCategories && getCategories.map(category =>
                 <Picker.Item key={category.id} label={this.capitalizeFirstLetter(category.name)} value={category.id} />)}
             </Picker>
-            {errors.categoryId && <Text style={styles.cutomeTextError}>{errors.categoryId}</Text>}
+            {errors.categoryId && <Text style={styles.customTextError}>{errors.categoryId}</Text>}
           </View>
           <View>
             <Text style={styles.pickerTitle}>Language</Text>
@@ -202,7 +202,7 @@ class AddBook extends PureComponent {
               {getLanguages && getLanguages.map(language =>
                 <Picker.Item key={language.id} label={this.capitalizeFirstLetter(language.name)} value={language.id} />)}
             </Picker>
-            {errors.languageId && <Text style={styles.cutomeTextError}>{errors.languageId}</Text>}
+            {errors.languageId && <Text style={styles.customTextError}>{errors.languageId}</Text>}
           </View>
           <Input value={price} onChangeText={text => this.onChangeText('price', text)} placeholder="price" errorStyle={{ color: colors.error }}
             errorMessage={errors.price} />
@@ -222,7 +222,7 @@ class AddBook extends PureComponent {
               title="Choose image"
               style={{ alignSelf: 'center', marginBottom: 10 }}
             />
-            {errors.coverFile && <Text style={styles.cutomeTextError}>{errors.coverFile}</Text>}
+            {errors.coverFile && <Text style={styles.customTextError}>{errors.coverFile}</Text>}
             {!!coverFile && <Image source={{ uri: coverFile.uri }} style={styles.image} PlaceholderContent={<ActivityIndicator />} />}
           </View>
           <TextInput
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     height: 200,
     marginBottom: 10
   },
-  cutomeTextError: {
+  customTextError: {
     color: colors.error,
     fontSize: 14,
     alignSelf: 'center',
@@ -324,8 +324,8 @@ const styles = StyleSheet.create({
 });
 
 const ADD_BOOK_MUTATION = gql`
-  mutation($title: String!, $authorId: Int!, $published_date: String, $status: String!, $condition: String!, $isbn: Int, $categoryId: Int!, $languageId: Int!, $price: Float!, $coverFile: Upload, $description: String) {
-    addBook(title: $title, authorId: $authorId, published_date: $published_date, status: $status, condition: $condition, isbn: $isbn, categoryId: $categoryId, languageId: $languageId, price: $price, coverFile: $coverFile, description: $description) {
+  mutation($title: String!, $authorId: Int!, $publishedDate: String, $status: String!, $condition: String!, $isbn: Int, $categoryId: Int!, $languageId: Int!, $price: Float!, $coverFile: Upload, $description: String) {
+    addBook(title: $title, authorId: $authorId, publishedDate: $publishedDate, status: $status, condition: $condition, isbn: $isbn, categoryId: $categoryId, languageId: $languageId, price: $price, coverFile: $coverFile, description: $description) {
       book {
         id
         title

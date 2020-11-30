@@ -84,7 +84,7 @@ const Orders = ({ navigation }) => {
             <Avatar source={{ uri: item.books.cover_url }} />
             <ListItem.Content>
               <ListItem.Title>{item.books.title}</ListItem.Title>
-              <ListItem.Subtitle>{item.books.price} <Text style={styles.currency + '\u0020'}>ETB</Text></ListItem.Subtitle>
+              <ListItem.Subtitle>{item.books.price + '\u0020'} <Text style={styles.currency}>ETB</Text></ListItem.Subtitle>
             </ListItem.Content>
             <ListItem.Content>
               <ListItem.Subtitle>{moment(item.order_date).format('ll')}</ListItem.Subtitle>

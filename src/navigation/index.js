@@ -23,7 +23,7 @@ import UsersOrders from "../orders/usersOrders";
 import UsersOrdersAdmin from "../orders/usersOrdersAdmin";
 import ViewUserOrdersAdmin from "../orders/viewUserOrdersAdmin";
 import Checkouts from "../checkout/chekcouts";
-import ViewCheckout from "../checkout/viewCheckout";
+import FormCheckout from "../checkout/formCheckout";
 import Settings from "../settings";
 import Authors from "../author/authors";
 import { colors } from "react-native-elements";
@@ -81,7 +81,7 @@ const CheckoutStack = createStackNavigator();
 const CheckoutStackScreen = () => (
   <CheckoutStack.Navigator>
     <CheckoutStack.Screen name='Checkouts' component={Checkouts} />
-    <CheckoutStack.Screen name='ViewCheckout' component={ViewCheckout} />
+    <CheckoutStack.Screen name='FormCheckout' component={FormCheckout} />
   </CheckoutStack.Navigator>
 )
 
@@ -133,7 +133,7 @@ const TabsScreen = () => {
       inactiveTintColor: colors.grey3,
     }}>
     <Tabs.Screen name="Books" component={BookStackScreen} />
-    <Tabs.Screen name="UsersOrders" component={me.is_admin ? OrderAdminStackScreen : OrderStackScreen} />
+    <Tabs.Screen name="UsersOrders" component={me.is_admin ? OrderAdminStackScreen : OrderStackScreen} options={me.is_admin && { title: "Users orders" }} />
     <Tabs.Screen name={me.is_admin ? 'Checkouts' : 'Settings'} component={me.is_admin ? CheckoutStackScreen : SettingsStackScreen} />
   </Tabs.Navigator>
   );

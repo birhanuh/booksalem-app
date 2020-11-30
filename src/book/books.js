@@ -85,7 +85,7 @@ const Books = ({ route, navigation }) => {
             <Card.Divider />
             <Card.Image source={{ uri: item.cover_url }} />
             <View style={styles.bookInfoPriceContainer}>
-              <View style={styles.bookInfoContainer}>
+              <View>
                 <Text style={styles.text}>
                   <Text style={styles.label}>Author: </Text>{item.authors.name}
                 </Text>
@@ -96,7 +96,7 @@ const Books = ({ route, navigation }) => {
                   <Text style={styles.label}>Category: </Text>{item.categories.name}
                 </Text>
                 <Text style={styles.text}>
-                  <Text style={styles.label}>Category: </Text>{item.status}
+                  <Text style={styles.label}>Status: </Text>{item.status}
                 </Text>
               </View>
               <View style={styles.priceContainer}>
