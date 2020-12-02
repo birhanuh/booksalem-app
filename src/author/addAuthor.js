@@ -1,80 +1,104 @@
-import React, { useState } from 'react'
+import React, { PureComponent } from 'react'
 import { View } from 'react-native';
 import { Card, Text, Input, Button, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { graphql, gql } from '@apollo/react-hoc';
 import { addAuthorSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
+import GET_AUTHORS from './authors.graphql';
 
-let nameLoc = ''
+class AddAuthor extends PureComponent {
+  state = {
+    name: '',
+    isSubmitting: false,
+    errors: {}
+  }
 
-const AddAuthor = ({ mutate, navigateToAddBook }) => {
-  const [name, setAuthor] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState({});
+  submit = async () => {
+    const { name, isSubmitting, errors } = this.state
 
-  const submit = async () => {
     if (isSubmitting) {
       return
     }
 
     // Validation
-    let errorsLoc = {}
     try {
       await addAuthorSchema.validate({ name }, { abortEarly: false })
     } catch (err) {
-      errorsLoc = err
-      setErrors(formatYupErrors(err))
+      this.setState({ errors: formatYupErrors(err) })
     }
 
-    if (Object.keys(errorsLoc).length === 0) {
-      setIsSubmitting(true)
+    if (Object.keys(errors).length === 0) {
+      this.setState({ isSubmitting: false })
 
-      const { data: { addAuthor: { author, errors } } } = await mutate({ variables: { name: nameLoc } })
+      const { data: { addAuthor: { author, errors } } } = await this.props.mutate({
+        variables: { name }, update: (store, { data: { addAuthor } }) => {
+          const { author, errors } = addAuthor;
+
+          if (errors) {
+            return;
+          }
+
+          // Read the data from our cache for this query.
+          const data = store.readQuery({ query: GET_AUTHORS });
+          // Add our comment from the mutation to the end.
+
+          // data.getAuthors.push(author);
+
+          // Write our data back to the cache.
+          store.writeQuery({ query: GET_AUTHORS, data });
+        },
+      })
+
       console.log("Resp data: ", author, errors)
       if (errors) {
-        setErrors(formatServerErrors(errors))
+        this.setState({ errors: formatServerErrors(errors) })
       } else {
-        navigateToAddBook();
+        this.setState({ name: '', isSubmitting: false })
+
+        if (this.props.route.params && this.props.route.params.params.referrer) {
+          this.props.navigation.navigate(this.props.route.params.params.referrer)
+        }
       }
+
     }
   }
 
-  const onChangeText = (key, value) => {
+  onChangeText = (key, value) => {
     // Clone errors form state to local variable
     let errors = Object.assign({}, errors);
     delete errors[key];
 
-    nameLoc = value
-
-    setErrors(errors)
-    setAuthor(value)
-    setIsSubmitting(false)
+    this.setState({ name: value, errors, isSubmitting: false })
   }
 
-  return (
-    <Card>
-      {/* Error message */}
-      {errors.addAuthor && <View style={{ backgroundColor: colors.error }}><Text color="white">{errors.addAuthor}</Text></View>}
+  render() {
+    const { name, isSubmitting, errors } = this.state
 
-      <Input value={name} onChangeText={text => onChangeText('name', text)} placeholder="Author" errorStyle={{ color: colors.error }}
-        errorMessage={errors.name} />
+    return (
+      <Card>
+        {/* Error message */}
+        {errors.addAuthor && <View style={{ backgroundColor: colors.error }}><Text color="white">{errors.addAuthor}</Text></View>}
 
-      <Button
-        title="Add"
-        icon={
-          <Icon
-            name="plus-circle"
-            size={20}
-            style={{ marginRight: 10 }}
-            color={colors.white}
-          />
-        }
-        onPress={submit}
-        disabled={isSubmitting}
-      />
-    </Card>
-  )
+        <Input value={name} onChangeText={text => this.onChangeText('name', text)} placeholder="Author" errorStyle={{ color: colors.error }}
+          errorMessage={errors.name} />
+
+        <Button
+          title="Add"
+          icon={
+            <Icon
+              name="plus-circle"
+              size={20}
+              style={{ marginRight: 10 }}
+              color={colors.white}
+            />
+          }
+          onPress={this.submit}
+          disabled={isSubmitting}
+        />
+      </Card>
+    )
+  }
 }
 
 const ADD_AUTHOR_MUTATION = gql`

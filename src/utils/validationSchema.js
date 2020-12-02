@@ -151,12 +151,13 @@ export const createCheckoutSchema = yup.object().shape({
   bookStatus: yup
     .string()
     .required("Book status is required"),
-  // checkoutDate: yup
-  //   .date()
-  //   .default(() => (new Date())),
+  checkoutDate: yup
+    .date()
+    .default(() => (new Date())),
   returnDate: yup
     .date()
-    .required("Book is required"),
+    .nullable()
+    .min(yup.ref('checkoutDate'), 'Return date should be greator than checkout date')
 });
 
 export const addAuthorSchema = yup.object().shape({

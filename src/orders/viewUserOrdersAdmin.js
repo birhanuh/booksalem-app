@@ -45,72 +45,66 @@ const ViewUserOrdersAdmin = ({ route, navigation }) => {
   const { getUserOrdersAdmin: { name, email, phone, orders } } = !!data && data
 
   return (
-    <View style={styles.container}>
-      <Card>
-        <Card.Title>{name}</Card.Title>
-        <Text style={styles.text}>
-          <Text style={styles.label}>Email: </Text>{email}
-        </Text>
-        <Text style={styles.text}>
-          <Text style={styles.label}>Phone: </Text>{phone}
-        </Text>
-        <Card.Divider />
-        {
-          orders.map((order, index) => {
-            let badgeStatus
-            switch (order.status) {
-              case 'active':
-                badgeStatus = 'primary'
-                break;
-              case 'pending':
-                badgeStatus = 'warnning'
-                break;
-              case 'resolved':
-                badgeStatus = 'sucess'
-                break;
-              default:
-                break;
-            }
-            return (<View key={index}><ListItem>
-              <Avatar source={{ uri: order.books.cover_url }} />
-              <ListItem.Content>
-                <ListItem.Subtitle>{order.books.title}</ListItem.Subtitle>
-                <Badge
-                  status={badgeStatus}
-                  value={order.books.status}
-                />
-              </ListItem.Content>
-              <ListItem.Content>
-                <ListItem.Title>{order.books.price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Title>
-              </ListItem.Content>
-              <ListItem.Content>
-                <ListItem.Subtitle>{moment(order.order_date).format('ll')}</ListItem.Subtitle>
-              </ListItem.Content>
-              <ListItem.Content>
-                <ListItem.Subtitle>Order status</ListItem.Subtitle>
-                <Badge
-                  value={order.status} />
-              </ListItem.Content>
-            </ListItem>
-              <Button
-                title='Checkout order'
-                buttonStyle={styles.button}
-                icon={<Icon name='credit-card-alt' color='#ffffff' style={{ marginRight: 10 }} />}
-                onPress={() => { navigation.navigate('Checkouts', { screen: 'FormCheckout', params: { name: 'Checkout', id: order.id } }) }} />
-              <Divider />
-            </View>)
-          })
-        }
-      </Card>
-    </View >
+    <Card>
+      <Card.Title>{name}</Card.Title>
+      <Text style={styles.text}>
+        <Text style={styles.label}>Email: </Text>{email}
+      </Text>
+      <Text style={styles.text}>
+        <Text style={styles.label}>Phone: </Text>{phone}
+      </Text>
+      <Card.Divider />
+      {
+        orders.map((order, index) => {
+          let badgeStatus
+          switch (order.status) {
+            case 'active':
+              badgeStatus = 'primary'
+              break;
+            case 'pending':
+              badgeStatus = 'warnning'
+              break;
+            case 'resolved':
+              badgeStatus = 'sucess'
+              break;
+            default:
+              break;
+          }
+          return (<View key={index}><ListItem>
+            <Avatar source={{ uri: order.books.cover_url }} />
+            <ListItem.Content>
+              <ListItem.Subtitle>{order.books.title}</ListItem.Subtitle>
+              <Badge
+                status={badgeStatus}
+                value={order.books.status}
+              />
+            </ListItem.Content>
+            <ListItem.Content>
+              <ListItem.Title>{order.books.price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Title>
+            </ListItem.Content>
+            <ListItem.Content>
+              <ListItem.Subtitle>{moment(order.order_date).format('ll')}</ListItem.Subtitle>
+            </ListItem.Content>
+            <ListItem.Content>
+              <ListItem.Subtitle>Order status</ListItem.Subtitle>
+              <Badge
+                value={order.status} />
+            </ListItem.Content>
+          </ListItem>
+            <Button
+              title='Checkout order'
+              buttonStyle={styles.button}
+              icon={<Icon name='credit-card-alt' color='#ffffff' style={{ marginRight: 10 }} />}
+              onPress={() => { navigation.navigate('Checkouts', { screen: 'FormCheckout', params: { name: 'Checkout', id: order.id } }) }} />
+            <Divider />
+          </View>)
+        })
+      }
+    </Card>
   )
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-  },
   card: {
     shadowColor: colors.divider,
     shadowOffset: {

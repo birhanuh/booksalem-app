@@ -97,8 +97,7 @@ const Orders = ({ navigation }) => {
             </ListItem.Content>
           </ListItem>
           )
-        }
-        } />
+        }} />
     </View>)
 }
 
