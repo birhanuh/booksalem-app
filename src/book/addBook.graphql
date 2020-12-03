@@ -1,0 +1,12 @@
+mutation($title: String!, $authorId: Int!, $publishedDate: String, $status: String!, $condition: String!, $isbn: Int, $categoryId: Int!, $languageId: Int!, $price: Float!, $coverFile: Upload, $description: String) {
+  addBook(title: $title, authorId: $authorId, publishedDate: $publishedDate, status: $status, condition: $condition, isbn: $isbn, categoryId: $categoryId, languageId: $languageId, price: $price, coverFile: $coverFile, description: $description) {
+    book {
+      id
+      title
+    }
+    errors {
+      path
+      message
+    }
+  }
+}

@@ -2,30 +2,13 @@ import React from 'react';
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
 import { Text, ListItem, Avatar, Button, Badge, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useQuery, gql } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import { colorsLocal } from '../theme';
 import moment from "moment";
-
-const GET_ORDERS_QUERY = gql`
-  query {
-    getUsersOrders {
-      id
-      order_date
-      status
-      user_id
-      book_id
-      books {
-        id
-        title
-        cover_url
-        price
-      }
-    }
-  } 
-`
+import GET_USERS_ORDERS_QUERY from './usersOrders.graphql';
 
 const Orders = ({ navigation }) => {
-  const { data, loading, error } = useQuery(GET_ORDERS_QUERY);
+  const { data, loading, error } = useQuery(GET_USERS_ORDERS_QUERY);
 
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);

@@ -5,10 +5,15 @@ import { Picker } from '@react-native-picker/picker';
 import { launchImageLibraryAsync } from 'expo-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Divider, Image, colors } from 'react-native-elements';
-import { graphql, gql } from '@apollo/react-hoc';
+import { graphql } from '@apollo/react-hoc';
 import compose from "lodash.flowright";
 import { addBookSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
+import ADD_BOOK_MUTATION from './addBook.graphql';
+import GET_LANGUAGES_QUERY from './languages.graphql';
+import GET_CATEGORIES_QUERY from './categories.graphql';
+import GET_AUTHORS_QUERY from '../author/authors.graphql';
+import GET_AVAILABLE_BOOKS from './availableBooks.graphql';
 
 class AddBook extends PureComponent {
   state = {
@@ -59,14 +64,37 @@ class AddBook extends PureComponent {
     if (Object.keys(errors).length === 0) {
       this.setState({ isSubmitting: true })
 
-      const { data: { addBook: { book, errors } } } = await this.props.addBookMutation({ variables: { title, authorId, publishedDate, status, condition, isbn: parseInt(isbn), categoryId, languageId, price: parseFloat(price), description, coverFile: coverFileWraped } })
-      console.log("Resp data: ", book, errors)
-      if (errors) {
-        this.setState({ errors: formatServerErrors(errors) })
-      } else {
-        this.props.navigation.navigate('ViewBook', { name: 'View book', id: book.id })
-      }
+      this.props.addBookMutation({
+        variables: {
+          title, authorId, publishedDate, status, condition, isbn: parseInt(isbn), categoryId, languageId, price: parseFloat(price),
+          description, coverFile: coverFileWraped
+        }, update: (store, { data: { addBook } }) => {
+          const { book, errors } = addBook;
 
+          if (errors) {
+            return;
+          }
+
+          // Read the data from our cache for this query.
+          const data = store.readQuery({ query: GET_AVAILABLE_BOOKS });
+
+          // Add our book from the mutation to the end.            
+          // data.getAvailableBooks.unshift(book);       
+          const getAvailableBooksUpdated = [book, ...data.getAvailableBooks];
+
+          // Write our data back to the cache.
+          store.writeQuery({ query: GET_AVAILABLE_BOOKS, data: { getAvailableBooks: getAvailableBooksUpdated } });
+        }
+      }).then(res => {
+        const { book, errors } = res.data.addBook;
+
+        console.log("Resp data: ", book, errors)
+        if (errors) {
+          this.setState({ errors: formatServerErrors(errors) })
+        } else {
+          this.props.navigation.navigate('ViewBook', { name: 'View book', id: book.id })
+        }
+      }).catch(err => this.setState({ errors: err, isSubmitting: false }));
     }
   }
 
@@ -322,48 +350,6 @@ const styles = StyleSheet.create({
     marginTop: -5
   }
 });
-
-const ADD_BOOK_MUTATION = gql`
-  mutation($title: String!, $authorId: Int!, $publishedDate: String, $status: String!, $condition: String!, $isbn: Int, $categoryId: Int!, $languageId: Int!, $price: Float!, $coverFile: Upload, $description: String) {
-    addBook(title: $title, authorId: $authorId, publishedDate: $publishedDate, status: $status, condition: $condition, isbn: $isbn, categoryId: $categoryId, languageId: $languageId, price: $price, coverFile: $coverFile, description: $description) {
-      book {
-        id
-        title
-      }
-      errors {
-        path
-        message
-      }
-    }
-  }
-`;
-
-const GET_AUTHORS_QUERY = gql`
-  query {
-    getAuthors {
-      id
-      name
-    }
-  }
-`
-
-const GET_LANGUAGES_QUERY = gql`
-  query {
-    getLanguages {
-      id
-      name
-    }
-  }
-`
-
-const GET_CATEGORIES_QUERY = gql`
-  query {
-    getCategories {
-      id
-      name
-    }
-  }
-`
 
 const MutationQueries = compose(
   graphql(ADD_BOOK_MUTATION, {

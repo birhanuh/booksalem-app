@@ -1,0 +1,15 @@
+mutation($bookId: Int!) {
+  cancelOrder(bookId: $bookId) {
+    order {
+      id
+      book_id
+      user_id
+      order_date
+      status
+    }
+    errors {
+      path
+      message
+    }
+  }
+}

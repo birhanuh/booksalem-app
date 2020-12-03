@@ -2,30 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
 import { Text, Card, Divider, colors, Button, SearchBar } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useQuery, gql } from '@apollo/client';
-
-const GET_AVAILABLE_BOOKS = gql`
-  query {
-    getAvailableBooks {
-      id
-      title
-      authors {
-        name
-      }
-      price
-      status
-      cover_url
-      languages {
-        name
-      }
-      categories {
-        name
-      }
-      description
-      rating
-    }
-  } 
-`
+import { useQuery } from '@apollo/client';
+import GET_AVAILABLE_BOOKS from './availableBooks.graphql';
 
 const Books = ({ route, navigation }) => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -48,7 +26,6 @@ const Books = ({ route, navigation }) => {
 
       setIsLoadingMore(false);
     }
-
   }
 
   const renderHeader = () => (

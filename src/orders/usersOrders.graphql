@@ -1,0 +1,15 @@
+ query {
+  getUsersOrders {
+    id
+    order_date
+    status
+    user_id
+    book_id
+    books {
+      id
+      title
+      cover_url
+      price
+    }
+  }
+} 

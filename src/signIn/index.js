@@ -6,6 +6,7 @@ import { Text, Input, Button, Card, Divider, colors } from 'react-native-element
 import { graphql, gql } from '@apollo/react-hoc';
 import { signInSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
+import SIGN_IN_MUTATION from './signIn.graphql'
 
 class SignIn extends React.PureComponent {
   state = {
@@ -146,21 +147,4 @@ const styles = StyleSheet.create({
   }
 });
 
-const LOGIN_MUTATION = gql`
-  mutation($email: String!, $password: String!) {
-    signIn(email: $email, password: $password) {
-      token
-      user {
-        name
-        email
-        phone
-      }
-      errors {
-        path
-        message
-      }
-    }
-  } 
-`;
-
-export default graphql(LOGIN_MUTATION)(SignIn);
+export default graphql(SIGN_IN_MUTATION)(SignIn);

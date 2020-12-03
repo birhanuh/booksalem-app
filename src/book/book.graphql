@@ -1,0 +1,29 @@
+query($id: Int!) {
+  getBook(id: $id) {
+    id
+    title
+    authors {
+      id
+      name
+    }
+    condition
+    price
+    status
+    published_date
+    isbn
+    cover_url
+    description
+    rating
+    languages {
+      id
+      name
+    }
+    categories {
+      id
+      name
+    }
+    users {
+      id
+    }
+  }
+}

@@ -7,8 +7,15 @@ import compose from "lodash.flowright";
 
 import { MeContext } from "../context";
 import { colorsLocal } from '../theme';
+import GET_USERS_ORDERS_QUERY from '../orders/usersOrders.graphql';
+import GET_AVAILABLE_BOOKS from './availableBooks.graphql';
+import GET_BOOK_QUERY from './book.graphql';
+import DELETE_BOOK_MUTATION from './deleteBook.graphql';
+import CREATE_ORDER_MUTATION from './createOrder.graphql';
+import CANCEL_ORDER_MUTATION from './cancelOrder.graphql';
+import { object } from 'yup';
 
-const ViewBook = ({ navigation, getBookQuery, createOrderMutation, getUsersOrdersQuery, cancelOrderMutation }) => {
+const ViewBook = ({ navigation, getBookQuery, deleteBookMutation, createOrderMutation, getUsersOrdersQuery, cancelOrderMutation }) => {
   const me = React.useContext(MeContext);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -69,21 +76,51 @@ const ViewBook = ({ navigation, getBookQuery, createOrderMutation, getUsersOrder
     setIsSubmitting(false)
   }
 
-  const deleteBook = async (bookId) => {
+  const deleteBook = (id) => {
     console.log('Delete book...')
     if (!!isSubmitting) {
       setIsSubmitting(true)
     }
 
-    const { data: { book, errors } } = await deleteBookMutation({ variables: { bookId } })
-    console.log("Resp data: ", book, errors)
-    if (errors) {
-      setErrors(formatServerErrors(errors));
-    } else {
-      navigation.push('Books')
-    }
+    deleteBookMutation({
+      variables: { id }, update: (store, { data: { deleteBook } }) => {
+        const { book, errors } = deleteBook;
 
-    setIsSubmitting(false)
+        if (errors) {
+          return;
+        }
+
+        // Read the data from our cache for this query.
+        const data = store.readQuery({
+          query: GET_AVAILABLE_BOOKS
+        });
+
+        // Filter the book that was deleted.
+        const getAvailableBooksUpdated = Object.assign(data.getAvailableBooks.filter(
+          item => item.id !== book.id
+        ));
+        console.log('DEL2: ', getAvailableBooksUpdated)
+        console.log('DEL: ', book)
+        // Write our data back to the cache.
+        store.writeQuery({ query: GET_AVAILABLE_BOOKS, data: { getAvailableBooks: getAvailableBooksUpdated } });
+      }
+    }).then(res => {
+      const { book, errors } = res.data.deleteBook;
+
+      console.log("Resp data: ", book, errors)
+      if (errors) {
+        setErrors(formatServerErrors(errors));
+      } else {
+        navigation.push('Books')
+      }
+
+      setVisible(false)
+      setIsSubmitting(false)
+    }).catch(err => {
+      setIsSubmitting(false)
+      setErrors(err);
+    });
+
   }
 
   const onPressConditioned = (bookId) => {
@@ -231,7 +268,7 @@ const ViewBook = ({ navigation, getBookQuery, createOrderMutation, getUsersOrder
     </ScrollView>,
     <Overlay key='overlay' isVisible={visible} onBackdropPress={toggleOverlay}>
       <View style={styles.deleteBtnContainer}>
-        <Text style={styles.errorModal}>Are you sure you want delete Book?!</Text>
+        <Text style={styles.errorModal}>Are you sure you want to delete this Book?!</Text>
         <Button
           type="outline"
           titleStyle={{ color: colors.error }}
@@ -244,7 +281,7 @@ const ViewBook = ({ navigation, getBookQuery, createOrderMutation, getUsersOrder
               style={{ marginRight: 10 }}
             />
           }
-          onPress={deleteBook}
+          onPress={() => deleteBook(id)}
           title="Delete book"
         /></View>
     </Overlay>
@@ -351,82 +388,6 @@ const styles = StyleSheet.create({
   },
 });
 
-const GET_BOOK_QUERY = gql`
-  query($id: Int!) {
-    getBook(id: $id) {
-      id
-      title
-      authors {
-        id
-        name
-      }
-      condition
-      price
-      status
-      published_date
-      isbn
-      cover_url
-      description
-      rating
-      languages {
-        id
-        name
-      }
-      categories {
-        id
-        name
-      }
-      users {
-        id
-      }
-    }
-  }
-`
-
-const GET_ORDERS_QUERY = gql`
-  query {
-    getUsersOrders {
-      book_id
-    }
-  } 
-`
-
-const CREATE_ORDER_MUTATION = gql`
-  mutation($bookId: Int!) {
-    createOrder(bookId: $bookId) {
-      order {
-        id
-        book_id
-        user_id
-        order_date
-        status
-      }
-      errors {
-        path
-        message
-      }
-    }
-  } 
-`;
-
-const CANCEL_ORDER_MUTATION = gql`
-  mutation($bookId: Int!) {
-    cancelOrder(bookId: $bookId) {
-      order {
-        id
-        book_id
-        user_id
-        order_date
-        status
-      }
-      errors {
-        path
-        message
-      }
-    }
-  }
-`;
-
 const MutationsQueries = compose(
   graphql(GET_BOOK_QUERY, {
     name: "getBookQuery",
@@ -436,8 +397,10 @@ const MutationsQueries = compose(
       }
     })
   }),
-
-  graphql(GET_ORDERS_QUERY, {
+  graphql(DELETE_BOOK_MUTATION, {
+    name: "deleteBookMutation"
+  }),
+  graphql(GET_USERS_ORDERS_QUERY, {
     name: "getUsersOrdersQuery"
   }),
   graphql(CREATE_ORDER_MUTATION, {

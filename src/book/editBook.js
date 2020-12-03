@@ -62,14 +62,37 @@ class EditBook extends React.PureComponent {
     if (Object.keys(errors).length === 0) {
       this.setState({ isSubmitting: true })
 
-      const { data: { updateBook: { book, errors } } } = await this.props.updateBookMutation({ variables: { bookId: id, title, authorId, published_date, status, condition, isbn: parseInt(isbn), categoryId, languageId, price: parseFloat(price), description, coverFile: coverFileWraped } })
-      console.log("Resp data: ", book, errors)
-      if (errors) {
-        this.setState({ errors: formatServerErrors(errors) })
-      } else {
-        this.props.navigation.push('ViewBook', { name: 'View book', id: book.id })
-      }
+      this.props.updateBookMutation({
+        variables: { bookId: id, title, authorId, published_date, status, condition, isbn: parseInt(isbn), categoryId, languageId, price: parseFloat(price), description, coverFile: coverFileWraped }, update: (store, { data: { addAuthor } }) => {
+          const { book, errors } = updateBook;
 
+          if (errors) {
+            return;
+          }
+
+          // Read the data from our cache for this query.
+          const data = store.readQuery({ query: GET_AVAILABLE_BOOKS });
+
+          // Update our book from the mutation at same index.
+          data.getAvailableBooks = data.getAvailableBooks.map(item => {
+            if (item.id === book.id) {
+              return book;
+            }
+          });
+
+          // Write our data back to the cache.
+          store.writeQuery({ query: GET_AVAILABLE_BOOKS, data });
+        }
+      }).then(res => {
+        const { book, errors } = res.data.updateBook;
+
+        console.log("Resp data: ", book, errors)
+        if (errors) {
+          this.setState({ errors: formatServerErrors(errors) })
+        } else {
+          this.props.navigation.push('ViewBook', { name: 'View book', id: book.id })
+        }
+      }).catch(err => this.setState({ errors: err, isSubmitting: false }));
     }
   }
 
