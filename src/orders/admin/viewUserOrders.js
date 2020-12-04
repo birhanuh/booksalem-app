@@ -5,9 +5,9 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
 import moment from "moment";
 
-const GET_ORDER_ADMIN_QUERY = gql`
+const GET_USER_ORDERS_BY_ID_QUERY = gql`
   query($userId: Int!) {
-    getUserOrdersAdmin(userId: $userId) {
+    getUserOrdersById(userId: $userId) {
       id
       name
       email
@@ -27,8 +27,8 @@ const GET_ORDER_ADMIN_QUERY = gql`
   }
 `
 
-const ViewUserOrdersAdmin = ({ route, navigation }) => {
-  const { loading, error, data } = useQuery(GET_ORDER_ADMIN_QUERY, { variables: { userId: route.params.id } });
+const ViewUserOrders = ({ route, navigation }) => {
+  const { loading, error, data } = useQuery(GET_USER_ORDERS_BY_ID_QUERY, { variables: { userId: route.params.id } });
 
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
@@ -42,7 +42,7 @@ const ViewUserOrdersAdmin = ({ route, navigation }) => {
     );
   };
 
-  const { getUserOrdersAdmin: { name, email, phone, orders } } = !!data && data
+  const { getUserOrdersById: { name, email, phone, orders } } = !!data && data
 
   return (
     <Card>
@@ -95,7 +95,7 @@ const ViewUserOrdersAdmin = ({ route, navigation }) => {
               title='Checkout order'
               buttonStyle={styles.button}
               icon={<Icon name='credit-card-alt' color='#ffffff' style={{ marginRight: 10 }} />}
-              onPress={() => { navigation.navigate('Checkouts', { screen: 'FormCheckout', params: { name: 'Checkout', id: order.id } }) }} />
+              onPress={() => { navigation.navigate('Checkouts', { screen: 'FormCheckoutAdmin', params: { name: 'Checkout', id: order.id } }) }} />
             <Divider />
           </View>)
         })
@@ -136,4 +136,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default ViewUserOrdersAdmin
+export default ViewUserOrders

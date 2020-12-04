@@ -5,10 +5,10 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery } from '@apollo/client';
 import { colorsLocal } from '../theme';
 import moment from "moment";
-import GET_USERS_ORDERS_QUERY from './usersOrders.graphql';
+import GET_USER_ORDERS_QUERY from './userOrders.graphql';
 
-const Orders = ({ navigation }) => {
-  const { data, loading, error } = useQuery(GET_USERS_ORDERS_QUERY);
+const UserOrders = ({ navigation }) => {
+  const { data, loading, error } = useQuery(GET_USER_ORDERS_QUERY);
 
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
@@ -30,11 +30,11 @@ const Orders = ({ navigation }) => {
     <View style={{ height: 1, width: '86%', backgroundColor: colors.divider, marginLeft: '14%' }} />
   )
 
-  const { getUsersOrders } = !!data && data;
+  const { getUserOrders } = !!data && data;
 
   return (
     <View style={styles.container}>
-      { getUsersOrders && getUsersOrders.length === 0 && <><View style={styles.infoMsgContainer}>
+      { getUserOrders && getUserOrders.length === 0 && <><View style={styles.infoMsgContainer}>
         <Text style={styles.info}>You don't haver orders placed yet. Go to Books screen, select the Book you wish like to order and place your order by clicking the 'Order' button.</Text>
       </View>
         <Button
@@ -43,7 +43,7 @@ const Orders = ({ navigation }) => {
           buttonStyle={styles.button}
           title='Books' onPress={() => { navigation.navigate('Books', { screen: 'Books' }) }} /></>}
       <FlatList
-        data={getUsersOrders}
+        data={getUserOrders}
         keyExtractor={(item) => item.id.toString()}
         ItemSeparatorComponent={renderSeprator}
         renderItem={({ item }) => {
@@ -118,4 +118,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Orders
+export default UserOrders

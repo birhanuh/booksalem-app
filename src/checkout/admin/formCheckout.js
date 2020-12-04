@@ -6,8 +6,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Divider, Card, colors } from 'react-native-elements';
 import { graphql, gql } from '@apollo/react-hoc';
 import compose from "lodash.flowright";
-import { createCheckoutSchema } from '../utils/validationSchema';
-import { formatYupErrors, formatServerErrors } from '../utils/formatError';
+import { createCheckoutSchema } from '../../utils/validationSchema';
+import { formatYupErrors, formatServerErrors } from '../../utils/formatError';
 import moment from "moment";
 
 class FormCheckout extends PureComponent {

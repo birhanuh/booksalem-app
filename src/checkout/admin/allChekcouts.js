@@ -5,7 +5,7 @@ import { useQuery, gql } from '@apollo/client';
 
 const GET_CHECKOUTS = gql`
   query {
-    getCheckouts {
+    getAllCheckouts {
       title
       author
       condition
@@ -27,7 +27,7 @@ const GET_CHECKOUTS = gql`
   }
 `
 
-const Checkouts = () => {
+const AllCheckouts = () => {
   const { data, loading, error } = useQuery(GET_CHECKOUTS);
 
   if (error) {
@@ -42,12 +42,12 @@ const Checkouts = () => {
     );
   };
 
-  // const { getCheckouts } = [];
-  const getCheckouts = [];
-  console.log("CHECKOUTS: ", getCheckouts);
+  // const { getAllCheckouts } = [];
+  const getAllCheckouts = [];
+  console.log("CHECKOUTS: ", getAllCheckouts);
   return (
     <View style={styles.container}>
-      {getCheckouts.map(checkout => (
+      {getAllCheckouts.map(checkout => (
         <>
           <View style={styles.authorContainer}>
             <Image
@@ -58,8 +58,8 @@ const Checkouts = () => {
               <Text style={styles.name}>
                 {checkout.author.name}
               </Text>
-              <Text style={styles.numberOfCheckouts}>
-                {checkout.numberOfCheckouts}
+              <Text style={styles.numberOfAllCheckouts}>
+                {checkout.numberOfAllCheckouts}
               </Text>
             </View>
           </View>
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold'
   },
-  numberOfCheckouts: {
+  numberOfAllCheckouts: {
     color: 'gray'
   },
   checkoutContainer: {
@@ -117,4 +117,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Checkouts
+export default AllCheckouts

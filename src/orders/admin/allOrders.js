@@ -3,12 +3,12 @@ import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'rea
 import { Text, ListItem, Avatar, Card, Button, Badge, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
-import { colorsLocal } from '../theme';
+import { colorsLocal } from '../../theme';
 import moment from "moment";
 
 const GET_ORDERS_ADMIN_QUERY = gql`
   query {
-    getUsersOrdersAdmin {
+    getAllOrders {
       id
       name
       email
@@ -31,7 +31,7 @@ const GET_ORDERS_ADMIN_QUERY = gql`
   } 
 `
 
-const Orders = ({ navigation }) => {
+const AllOrders = ({ navigation }) => {
   const { data, loading, error } = useQuery(GET_ORDERS_ADMIN_QUERY);
 
   if (error) {
@@ -54,15 +54,15 @@ const Orders = ({ navigation }) => {
     <View style={{ height: 1, width: '86%', backgroundColor: colors.divider, marginLeft: '14%' }} />
   )
 
-  const { getUsersOrdersAdmin } = !!data && data;
+  const { getAllOrders } = !!data && data;
 
   return (
     <View style={styles.container}>
-      { getUsersOrdersAdmin && getUsersOrdersAdmin.length === 0 && <View style={styles.infoMsgContainer}>
+      { getAllOrders && getAllOrders.length === 0 && <View style={styles.infoMsgContainer}>
         <Text style={styles.info}>No one has placed an order yet.</Text>
       </View>}
       <FlatList
-        data={getUsersOrdersAdmin}
+        data={getAllOrders}
         keyExtractor={(item) => item.id.toString()}
         ItemSeparatorComponent={renderSeprator}
         renderItem={({ item }) => (
@@ -188,4 +188,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Orders
+export default AllOrders
