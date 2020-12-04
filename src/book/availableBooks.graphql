@@ -6,6 +6,7 @@
       name
     }
     price
+    type
     status
     cover_url
     languages {

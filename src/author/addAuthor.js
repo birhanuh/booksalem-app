@@ -39,14 +39,14 @@ class AddAuthor extends PureComponent {
             return;
           }
 
-          // Read the data from our cache for this query.
+          // Read the data from cache for this query.
           const data = store.readQuery({ query: GET_AUTHORS });
 
-          // Add our author from the mutation to the end.
-          // data.getAuthors.unshift(author);
+          // Add author from the mutation to the end.  
+          const getAuthorsUpdated = [author, ...data.getAuthors];
 
-          // Write our data back to the cache.
-          store.writeQuery({ query: GET_AUTHORS, data });
+          // Write data back to the cache.
+          store.writeQuery({ query: GET_AUTHORS, data: { getAuthors: getAuthorsUpdated } });
         },
       })
 

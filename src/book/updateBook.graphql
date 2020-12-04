@@ -1,0 +1,35 @@
+mutation($bookId: Int!, $title: String, $authorId: Int, $publishedDate: String, $type: String, $status: String, $condition: String, $isbn: Int, $categoryId: Int, $languageId: Int, $price: Float, $coverFile: Upload, $description: String) {
+  updateBook(bookId: $bookId, title: $title, authorId: $authorId, publishedDate: $publishedDate, type: $type, status: $status,condition: $condition, isbn: $isbn, categoryId: $categoryId, languageId: $languageId, price: $price, coverFile: $coverFile, description: $description) {
+    book {
+      id
+      title
+      condition
+      price
+      status
+      published_date
+      isbn
+      cover_url
+      description
+      rating
+      authors {
+        id
+        name
+      }
+      languages {
+        id
+        name
+      }
+      categories {
+        id
+        name
+      }
+      users {
+        id
+      }
+    }
+    errors {
+      path
+      message
+    }
+  }
+}

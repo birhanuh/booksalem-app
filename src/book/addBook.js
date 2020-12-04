@@ -22,6 +22,7 @@ class AddBook extends PureComponent {
       authorId: '',
       publishedDate: '',
       status: 'available',
+      type: 'rent',
       condition: 'new',
       isbn: null,
       categoryId: 1,
@@ -47,7 +48,7 @@ class AddBook extends PureComponent {
       this.setState({ errors: formatYupErrors(err) })
     }
 
-    const { values: { title, authorId, publishedDate, status, condition, isbn, categoryId, languageId, price, description, coverFile }, errors } = this.state
+    const { values: { title, authorId, publishedDate, type, status, condition, isbn, categoryId, languageId, price, description, coverFile }, errors } = this.state
 
     let coverFileWraped
     if (!!coverFile) {
@@ -66,7 +67,7 @@ class AddBook extends PureComponent {
 
       this.props.addBookMutation({
         variables: {
-          title, authorId, publishedDate, status, condition, isbn: parseInt(isbn), categoryId, languageId, price: parseFloat(price),
+          title, authorId, publishedDate, type, status, condition, isbn: parseInt(isbn), categoryId, languageId, price: parseFloat(price),
           description, coverFile: coverFileWraped
         }, update: (store, { data: { addBook } }) => {
           const { book, errors } = addBook;
@@ -75,14 +76,14 @@ class AddBook extends PureComponent {
             return;
           }
 
-          // Read the data from our cache for this query.
+          // Read the data from cache for this query.
           const data = store.readQuery({ query: GET_AVAILABLE_BOOKS });
 
-          // Add our book from the mutation to the end.            
+          // Add book from the mutation to the end.            
           // data.getAvailableBooks.unshift(book);       
           const getAvailableBooksUpdated = [book, ...data.getAvailableBooks];
 
-          // Write our data back to the cache.
+          // Write data back to the cache.
           store.writeQuery({ query: GET_AVAILABLE_BOOKS, data: { getAvailableBooks: getAvailableBooksUpdated } });
         }
       }).then(res => {
@@ -130,7 +131,7 @@ class AddBook extends PureComponent {
   }
 
   render() {
-    const { values: { title, authorId, publishedDate, status, condition, isbn, categoryId, languageId, price, description, coverFile }, loading, isSubmitting, errors } = this.state
+    const { values: { title, authorId, publishedDate, type, status, condition, isbn, categoryId, languageId, price, description, coverFile }, loading, isSubmitting, errors } = this.state
     const { getAuthorsQuery: { getAuthors }, getCategoriesQuery: { getCategories }, getLanguagesQuery: { getLanguages } } = this.props
 
     if (loading) {
@@ -174,6 +175,18 @@ class AddBook extends PureComponent {
               }
               onPress={() => { this.props.navigation.navigate('Authors', { params: { name: 'Add author', referrer: 'AddBook' } }) }}
             />
+          </View>
+          <View>
+            <Text style={styles.pickerTitle}>Type (Is is to for Sell or Rent)</Text>
+            <Picker
+              itemStyle={styles.picker}
+              selectedValue={type || book.type}
+              onValueChange={(itemValue, itemIndex) =>
+                this.setState({ values: { ...this.state.values, status: itemValue } })
+              }>
+              <Picker.Item label="Rent" value="rent" />
+              <Picker.Item label="Sell" value="sell" />
+            </Picker>
           </View>
           <View>
             <Text style={styles.pickerTitle}>Status</Text>

@@ -137,6 +137,12 @@ export const addBookSchema = yup.object().shape({
   // )
 });
 
+export const updateBookSchema = yup.object().shape({
+  id: yup
+    .string()
+    .required("Book ID is required")
+});
+
 export const createCheckoutSchema = yup.object().shape({
   orderId: yup
     .number()

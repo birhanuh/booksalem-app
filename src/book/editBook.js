@@ -5,26 +5,32 @@ import { Picker } from '@react-native-picker/picker';
 import { launchImageLibraryAsync } from 'expo-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Divider, Image, colors } from 'react-native-elements';
-import { graphql, gql } from '@apollo/react-hoc';
+import { graphql } from '@apollo/react-hoc';
 import compose from "lodash.flowright";
-import { addBookSchema } from '../utils/validationSchema';
+import { updateBookSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
+import UPDATE_BOOK_MUTATION from './updateBook.graphql';
+import GET_LANGUAGES_QUERY from './languages.graphql';
+import GET_CATEGORIES_QUERY from './categories.graphql';
+import GET_AUTHORS_QUERY from '../author/authors.graphql';
+import GET_AVAILABLE_BOOKS from './availableBooks.graphql';
 
 class EditBook extends React.PureComponent {
   state = {
     values: {
       id: this.props.route.params.book.id,
-      title: this.props.route.params.book.title,
-      authorId: this.props.route.params.book.authors.id,
-      published_date: this.props.route.params.book.published_date,
-      status: this.props.route.params.book.status,
-      condition: this.props.route.params.book.condition,
-      isbn: this.props.route.params.book.isbn,
-      categoryId: this.props.route.params.book.categories.id,
-      languageId: this.props.route.params.book.languages.id,
-      price: this.props.route.params.book.price,
-      description: this.props.route.params.book.description,
-      coverFile: this.props.route.params.book.cover_url
+      title: '',
+      authorId: null,
+      publishedDate: '',
+      type: '',
+      status: '',
+      condition: '',
+      isbn: '',
+      categoryId: null,
+      languageId: null,
+      price: '',
+      description: '',
+      coverFile: ''
     },
     errors: {},
     isSubmitting: false,
@@ -38,15 +44,15 @@ class EditBook extends React.PureComponent {
 
     // Validation
     try {
-      await addBookSchema.validate(this.state.values, { abortEarly: false })
+      await updateBookSchema.validate(this.state.values, { abortEarly: false })
     } catch (err) {
       this.setState({ errors: formatYupErrors(err) })
     }
 
-    const { values: { id, title, authorId, published_date, status, condition, isbn, categoryId, languageId, price, description, coverFile }, errors } = this.state
+    const { values: { id, title, authorId, publishedDate, type, status, condition, isbn, categoryId, languageId, price, description, coverFile }, errors } = this.state
 
     let coverFileWraped
-    if (typeof coverFile === 'object') {
+    if (!!coverFile) {
       const tokens = coverFile.uri.split('/');
       const name = tokens[tokens.length - 1];
 
@@ -55,33 +61,36 @@ class EditBook extends React.PureComponent {
         type: coverFile.type,
         name
       })
-    } else if (typeof coverFile === 'string') {
-      coverFileWraped = coverFile;
     }
 
     if (Object.keys(errors).length === 0) {
       this.setState({ isSubmitting: true })
 
       this.props.updateBookMutation({
-        variables: { bookId: id, title, authorId, published_date, status, condition, isbn: parseInt(isbn), categoryId, languageId, price: parseFloat(price), description, coverFile: coverFileWraped }, update: (store, { data: { addAuthor } }) => {
+        variables: {
+          bookId: id, title, authorId, publishedDate, type, status, condition, isbn: parseInt(isbn), categoryId, languageId, price: parseFloat(price),
+          description, coverFile: coverFileWraped
+        }, update: (store, { data: { updateBook } }) => {
           const { book, errors } = updateBook;
 
           if (errors) {
             return;
           }
 
-          // Read the data from our cache for this query.
+          // Read the data from cache for this query.
           const data = store.readQuery({ query: GET_AVAILABLE_BOOKS });
 
-          // Update our book from the mutation at same index.
-          data.getAvailableBooks = data.getAvailableBooks.map(item => {
+          // Clone getAbailableBooks.
+          const getAvailableBooksCloned = Object.assign(data.getAvailableBooks);
+          // Update book from the mutation at same index.
+          const getAvailableBooksUpdated = getAvailableBooksCloned.map(item => {
             if (item.id === book.id) {
               return book;
             }
           });
 
-          // Write our data back to the cache.
-          store.writeQuery({ query: GET_AVAILABLE_BOOKS, data });
+          // Write data back to the cache.
+          store.writeQuery({ query: GET_AVAILABLE_BOOKS, data: { getAbailableBooks: getAvailableBooksUpdated } });
         }
       }).then(res => {
         const { book, errors } = res.data.updateBook;
@@ -128,7 +137,8 @@ class EditBook extends React.PureComponent {
   }
 
   render() {
-    const { values: { title, authorId, published_date, status, condition, isbn, categoryId, languageId, price, description, coverFile }, loading, isSubmitting, errors } = this.state
+    const { values: { title, authorId, publishedDate, type, status, condition, isbn, categoryId, languageId, price, description, coverFile }, loading, isSubmitting, errors } = this.state
+    const { book } = this.props.route.params
     const { getAuthorsQuery: { getAuthors }, getCategoriesQuery: { getCategories }, getLanguagesQuery: { getLanguages } } = this.props
 
     if (loading) {
@@ -145,13 +155,13 @@ class EditBook extends React.PureComponent {
           {/* Error message */}
           {errors.updateBook && <View style={{ backgroundColor: colors.error }}><Text color="white">{errors.updateBook}</Text></View>}
 
-          <Input value={title} onChangeText={text => this.onChangeText('title', text)} placeholder="Title" errorStyle={{ color: colors.error }}
+          <Input value={title || book.title} onChangeText={text => this.onChangeText('title', text)} placeholder="Title" errorStyle={{ color: colors.error }}
             errorMessage={errors.title} />
           <View style={styles.authorContainer}>
             <Text style={styles.authorTitle}>Select author or add a new one</Text>
             <Picker
               itemStyle={styles.picker}
-              selectedValue={authorId}
+              selectedValue={authorId || book.authors.id}
               onValueChange={(itemValue, itemIndex) =>
                 this.setState({ values: { ...this.state.values, authorId: itemValue } })
               }>
@@ -174,10 +184,22 @@ class EditBook extends React.PureComponent {
             />
           </View>
           <View>
+            <Text style={styles.pickerTitle}>Type (Is is to for Sell or Rent)</Text>
+            <Picker
+              itemStyle={styles.picker}
+              selectedValue={type || book.type}
+              onValueChange={(itemValue, itemIndex) =>
+                this.setState({ values: { ...this.state.values, status: itemValue } })
+              }>
+              <Picker.Item label="Rent" value="rent" />
+              <Picker.Item label="Sell" value="sell" />
+            </Picker>
+          </View>
+          <View>
             <Text style={styles.pickerTitle}>Status</Text>
             <Picker
               itemStyle={styles.picker}
-              selectedValue={status}
+              selectedValue={status || book.status}
               onValueChange={(itemValue, itemIndex) =>
                 this.setState({ values: { ...this.state.values, status: itemValue } })
               }>
@@ -191,7 +213,7 @@ class EditBook extends React.PureComponent {
             <Text style={styles.pickerTitle}>Condition</Text>
             <Picker
               itemStyle={styles.picker}
-              selectedValue={condition}
+              selectedValue={condition || book.condition}
               onValueChange={(itemValue, itemIndex) =>
                 this.setState({ values: { ...this.state.values, condition: itemValue } })
               }>
@@ -200,15 +222,15 @@ class EditBook extends React.PureComponent {
               <Picker.Item label="Old" value="old" />
             </Picker>
           </View>
-          <Input value={published_date} onChangeText={text => this.onChangeText('published_date', text)} placeholder="Published date ( Optional )" errorStyle={{ color: colors.error }}
-            errorMessage={errors.published_date} />
-          <Input value={isbn.toString()} onChangeText={text => this.onChangeText('isbn', text)} placeholder="ISBN" errorStyle={{ color: colors.error }}
+          <Input value={publishedDate || book.published_date} onChangeText={text => this.onChangeText('publishedDate', text)} placeholder="Published date ( Optional )" errorStyle={{ color: colors.error }}
+            errorMessage={errors.publishedDate} />
+          <Input value={isbn.toString() || book.isbn.toString()} onChangeText={text => this.onChangeText('isbn', text)} placeholder="ISBN" errorStyle={{ color: colors.error }}
             errorMessage={errors.isbn} />
           <View>
             <Text style={styles.pickerTitle}>Category</Text>
             <Picker
               itemStyle={styles.picker}
-              selectedValue={categoryId}
+              selectedValue={categoryId || book.categories.id}
               onValueChange={(itemValue, itemIndex) =>
                 this.setState({ values: { ...this.state.values, categoryId: itemValue } })
               }>
@@ -221,7 +243,7 @@ class EditBook extends React.PureComponent {
             <Text style={styles.pickerTitle}>Language</Text>
             <Picker
               itemStyle={styles.picker}
-              selectedValue={languageId}
+              selectedValue={languageId || book.languages.id}
               onValueChange={(itemValue, itemIndex) =>
                 this.setState({ values: { ...this.state.values, languageId: itemValue } })
               }>
@@ -230,7 +252,7 @@ class EditBook extends React.PureComponent {
             </Picker>
             {errors.languageId && <Text style={styles.cutomeTextError}>{errors.languageId}</Text>}
           </View>
-          <Input value={price.toString()} onChangeText={text => this.onChangeText('price', text)} placeholder="price" errorStyle={{ color: colors.error }}
+          <Input value={price.toString() || book.price.toString()} onChangeText={text => this.onChangeText('price', text)} placeholder="price" errorStyle={{ color: colors.error }}
             errorMessage={errors.price} />
           <View style={{ flex: 1 }}>
             <Text style={styles.uploadPictureTitle}>Upload picture</Text>
@@ -249,11 +271,11 @@ class EditBook extends React.PureComponent {
               style={{ alignSelf: 'center', marginBottom: 10 }}
             />
             {errors.coverFile && <Text style={styles.cutomeTextError}>{errors.coverFile}</Text>}
-            {!!coverFile && <Image source={{ uri: coverFile.uri ? coverFile.uri : coverFile }} style={styles.image} PlaceholderContent={<ActivityIndicator />} />}
+            {<Image source={{ uri: coverFile ? coverFile.uri : book.cover_url }} style={styles.image} PlaceholderContent={<ActivityIndicator />} />}
           </View>
           <TextInput
             style={styles.description}
-            value={description}
+            value={description || book.description}
             multiline={true}
             numberOfLines={4}
             onChangeText={text => this.onChangeText('description', text)} placeholder="Description" errorStyle={{ color: colors.error }} />
@@ -348,48 +370,6 @@ const styles = StyleSheet.create({
     marginTop: -5
   }
 });
-
-const UPDATE_BOOK_MUTATION = gql`
-  mutation($bookId: Int!, $title: String!, $authorId: Int!, $published_date: String, $status: String!, $condition: String!, $isbn: Int, $categoryId: Int!, $languageId: Int!, $price: Float!, $coverFile: Upload, $description: String) {
-    updateBook(bookId: $bookId, title: $title, authorId: $authorId, published_date: $published_date, status: $status, condition: $condition, isbn: $isbn, categoryId: $categoryId, languageId: $languageId, price: $price, coverFile: $coverFile, description: $description) {
-      book {
-        id
-        title
-      }
-      errors {
-        path
-        message
-      }
-    }
-  }
-`;
-
-const GET_AUTHORS_QUERY = gql`
-  query {
-    getAuthors {
-      id
-      name
-    }
-  }
-`
-
-const GET_LANGUAGES_QUERY = gql`
-  query {
-    getLanguages {
-      id
-      name
-    }
-  }
-`
-
-const GET_CATEGORIES_QUERY = gql`
-  query {
-    getCategories {
-      id
-      name
-    }
-  }
-`
 
 const MutationQueries = compose(
   graphql(UPDATE_BOOK_MUTATION, {

@@ -23,7 +23,7 @@ const ViewBook = ({ navigation, getBookQuery, deleteBookMutation, createOrderMut
 
   const { loading, error, getBook } = getBookQuery;
 
-  const { id, title, condition, price, status, published_date, isbn, cover_url, description, rating, authors, languages, categories, users } = !!getBook && getBook
+  const { id, title, condition, price, type, status, published_date, isbn, cover_url, description, rating, authors, languages, categories, users } = !!getBook && getBook
 
   const { getUsersOrders } = getUsersOrdersQuery;
   const isAlreadyOrdered = getUsersOrders && getUsersOrders.filter(order => order.book_id === id);
@@ -95,12 +95,13 @@ const ViewBook = ({ navigation, getBookQuery, deleteBookMutation, createOrderMut
           query: GET_AVAILABLE_BOOKS
         });
 
+        // Clone getAbailableBooks.
+        const getAvailableBooksCloned = Object.assign(data.getAvailableBooks);
         // Filter the book that was deleted.
-        const getAvailableBooksUpdated = Object.assign(data.getAvailableBooks.filter(
+        const getAvailableBooksUpdated = getAvailableBooksCloned.filter(
           item => item.id !== book.id
-        ));
-        console.log('DEL2: ', getAvailableBooksUpdated)
-        console.log('DEL: ', book)
+        );
+
         // Write our data back to the cache.
         store.writeQuery({ query: GET_AVAILABLE_BOOKS, data: { getAvailableBooks: getAvailableBooksUpdated } });
       }
@@ -184,6 +185,11 @@ const ViewBook = ({ navigation, getBookQuery, deleteBookMutation, createOrderMut
         </View>}
         <Card style={styles.card}>
           <Card.Title>{title}</Card.Title>
+          <Badge
+            status={type === 'rent' ? 'primary' : 'success'}
+            value={type}
+            containerStyle={{ position: 'absolute', right: 0 }}
+          />
           <Card.Divider />
           <Card.Image source={{ uri: cover_url }} />
           <View style={styles.bookInfoPriceContainer}>
