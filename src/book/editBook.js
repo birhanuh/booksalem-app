@@ -189,7 +189,7 @@ class EditBook extends React.PureComponent {
               itemStyle={styles.picker}
               selectedValue={type || book.type}
               onValueChange={(itemValue, itemIndex) =>
-                this.setState({ values: { ...this.state.values, status: itemValue } })
+                this.setState({ values: { ...this.state.values, type: itemValue } })
               }>
               <Picker.Item label="Rent" value="rent" />
               <Picker.Item label="Sell" value="sell" />

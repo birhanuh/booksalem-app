@@ -20,6 +20,7 @@ const GET_USER_ORDERS_BY_ID_QUERY = gql`
           title
           price
           status
+          type
           cover_url
         }
       }
@@ -48,56 +49,80 @@ const ViewUserOrders = ({ route, navigation }) => {
     <Card>
       <Card.Title>{name}</Card.Title>
       <Text style={styles.text}>
+        <Text style={styles.label}>Name: </Text>{name}
+      </Text>
+      <Text>
         <Text style={styles.label}>Email: </Text>{email}
       </Text>
-      <Text style={styles.text}>
+      <Text style={styles.text, { marginBottom: 8 }} >
         <Text style={styles.label}>Phone: </Text>{phone}
       </Text>
       <Card.Divider />
       {
         orders.map((order, index) => {
-          let badgeStatus
-          switch (order.status) {
-            case 'active':
-              badgeStatus = 'primary'
-              break;
-            case 'pending':
-              badgeStatus = 'warnning'
-              break;
-            case 'resolved':
-              badgeStatus = 'sucess'
-              break;
-            default:
-              break;
+          if (order.status !== 'closed') {
+            let orderBadgeStatus
+            switch (order.status) {
+              case 'active':
+                orderBadgeStatus = 'primary'
+                break;
+              case 'pending':
+                orderBadgeStatus = 'warning'
+                break;
+              case 'closed':
+                orderBadgeStatus = 'success'
+                break;
+              default:
+                break;
+            }
+            let bookBadgeStatus
+            switch (order.books.status) {
+              case 'available':
+                bookBadgeStatus = 'success'
+                break;
+              case 'ordered':
+                bookBadgeStatus = 'primary'
+                break;
+              case 'rented':
+                bookBadgeStatus = 'warning'
+                break;
+              case 'sold':
+                bookBadgeStatus = 'error'
+                break;
+              default:
+                break;
+            }
+            return (<View key={index}><ListItem>
+              <Avatar source={{ uri: order.books.cover_url }} />
+              <ListItem.Content>
+                <ListItem.Subtitle>{order.books.title}</ListItem.Subtitle>
+                <Badge
+                  status={bookBadgeStatus}
+                  value={order.books.status}
+                />
+                <Text style={styles.type}>{order.books.type}</Text>
+              </ListItem.Content>
+              <ListItem.Content>
+                <ListItem.Title>{order.books.price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Title>
+              </ListItem.Content>
+              <ListItem.Content>
+                <ListItem.Subtitle>{moment(order.order_date).format('ll')}</ListItem.Subtitle>
+              </ListItem.Content>
+              <ListItem.Content>
+                <ListItem.Subtitle>Order status</ListItem.Subtitle>
+                <Badge
+                  status={orderBadgeStatus}
+                  value={order.status} />
+              </ListItem.Content>
+            </ListItem>
+              <Button
+                title={order.status === 'closed' && order.books.type === 'rented' ? 'Update checkout' : 'Checkout book'}
+                buttonStyle={styles.button}
+                icon={<Icon name='credit-card-alt' color='#ffffff' style={{ marginRight: 10 }} />}
+                onPress={() => { navigation.navigate('Checkouts', { screen: 'FormCheckoutAdmin', params: { name: 'Checkout', id: order.id } }) }} />
+              <Divider />
+            </View>)
           }
-          return (<View key={index}><ListItem>
-            <Avatar source={{ uri: order.books.cover_url }} />
-            <ListItem.Content>
-              <ListItem.Subtitle>{order.books.title}</ListItem.Subtitle>
-              <Badge
-                status={badgeStatus}
-                value={order.books.status}
-              />
-            </ListItem.Content>
-            <ListItem.Content>
-              <ListItem.Title>{order.books.price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Title>
-            </ListItem.Content>
-            <ListItem.Content>
-              <ListItem.Subtitle>{moment(order.order_date).format('ll')}</ListItem.Subtitle>
-            </ListItem.Content>
-            <ListItem.Content>
-              <ListItem.Subtitle>Order status</ListItem.Subtitle>
-              <Badge
-                value={order.status} />
-            </ListItem.Content>
-          </ListItem>
-            <Button
-              title='Checkout order'
-              buttonStyle={styles.button}
-              icon={<Icon name='credit-card-alt' color='#ffffff' style={{ marginRight: 10 }} />}
-              onPress={() => { navigation.navigate('Checkouts', { screen: 'FormCheckoutAdmin', params: { name: 'Checkout', id: order.id } }) }} />
-            <Divider />
-          </View>)
         })
       }
     </Card>
@@ -116,8 +141,10 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   text: {
-    marginTop: 10,
     textTransform: 'capitalize'
+  },
+  label: {
+    fontWeight: '600',
   },
   currency: {
     fontSize: 12,
@@ -126,14 +153,18 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textTransform: 'uppercase'
   },
-  label: {
-    fontWeight: '600',
-  },
   button: {
     marginVertical: 10,
     paddingHorizontal: 5,
     width: '50%'
-  }
+  },
+  type: {
+    marginTop: 4,
+    textTransform: 'uppercase',
+    padding: 2,
+    borderWidth: 1,
+    borderColor: colors.greyOutline,
+  },
 });
 
 export default ViewUserOrders

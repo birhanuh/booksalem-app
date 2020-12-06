@@ -24,6 +24,7 @@ const GET_ORDERS_ADMIN_QUERY = gql`
           title
           price
           status
+          type
           cover_url
         }
       }
@@ -57,7 +58,7 @@ const AllOrders = ({ navigation }) => {
   const { getAllOrders } = !!data && data;
 
   return (
-    <View style={styles.container}>
+    <View>
       { getAllOrders && getAllOrders.length === 0 && <View style={styles.infoMsgContainer}>
         <Text style={styles.info}>No one has placed an order yet.</Text>
       </View>}
@@ -70,56 +71,76 @@ const AllOrders = ({ navigation }) => {
             <Text style={styles.text}>
               <Text style={styles.label}>Name: </Text>{item.name}
             </Text>
-            <Text style={styles.text}>
+            <Text>
               <Text style={styles.label}>Email: </Text>{item.email}
             </Text>
-            <Text style={styles.text}>
+            <Text style={styles.text, { marginBottom: 8 }}>
               <Text style={styles.label}>Phone: </Text>{item.phone}
             </Text>
             <Card.Divider />
             <Text h4>Orders</Text>
             {item.orders.map(order => {
-              let badgeStatus
-              switch (order.status) {
-                case 'active':
-                  badgeStatus = 'primary'
-                  break;
-                case 'pending':
-                  badgeStatus = 'warnning'
-                  break;
-                case 'resolved':
-                  badgeStatus = 'sucess'
-                  break;
-                default:
-                  break;
+              if (order.status !== 'closed') {
+                let orderBadgeStatus
+                switch (order.status) {
+                  case 'active':
+                    orderBadgeStatus = 'primary'
+                    break;
+                  case 'pending':
+                    orderBadgeStatus = 'warning'
+                    break;
+                  case 'closed':
+                    orderBadgeStatus = 'success'
+                    break;
+                  default:
+                    break;
+                }
+                let bookBadgeStatus
+                switch (order.books.status) {
+                  case 'available':
+                    bookBadgeStatus = 'success'
+                    break;
+                  case 'ordered':
+                    bookBadgeStatus = 'primary'
+                    break;
+                  case 'rented':
+                    bookBadgeStatus = 'warning'
+                    break;
+                  case 'sold':
+                    bookBadgeStatus = 'error'
+                    break;
+                  default:
+                    break;
+                }
+                return (<ListItem key={order.id}
+                  containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0 }}
+                  onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: order.books.id } }) }}>
+                  <Avatar source={{ uri: order.books.cover_url }} />
+                  <ListItem.Content>
+                    <ListItem.Subtitle>{order.books.title}</ListItem.Subtitle>
+                    <Badge
+                      status={bookBadgeStatus}
+                      value={order.books.status} />
+                    <Text style={styles.type}>{order.books.type}</Text>
+                  </ListItem.Content>
+                  <ListItem.Content>
+                    <ListItem.Subtitle>{moment(order.order_date).format('ll')}</ListItem.Subtitle>
+                  </ListItem.Content>
+                  <ListItem.Content>
+                    <ListItem.Title>{order.books.price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Title>
+                  </ListItem.Content>
+                  <ListItem.Content>
+                    <ListItem.Subtitle>Order status</ListItem.Subtitle>
+                    <Badge
+                      status={orderBadgeStatus}
+                      value={order.status} />
+                  </ListItem.Content>
+                </ListItem>)
               }
-              return (<ListItem key={order.id}
-                containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0 }}
-                onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: order.books.id } }) }}>
-                <Avatar source={{ uri: order.books.cover_url }} />
-                <ListItem.Content>
-                  <ListItem.Subtitle>{order.books.title}</ListItem.Subtitle>
-                  <Badge
-                    status={badgeStatus}
-                    value={order.books.status} />
-                </ListItem.Content>
-                <ListItem.Content>
-                  <ListItem.Subtitle>{moment(order.order_date).format('ll')}</ListItem.Subtitle>
-                </ListItem.Content>
-                <ListItem.Content>
-                  <ListItem.Title>{order.books.price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Title>
-                </ListItem.Content>
-                <ListItem.Content>
-
-                  <ListItem.Subtitle>Order status</ListItem.Subtitle>
-                  <Badge
-                    value={order.status} />
-                </ListItem.Content>
-              </ListItem>)
             })}
             <Button
               type='outline'
-              title="View order"
+              title="View orders"
               icon={
                 <Icon
                   name="eye"
@@ -148,14 +169,24 @@ const styles = StyleSheet.create({
     fontSize: 18,
     paddingHorizontal: 20
   },
-  container: {
-    flex: 1,
-  },
   infoMsgContainer: {
     backgroundColor: colorsLocal.infoBg,
     marginBottom: 26,
     paddingHorizontal: 12,
     paddingVertical: 12
+  },
+  info: {
+    color: colorsLocal.info,
+    fontSize: 18,
+    lineHeight: 25,
+    paddingHorizontal: 20
+  },
+  type: {
+    marginTop: 4,
+    textTransform: 'uppercase',
+    padding: 2,
+    borderWidth: 1,
+    borderColor: colors.greyOutline,
   },
   card: {
     shadowColor: colors.divider,
@@ -167,14 +198,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  info: {
-    color: colorsLocal.info,
-    fontSize: 18,
-    lineHeight: 25,
-    paddingHorizontal: 20
-  },
   text: {
-    marginTop: 10,
     textTransform: 'capitalize'
   },
   currency: {

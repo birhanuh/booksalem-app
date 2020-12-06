@@ -1,34 +1,12 @@
 import React from 'react';
-import { View, SafeAreaView, ActivityIndicator, Image, StyleSheet } from 'react-native';
-import { Text, colors } from 'react-native-elements';
-import { useQuery, gql } from '@apollo/client';
+import { View, SafeAreaView, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
+import { Text, ListItem, Avatar, Badge, colors } from 'react-native-elements';
+import { useQuery } from '@apollo/client';
+import moment from "moment";
+import GET_ALL_CHECKOUTS from './allCheckouts.graphql';
 
-const GET_CHECKOUTS = gql`
-  query {
-    getAllCheckouts {
-      title
-      author
-      condition
-      language
-      price
-      status
-      published_date
-      isbn
-      categories {
-        name
-      }
-      orders {
-        users {
-          id
-          name
-        }
-      }
-    }
-  }
-`
-
-const AllCheckouts = () => {
-  const { data, loading, error } = useQuery(GET_CHECKOUTS);
+const AllCheckouts = ({ navigation }) => {
+  const { data, loading, error } = useQuery(GET_ALL_CHECKOUTS);
 
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
@@ -42,34 +20,75 @@ const AllCheckouts = () => {
     );
   };
 
-  // const { getAllCheckouts } = [];
-  const getAllCheckouts = [];
-  console.log("CHECKOUTS: ", getAllCheckouts);
+  const { getAllCheckouts } = !!data && data;
+
+  const renderSeprator = () => (
+    <View style={{ height: 1, width: '86%', backgroundColor: colors.divider, marginLeft: '14%' }} />
+  )
+
   return (
     <View style={styles.container}>
-      {getAllCheckouts.map(checkout => (
-        <>
-          <View style={styles.authorContainer}>
-            <Image
-              source={{ uri: checkout.converImageUrl }}
-              style={styles.image}
-            />
-            <View style={styles.details}>
-              <Text style={styles.name}>
-                {checkout.author.name}
+      <FlatList
+        data={getAllCheckouts}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => {
+          let bookBadgeStatus
+          switch (item.orders.books.status) {
+            case 'available':
+              bookBadgeStatus = 'success'
+              break;
+            case 'ordered':
+              bookBadgeStatus = 'primary'
+              break;
+            case 'rented':
+              bookBadgeStatus = 'warning'
+              break;
+            case 'sold':
+              bookBadgeStatus = 'error'
+              break;
+            default:
+              break;
+          }
+          return (<ListItem
+            containerStyle={{ flex: 1, flexWrap: 'wrap', borderTopWidth: 0, borderBottomWidth: 0, marginBottom: 10 }}
+            onPress={() => { item.orders.books.status === 'rented' && navigation.navigate('Checkouts', { screen: 'FormCheckoutAdmin', params: { name: 'Checkout', id: item.id } }) }}>
+            <View style={styles.userInfoContainer}>
+              <Text style={styles.text}>
+                <Text style={styles.label}>Name: </Text>{item.orders.users.name}
               </Text>
-              <Text style={styles.numberOfAllCheckouts}>
-                {checkout.numberOfAllCheckouts}
+              <Text style={styles.text}>
+                <Text style={styles.label}>Email: </Text>{item.orders.users.email}
+              </Text>
+              <Text style={styles.text}>
+                <Text style={styles.label}>Phone: </Text>{item.orders.users.phone}
               </Text>
             </View>
-          </View>
-          <View style={styles.checkoutContainer}>
-            <Text style={styles.checkout}>
-              {checkout.title}
-            </Text>
-          </View>
-        </>
-      ))}
+            <View style={styles.bookInfoContainer}>
+              <Avatar source={{ uri: item.orders.books.cover_url }} containerStyle={{ marginRight: 12 }} />
+              <ListItem.Content>
+                <ListItem.Title>{item.orders.books.title}</ListItem.Title>
+                <ListItem.Subtitle>{item.total_price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Subtitle>
+              </ListItem.Content>
+              <ListItem.Content>
+                <ListItem.Title>Return date</ListItem.Title>
+                <ListItem.Subtitle>{moment(item.return_date).format('ll')}</ListItem.Subtitle>
+              </ListItem.Content>
+              <ListItem.Content>
+                <ListItem.Title>Book status</ListItem.Title>
+                <Badge
+                  status={bookBadgeStatus}
+                  value={item.orders.books.status} />
+              </ListItem.Content>
+              {/* <ListItem.Content>
+              <Badge
+                status={badgeStatus}
+                value={item.status}
+              />
+            </ListItem.Content> */}
+            </View>
+          </ListItem>)
+        }
+        } />
     </View>
   )
 }
@@ -88,33 +107,32 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 50
+    paddingVertical: 10,
+    paddingHorizontal: 10
   },
-  authorContainer: {
+  userInfoContainer: {
+    marginBottom: 2
+  },
+  bookInfoContainer: {
     flexDirection: 'row',
-    alignItems: 'center'
+    borderColor: colors.grey5,
+    borderTopWidth: 1,
+    paddingTop: 8
   },
-  image: {
-    height: 50,
-    width: 50,
-    borderRadius: 100,
+  currency: {
+    fontSize: 12,
+    color: colors.success,
+    fontWeight: '600',
+    marginTop: 10,
+    textTransform: 'uppercase'
   },
-  details: {
-    marginLeft: 5,
+  label: {
+    fontWeight: '600',
   },
-  name: {
-    fontSize: 20,
-    fontWeight: 'bold'
+  text: {
+    marginBottom: 4,
+    textTransform: 'capitalize'
   },
-  numberOfAllCheckouts: {
-    color: 'gray'
-  },
-  checkoutContainer: {
-    marginTop: 10
-  },
-  checkout: {
-    fontSize: 16
-  }
 });
 
 export default AllCheckouts

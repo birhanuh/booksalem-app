@@ -46,7 +46,7 @@ class CreateAccount extends React.PureComponent {
       } else {
         AsyncStorage.setItem('@kemetsehaftalem/token', token)
         console.log("Resp: ", user, token)
-        this.props.navigation.push('Books')
+        this.props.navigation.navigate('Books')
       }
     }
   }

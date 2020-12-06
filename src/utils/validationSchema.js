@@ -147,7 +147,7 @@ export const createCheckoutSchema = yup.object().shape({
   orderId: yup
     .number()
     .required("Order ID is required"),
-  price: yup
+  totalPrice: yup
     .number()
     .positive()
     .required("Price is required"),
@@ -157,13 +157,18 @@ export const createCheckoutSchema = yup.object().shape({
   bookStatus: yup
     .string()
     .required("Book status is required"),
-  checkoutDate: yup
-    .date()
-    .default(() => (new Date())),
+  // checkoutDate: yup
+  //   .date()
+  //   .default(() => (new Date())),
+  // returnDate: yup
+  //   .date()
+  //   .min(yup.ref('checkoutDate'), 'Return date should be greator than checkout date')
+  //   .nullable()
   returnDate: yup
     .date()
     .nullable()
-    .min(yup.ref('checkoutDate'), 'Return date should be greator than checkout date')
+    .default(null)
+    .min(new Date(), 'Return date can not be past date')
 });
 
 export const addAuthorSchema = yup.object().shape({

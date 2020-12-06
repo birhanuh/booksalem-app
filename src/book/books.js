@@ -56,16 +56,19 @@ const Books = ({ route, navigation }) => {
         refreshing={isLoadingMore}
         onRefresh={handleLoadMore}
         renderItem={({ item }) => {
-          let badgeStatus
+          let bookBadgeStatus
           switch (item.status) {
-            case 'active':
-              badgeStatus = 'primary'
+            case 'available':
+              bookBadgeStatus = 'success'
               break;
-            case 'pending':
-              badgeStatus = 'warnning'
+            case 'ordered':
+              bookBadgeStatus = 'primary'
               break;
-            case 'resolved':
-              badgeStatus = 'sucess'
+            case 'rented':
+              bookBadgeStatus = 'warning'
+              break;
+            case 'sold':
+              bookBadgeStatus = 'error'
               break;
             default:
               break;
@@ -74,11 +77,7 @@ const Books = ({ route, navigation }) => {
             // implemented with Text and Button as children
             <Card style={styles.card}>
               <Card.Title>{item.title}</Card.Title>
-              <Badge
-                status={item.type === 'rent' ? 'primary' : 'success'}
-                value={item.type}
-                containerStyle={{ position: 'absolute', right: 0 }}
-              />
+              <Text style={styles.type}>{item.type}</Text>
               <Card.Divider />
               <Card.Image source={{ uri: item.cover_url }} />
               <View style={styles.bookInfoPriceContainer}>
@@ -94,7 +93,7 @@ const Books = ({ route, navigation }) => {
                   </Text>
                   <Text style={styles.text}>
                     <Text style={styles.label}>Status: </Text><Badge
-                      status={badgeStatus}
+                      status={bookBadgeStatus}
                       value={item.status}
                       containerStyle={{ marginTop: -4 }}
                     />
@@ -178,6 +177,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  type: {
+    textTransform: 'uppercase',
+    position: 'absolute',
+    right: 0,
+    padding: 2,
+    borderWidth: 1,
+    borderColor: colors.greyOutline,
   },
   price: {
     fontSize: 24,

@@ -72,7 +72,7 @@ const OrderStackScreen = () => (
 const OrderAdminStack = createStackNavigator();
 const OrderAdminStackScreen = () => (
   <OrderAdminStack.Navigator>
-    <OrderAdminStack.Screen name='AllOrdersAdmin' component={AllOrdersAdmin} options={{ title: "Users orders (Admin view)" }} />
+    <OrderAdminStack.Screen name='AllOrdersAdmin' component={AllOrdersAdmin} options={{ title: "All orders (Admin view)" }} />
     <OrderAdminStack.Screen name='ViewUserOrdersAdmin' component={ViewUserOrdersAdmin} options={{ title: "User orders (Admin view)" }} />
   </OrderAdminStack.Navigator>
 )
@@ -87,7 +87,7 @@ const CheckoutStackScreen = () => (
 const CheckoutAdminStack = createStackNavigator();
 const CheckoutAdminStackScreen = () => (
   <CheckoutAdminStack.Navigator>
-    <CheckoutAdminStack.Screen name='AllCheckoutsAdmin' component={AllCheckoutsAdmin} options={{ title: "Checkouts (Admin view)" }} />
+    <CheckoutAdminStack.Screen name='AllCheckoutsAdmin' component={AllCheckoutsAdmin} options={{ title: "All Checkouts (Admin view)" }} />
     <CheckoutAdminStack.Screen name='FormCheckoutAdmin' component={FormCheckoutAdmin} options={{ title: "Checkout Form (Admin view)" }} />
   </CheckoutAdminStack.Navigator>
 )

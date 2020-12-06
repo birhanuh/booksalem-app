@@ -1,0 +1,20 @@
+query {
+  getAllCheckouts {
+    id
+    return_date
+    total_price
+    orders {
+      id
+      books {
+        title
+        cover_url
+        status
+      }
+      users {
+        name
+        email
+        phone
+      }
+    }
+  }
+}

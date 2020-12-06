@@ -2,18 +2,17 @@ import React, { useState } from 'react';
 import { View, SafeAreaView, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
 import { Card, Button, Text, colors, Divider, Badge, Overlay } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { graphql, gql } from '@apollo/react-hoc';
+import { graphql } from '@apollo/react-hoc';
 import compose from "lodash.flowright";
 
 import { MeContext } from "../context";
 import { colorsLocal } from '../theme';
-import GET_USERS_ORDERS_QUERY from '../orders/usersOrders.graphql';
+import GET_USERS_ORDERS_QUERY from '../orders/userOrders.graphql';
 import GET_AVAILABLE_BOOKS from './availableBooks.graphql';
 import GET_BOOK_QUERY from './book.graphql';
 import DELETE_BOOK_MUTATION from './deleteBook.graphql';
 import CREATE_ORDER_MUTATION from './createOrder.graphql';
 import CANCEL_ORDER_MUTATION from './cancelOrder.graphql';
-import { object } from 'yup';
 
 const ViewBook = ({ navigation, getBookQuery, deleteBookMutation, createOrderMutation, getUsersOrdersQuery, cancelOrderMutation }) => {
   const me = React.useContext(MeContext);
@@ -164,14 +163,17 @@ const ViewBook = ({ navigation, getBookQuery, deleteBookMutation, createOrderMut
 
   let badgeStatus
   switch (status) {
-    case 'active':
+    case 'available':
+      badgeStatus = 'success'
+      break;
+    case 'ordered':
       badgeStatus = 'primary'
       break;
-    case 'pending':
-      badgeStatus = 'warnning'
+    case 'rented':
+      badgeStatus = 'warning'
       break;
-    case 'resolved':
-      badgeStatus = 'sucess'
+    case 'sold':
+      badgeStatus = 'error'
       break;
     default:
       break;
@@ -185,11 +187,7 @@ const ViewBook = ({ navigation, getBookQuery, deleteBookMutation, createOrderMut
         </View>}
         <Card style={styles.card}>
           <Card.Title>{title}</Card.Title>
-          <Badge
-            status={type === 'rent' ? 'primary' : 'success'}
-            value={type}
-            containerStyle={{ position: 'absolute', right: 0 }}
-          />
+          <Text style={styles.type}>{type}</Text>
           <Card.Divider />
           <Card.Image source={{ uri: cover_url }} />
           <View style={styles.bookInfoPriceContainer}>
@@ -325,6 +323,14 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between'
+  },
+  type: {
+    textTransform: 'uppercase',
+    position: 'absolute',
+    right: 0,
+    padding: 2,
+    borderWidth: 1,
+    borderColor: colors.greyOutline,
   },
   priceContainer: {
     flex: 1,

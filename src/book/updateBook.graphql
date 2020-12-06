@@ -5,6 +5,7 @@ mutation($bookId: Int!, $title: String, $authorId: Int, $publishedDate: String, 
       title
       condition
       price
+      type
       status
       published_date
       isbn
