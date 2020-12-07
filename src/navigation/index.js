@@ -25,6 +25,7 @@ import ViewUserOrdersAdmin from "../orders/admin/viewUserOrders";
 import UserCheckouts from "../checkout/userCheckouts";
 import AllCheckoutsAdmin from "../checkout/admin/allChekcouts";
 import FormCheckoutAdmin from "../checkout/admin/formCheckout";
+import EditCheckoutAdmin from "../checkout/admin/editCheckout";
 import Settings from "../settings";
 import Authors from "../author/authors";
 import { colors } from "react-native-elements";
@@ -89,6 +90,7 @@ const CheckoutAdminStackScreen = () => (
   <CheckoutAdminStack.Navigator>
     <CheckoutAdminStack.Screen name='AllCheckoutsAdmin' component={AllCheckoutsAdmin} options={{ title: "All Checkouts (Admin view)" }} />
     <CheckoutAdminStack.Screen name='FormCheckoutAdmin' component={FormCheckoutAdmin} options={{ title: "Checkout Form (Admin view)" }} />
+    <CheckoutAdminStack.Screen name='EditCheckoutAdmin' component={EditCheckoutAdmin} options={{ title: "Checkout Edit (Admin view)" }} />
   </CheckoutAdminStack.Navigator>
 )
 

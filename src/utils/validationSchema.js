@@ -137,6 +137,13 @@ export const addBookSchema = yup.object().shape({
   // )
 });
 
+export const addAuthorSchema = yup.object().shape({
+  name: yup
+    .string()
+    .max(255)
+    .required("Name is required")
+});
+
 export const updateBookSchema = yup.object().shape({
   id: yup
     .string()
@@ -171,9 +178,13 @@ export const createCheckoutSchema = yup.object().shape({
     .min(new Date(), 'Return date can not be past date')
 });
 
-export const addAuthorSchema = yup.object().shape({
-  name: yup
-    .string()
-    .max(255)
-    .required("Name is required")
+export const updateCheckoutSchema = yup.object().shape({
+  checkoutId: yup
+    .number()
+    .required("Checkout ID is required"),
+  returnDate: yup
+    .date()
+    .nullable()
+    .default(null)
+    .min(new Date(), 'Return date can not be past date')
 });

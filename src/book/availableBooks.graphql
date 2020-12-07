@@ -3,6 +3,7 @@
     id
     title
     authors {
+      id
       name
     }
     price
@@ -10,9 +11,11 @@
     status
     cover_url
     languages {
+      id
       name
     }
     categories {
+      id
       name
     }
     description

@@ -93,9 +93,9 @@ const ViewUserOrders = ({ route, navigation }) => {
                 break;
             }
             return (<View key={index}><ListItem>
-              <Avatar source={{ uri: order.books.cover_url }} />
+              <Avatar source={{ uri: order.books.cover_url }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: order.books.id } }) }} />
               <ListItem.Content>
-                <ListItem.Subtitle>{order.books.title}</ListItem.Subtitle>
+                <ListItem.Title style={{ color: colors.primary }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: order.books.id } }) }}>{order.books.title}</ListItem.Title>
                 <Badge
                   status={bookBadgeStatus}
                   value={order.books.status}
@@ -106,10 +106,11 @@ const ViewUserOrders = ({ route, navigation }) => {
                 <ListItem.Title>{order.books.price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Title>
               </ListItem.Content>
               <ListItem.Content>
-                <ListItem.Subtitle>{moment(order.order_date).format('ll')}</ListItem.Subtitle>
+                <ListItem.Subtitle>Order placed date</ListItem.Subtitle>
+                <ListItem.Title>{moment(order.order_date).format('ll')}</ListItem.Title>
               </ListItem.Content>
               <ListItem.Content>
-                <ListItem.Subtitle>Order status</ListItem.Subtitle>
+                <ListItem.Subtitle>Status</ListItem.Subtitle>
                 <Badge
                   status={orderBadgeStatus}
                   value={order.status} />

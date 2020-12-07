@@ -113,24 +113,24 @@ const AllOrders = ({ navigation }) => {
                     break;
                 }
                 return (<ListItem key={order.id}
-                  containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0 }}
-                  onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: order.books.id } }) }}>
-                  <Avatar source={{ uri: order.books.cover_url }} />
+                  containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0 }}>
+                  <Avatar source={{ uri: order.books.cover_url }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: order.books.id } }) }} />
                   <ListItem.Content>
-                    <ListItem.Subtitle>{order.books.title}</ListItem.Subtitle>
+                    <ListItem.Title style={{ color: colors.primary }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: order.books.id } }) }}>{order.books.title}</ListItem.Title>
                     <Badge
                       status={bookBadgeStatus}
                       value={order.books.status} />
                     <Text style={styles.type}>{order.books.type}</Text>
                   </ListItem.Content>
                   <ListItem.Content>
-                    <ListItem.Subtitle>{moment(order.order_date).format('ll')}</ListItem.Subtitle>
+                    <ListItem.Subtitle>Order placed date</ListItem.Subtitle>
+                    <ListItem.Title>{moment(order.order_date).format('ll')}</ListItem.Title>
                   </ListItem.Content>
                   <ListItem.Content>
                     <ListItem.Title>{order.books.price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Title>
                   </ListItem.Content>
                   <ListItem.Content>
-                    <ListItem.Subtitle>Order status</ListItem.Subtitle>
+                    <ListItem.Subtitle>Status</ListItem.Subtitle>
                     <Badge
                       status={orderBadgeStatus}
                       value={order.status} />

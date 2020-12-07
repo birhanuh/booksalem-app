@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, SafeAreaView, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
-import { Text, ListItem, Avatar, Badge, colors } from 'react-native-elements';
+import { Text, ListItem, Avatar, Badge, Button, colors } from 'react-native-elements';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery } from '@apollo/client';
 import moment from "moment";
 import GET_ALL_CHECKOUTS from './allCheckouts.graphql';
@@ -21,10 +22,6 @@ const AllCheckouts = ({ navigation }) => {
   };
 
   const { getAllCheckouts } = !!data && data;
-
-  const renderSeprator = () => (
-    <View style={{ height: 1, width: '86%', backgroundColor: colors.divider, marginLeft: '14%' }} />
-  )
 
   return (
     <View style={styles.container}>
@@ -50,8 +47,7 @@ const AllCheckouts = ({ navigation }) => {
               break;
           }
           return (<ListItem
-            containerStyle={{ flex: 1, flexWrap: 'wrap', borderTopWidth: 0, borderBottomWidth: 0, marginBottom: 10 }}
-            onPress={() => { item.orders.books.status === 'rented' && navigation.navigate('Checkouts', { screen: 'FormCheckoutAdmin', params: { name: 'Checkout', id: item.id } }) }}>
+            containerStyle={{ flex: 1, flexWrap: 'wrap', borderTopWidth: 0, borderBottomWidth: 0, marginBottom: 10 }}>
             <View style={styles.userInfoContainer}>
               <Text style={styles.text}>
                 <Text style={styles.label}>Name: </Text>{item.orders.users.name}
@@ -86,6 +82,20 @@ const AllCheckouts = ({ navigation }) => {
               />
             </ListItem.Content> */}
             </View>
+            <View style={styles.checkoutInfoContainer}>
+              <Text style={styles.text}>
+                <Text style={styles.label}>Note: </Text>{item.note}
+              </Text>
+            </View>
+            {item.orders.books.status === 'rented' && <View style={styles.checkoutInfoContainer}>
+              <Button title='Update checkout' type='outline' style={{ marginTop: 10 }}
+                onPress={() => { navigation.navigate('Checkouts', { screen: 'EditCheckoutAdmin', params: { name: 'Checkout', id: item.id } }) }} icon={
+                  <Icon
+                    name="edit"
+                    size={20}
+                    color={colors.primary}
+                    style={{ marginRight: 10 }}
+                  />} /></View>}
           </ListItem>)
         }
         } />
@@ -113,11 +123,18 @@ const styles = StyleSheet.create({
   userInfoContainer: {
     marginBottom: 2
   },
+  checkoutInfoContainer: {
+    borderColor: colors.grey5,
+    borderTopWidth: 1,
+    width: '100%',
+    paddingTop: 2
+  },
   bookInfoContainer: {
     flexDirection: 'row',
     borderColor: colors.grey5,
     borderTopWidth: 1,
-    paddingTop: 8
+    paddingTop: 8,
+    paddingBottom: 6
   },
   currency: {
     fontSize: 12,

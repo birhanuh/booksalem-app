@@ -3,6 +3,7 @@ query {
     id
     return_date
     total_price
+    note
     orders {
       id
       books {

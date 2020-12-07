@@ -26,10 +26,6 @@ const UserOrders = ({ navigation }) => {
     }
   }
 
-  const renderSeprator = () => (
-    <View style={{ height: 1, width: '86%', backgroundColor: colors.divider, marginLeft: '14%' }} />
-  )
-
   const { getUserOrders } = !!data && data;
 
   return (
@@ -41,11 +37,10 @@ const UserOrders = ({ navigation }) => {
           icon={<Icon name='book' color='#ffffff' size={15}
             style={{ marginRight: 10 }} />}
           buttonStyle={styles.button}
-          title='Books' onPress={() => { navigation.navigate('Books', { screen: 'Books' }) }} /></>}
+          title='Go to Books' onPress={() => { navigation.navigate('Books', { screen: 'Books' }) }} /></>}
       <FlatList
         data={getUserOrders}
         keyExtractor={(item) => item.id.toString()}
-        ItemSeparatorComponent={renderSeprator}
         renderItem={({ item }) => {
           let badgeStatus
           switch (item.status) {
@@ -62,17 +57,18 @@ const UserOrders = ({ navigation }) => {
               break;
           }
           return (<ListItem
-            containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0 }}
-            onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: item.books.id } }) }}>
-            <Avatar source={{ uri: item.books.cover_url }} />
+            containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0, marginBottom: 10 }}>
+            <Avatar source={{ uri: item.books.cover_url }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: item.books.id } }) }} />
             <ListItem.Content>
-              <ListItem.Title>{item.books.title}</ListItem.Title>
+              <ListItem.Title style={{ color: colors.primary }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: item.books.id } }) }}>{item.books.title}</ListItem.Title>
               <ListItem.Subtitle>{item.books.price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Subtitle>
             </ListItem.Content>
             <ListItem.Content>
+              <ListItem.Subtitle>Order placed date</ListItem.Subtitle>
               <ListItem.Subtitle>{moment(item.order_date).format('ll')}</ListItem.Subtitle>
             </ListItem.Content>
             <ListItem.Content>
+              <ListItem.Subtitle>Status</ListItem.Subtitle>
               <Badge
                 status={badgeStatus}
                 value={item.status}
