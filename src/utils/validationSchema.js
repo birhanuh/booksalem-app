@@ -137,27 +137,54 @@ export const addBookSchema = yup.object().shape({
   // )
 });
 
-export const checkoutSchema = yup.object().shape({
-  chekcoutType: yup
-    .string()
-    .required("Checkout type is required"),
-  userId: yup
-    .number()
-    .required("User is required"),
-  bookId: yup
-    .number()
-    .required("Book is required"),
-  checkoutDate: yup
-    .date()
-    .default(() => (new Date())),
-  returnDate: yup
-    .date()
-    .required("Book is required"),
-});
-
 export const addAuthorSchema = yup.object().shape({
   name: yup
     .string()
     .max(255)
     .required("Name is required")
+});
+
+export const updateBookSchema = yup.object().shape({
+  id: yup
+    .string()
+    .required("Book ID is required")
+});
+
+export const createCheckoutSchema = yup.object().shape({
+  orderId: yup
+    .number()
+    .required("Order ID is required"),
+  totalPrice: yup
+    .number()
+    .positive()
+    .required("Price is required"),
+  orderStatus: yup
+    .string()
+    .required("Order status is required"),
+  bookStatus: yup
+    .string()
+    .required("Book status is required"),
+  // checkoutDate: yup
+  //   .date()
+  //   .default(() => (new Date())),
+  // returnDate: yup
+  //   .date()
+  //   .min(yup.ref('checkoutDate'), 'Return date should be greator than checkout date')
+  //   .nullable()
+  returnDate: yup
+    .date()
+    .nullable()
+    .default(null)
+    .min(new Date(), 'Return date can not be past date')
+});
+
+export const updateCheckoutSchema = yup.object().shape({
+  checkoutId: yup
+    .number()
+    .required("Checkout ID is required"),
+  returnDate: yup
+    .date()
+    .nullable()
+    .default(null)
+    .min(new Date(), 'Return date can not be past date')
 });

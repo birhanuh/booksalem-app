@@ -1,20 +1,12 @@
 import React from 'react';
-import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
 import { Text, ListItem, Card, colors } from 'react-native-elements';
-import { useQuery, gql } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import AddAuthor from './addAuthor';
+import GET_AUTHORS from './authors.graphql';
 
-const GET_AUTHORS = gql`
-  query {
-    getAuthors {
-      id
-      name
-    }
-  }
-`
-
-const Orders = ({ route, navigation }) => {
-  const { data, loading, error } = useQuery(GET_AUTHORS);
+const Authors = ({ route, navigation }) => {
+  const { data, loading, error } = useQuery(GET_AUTHORS, { fetchPolicy: "network-only" });
 
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
@@ -28,31 +20,27 @@ const Orders = ({ route, navigation }) => {
     );
   };
 
-  const navigateToAddBook = () => {
-    if (route.params.params.referrer) {
-      navigation.navigate(route.params.params.referrer)
-    }
-  }
-
   const { getAuthors } = data;
 
   return (
     <View style={styles.container}>
-      <AddAuthor navigateToAddBook={navigateToAddBook} />
+      <AddAuthor route={route} navigation={navigation} />
 
       <Card style={styles.card}>
         <Card.Title>Authors</Card.Title>
         <Card.Divider />
-        {
-          getAuthors.map((a, i) => (
-            <ListItem key={i} bottomDivider>
+        <FlatList
+          data={getAuthors}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <ListItem>
               <ListItem.Content>
-                <ListItem.Title>{a.name}</ListItem.Title>
-                <ListItem.Subtitle>{a.id}</ListItem.Subtitle>
+                <ListItem.Title>{item.name}</ListItem.Title>
+                <ListItem.Subtitle>{item.id}</ListItem.Subtitle>
               </ListItem.Content>
             </ListItem>
-          ))
-        }
+          )}
+        />
       </Card>
     </View>
   )
@@ -81,4 +69,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Orders
+export default Authors

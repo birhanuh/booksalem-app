@@ -5,18 +5,24 @@ import { Picker } from '@react-native-picker/picker';
 import { launchImageLibraryAsync } from 'expo-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Divider, Image, colors } from 'react-native-elements';
-import { graphql, gql } from '@apollo/react-hoc';
+import { graphql } from '@apollo/react-hoc';
 import compose from "lodash.flowright";
 import { addBookSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
+import ADD_BOOK_MUTATION from './addBook.graphql';
+import GET_LANGUAGES_QUERY from './languages.graphql';
+import GET_CATEGORIES_QUERY from './categories.graphql';
+import GET_AUTHORS_QUERY from '../author/authors.graphql';
+import GET_AVAILABLE_BOOKS from './availableBooks.graphql';
 
 class AddBook extends PureComponent {
   state = {
     values: {
       title: '',
       authorId: '',
-      published_date: '',
+      publishedDate: '',
       status: 'available',
+      type: 'rent',
       condition: 'new',
       isbn: null,
       categoryId: 1,
@@ -42,7 +48,7 @@ class AddBook extends PureComponent {
       this.setState({ errors: formatYupErrors(err) })
     }
 
-    const { values: { title, authorId, published_date, status, condition, isbn, categoryId, languageId, price, description, coverFile }, errors } = this.state
+    const { values: { title, authorId, publishedDate, type, status, condition, isbn, categoryId, languageId, price, description, coverFile }, errors } = this.state
 
     let coverFileWraped
     if (!!coverFile) {
@@ -59,14 +65,37 @@ class AddBook extends PureComponent {
     if (Object.keys(errors).length === 0) {
       this.setState({ isSubmitting: true })
 
-      const { data: { addBook: { book, errors } } } = await this.props.addBookMutation({ variables: { title, authorId, published_date, status, condition, isbn: parseInt(isbn), categoryId, languageId, price: parseFloat(price), description, coverFile: coverFileWraped } })
-      console.log("Resp data: ", book, errors)
-      if (errors) {
-        this.setState({ errors: formatServerErrors(errors) })
-      } else {
-        this.props.navigation.navigate('ViewBook', { name: 'View book', id: book.id })
-      }
+      this.props.addBookMutation({
+        variables: {
+          title, authorId, publishedDate, type, status, condition, isbn: parseInt(isbn), categoryId, languageId, price: parseFloat(price),
+          description, coverFile: coverFileWraped
+        }, update: (store, { data: { addBook } }) => {
+          const { book, errors } = addBook;
 
+          if (errors) {
+            return;
+          }
+
+          // Read the data from cache for this query.
+          const data = store.readQuery({ query: GET_AVAILABLE_BOOKS });
+
+          // Add book from the mutation to the end.            
+          // data.getAvailableBooks.unshift(book);       
+          const getAvailableBooksUpdated = [book, ...data.getAvailableBooks];
+
+          // Write data back to the cache.
+          store.writeQuery({ query: GET_AVAILABLE_BOOKS, data: { getAvailableBooks: getAvailableBooksUpdated } });
+        }
+      }).then(res => {
+        const { book, errors } = res.data.addBook;
+
+        console.log("Resp data: ", book, errors)
+        if (errors) {
+          this.setState({ errors: formatServerErrors(errors) })
+        } else {
+          this.props.navigation.navigate('ViewBook', { name: 'View book', id: book.id })
+        }
+      }).catch(err => this.setState({ errors: err, isSubmitting: false }));
     }
   }
 
@@ -102,7 +131,7 @@ class AddBook extends PureComponent {
   }
 
   render() {
-    const { values: { title, authorId, published_date, status, condition, isbn, categoryId, languageId, price, description, coverFile }, loading, isSubmitting, errors } = this.state
+    const { values: { title, authorId, publishedDate, type, status, condition, isbn, categoryId, languageId, price, description, coverFile }, loading, isSubmitting, errors } = this.state
     const { getAuthorsQuery: { getAuthors }, getCategoriesQuery: { getCategories }, getLanguagesQuery: { getLanguages } } = this.props
 
     if (loading) {
@@ -132,7 +161,7 @@ class AddBook extends PureComponent {
               {getAuthors && getAuthors.map(author =>
                 <Picker.Item key={author.id} label={this.capitalizeFirstLetter(author.name)} value={author.id} />)}
             </Picker>
-            {errors.authorId && <Text style={styles.cutomeTextError}>{errors.authorId}</Text>}
+            {errors.authorId && <Text style={styles.customTextError}>{errors.authorId}</Text>}
             <Button
               title='Add author'
               type='outline'
@@ -146,6 +175,18 @@ class AddBook extends PureComponent {
               }
               onPress={() => { this.props.navigation.navigate('Authors', { params: { name: 'Add author', referrer: 'AddBook' } }) }}
             />
+          </View>
+          <View>
+            <Text style={styles.pickerTitle}>Type (Is is to for Sell or Rent)</Text>
+            <Picker
+              itemStyle={styles.picker}
+              selectedValue={type || book.type}
+              onValueChange={(itemValue, itemIndex) =>
+                this.setState({ values: { ...this.state.values, status: itemValue } })
+              }>
+              <Picker.Item label="Rent" value="rent" />
+              <Picker.Item label="Sell" value="sell" />
+            </Picker>
           </View>
           <View>
             <Text style={styles.pickerTitle}>Status</Text>
@@ -174,8 +215,8 @@ class AddBook extends PureComponent {
               <Picker.Item label="Old" value="old" />
             </Picker>
           </View>
-          <Input value={published_date} onChangeText={text => this.onChangeText('published_date', text)} placeholder="Published date ( Optional )" errorStyle={{ color: colors.error }}
-            errorMessage={errors.published_date} />
+          <Input value={publishedDate} onChangeText={text => this.onChangeText('publishedDate', text)} placeholder="Published date ( Optional )" errorStyle={{ color: colors.error }}
+            errorMessage={errors.publishedDate} />
           <Input value={isbn} onChangeText={text => this.onChangeText('isbn', text)} placeholder="ISBN" errorStyle={{ color: colors.error }}
             errorMessage={errors.isbn} />
           <View>
@@ -189,7 +230,7 @@ class AddBook extends PureComponent {
               {getCategories && getCategories.map(category =>
                 <Picker.Item key={category.id} label={this.capitalizeFirstLetter(category.name)} value={category.id} />)}
             </Picker>
-            {errors.categoryId && <Text style={styles.cutomeTextError}>{errors.categoryId}</Text>}
+            {errors.categoryId && <Text style={styles.customTextError}>{errors.categoryId}</Text>}
           </View>
           <View>
             <Text style={styles.pickerTitle}>Language</Text>
@@ -202,7 +243,7 @@ class AddBook extends PureComponent {
               {getLanguages && getLanguages.map(language =>
                 <Picker.Item key={language.id} label={this.capitalizeFirstLetter(language.name)} value={language.id} />)}
             </Picker>
-            {errors.languageId && <Text style={styles.cutomeTextError}>{errors.languageId}</Text>}
+            {errors.languageId && <Text style={styles.customTextError}>{errors.languageId}</Text>}
           </View>
           <Input value={price} onChangeText={text => this.onChangeText('price', text)} placeholder="price" errorStyle={{ color: colors.error }}
             errorMessage={errors.price} />
@@ -222,7 +263,7 @@ class AddBook extends PureComponent {
               title="Choose image"
               style={{ alignSelf: 'center', marginBottom: 10 }}
             />
-            {errors.coverFile && <Text style={styles.cutomeTextError}>{errors.coverFile}</Text>}
+            {errors.coverFile && <Text style={styles.customTextError}>{errors.coverFile}</Text>}
             {!!coverFile && <Image source={{ uri: coverFile.uri }} style={styles.image} PlaceholderContent={<ActivityIndicator />} />}
           </View>
           <TextInput
@@ -314,7 +355,7 @@ const styles = StyleSheet.create({
     height: 200,
     marginBottom: 10
   },
-  cutomeTextError: {
+  customTextError: {
     color: colors.error,
     fontSize: 14,
     alignSelf: 'center',
@@ -322,48 +363,6 @@ const styles = StyleSheet.create({
     marginTop: -5
   }
 });
-
-const ADD_BOOK_MUTATION = gql`
-  mutation($title: String!, $authorId: Int!, $published_date: String, $status: String!, $condition: String!, $isbn: Int, $categoryId: Int!, $languageId: Int!, $price: Float!, $coverFile: Upload, $description: String) {
-    addBook(title: $title, authorId: $authorId, published_date: $published_date, status: $status, condition: $condition, isbn: $isbn, categoryId: $categoryId, languageId: $languageId, price: $price, coverFile: $coverFile, description: $description) {
-      book {
-        id
-        title
-      }
-      errors {
-        path
-        message
-      }
-    }
-  }
-`;
-
-const GET_AUTHORS_QUERY = gql`
-  query {
-    getAuthors {
-      id
-      name
-    }
-  }
-`
-
-const GET_LANGUAGES_QUERY = gql`
-  query {
-    getLanguages {
-      id
-      name
-    }
-  }
-`
-
-const GET_CATEGORIES_QUERY = gql`
-  query {
-    getCategories {
-      id
-      name
-    }
-  }
-`
 
 const MutationQueries = compose(
   graphql(ADD_BOOK_MUTATION, {

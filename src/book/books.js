@@ -1,31 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
-import { Text, Card, Divider, colors, Button, SearchBar } from 'react-native-elements';
+import { Text, Badge, Card, Divider, colors, Button, SearchBar } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useQuery, gql } from '@apollo/client';
-
-const GET_AVAILABLE_BOOKS = gql`
-  query {
-    getAvailableBooks {
-      id
-      title
-      authors {
-        name
-      }
-      price
-      status
-      cover_url
-      languages {
-        name
-      }
-      categories {
-        name
-      }
-      description
-      rating
-    }
-  } 
-`
+import { useQuery } from '@apollo/client';
+import GET_AVAILABLE_BOOKS from './availableBooks.graphql';
 
 const Books = ({ route, navigation }) => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -48,7 +26,6 @@ const Books = ({ route, navigation }) => {
 
       setIsLoadingMore(false);
     }
-
   }
 
   const renderHeader = () => (
@@ -78,64 +55,88 @@ const Books = ({ route, navigation }) => {
         ListFooterComponent={renderFooter}
         refreshing={isLoadingMore}
         onRefresh={handleLoadMore}
-        renderItem={({ item }) => (
-          // implemented with Text and Button as children
-          <Card style={styles.card}>
-            <Card.Title>{item.title}</Card.Title>
-            <Card.Divider />
-            <Card.Image source={{ uri: item.cover_url }} />
-            <View style={styles.bookInfoPriceContainer}>
-              <View style={styles.bookInfoContainer}>
-                <Text style={styles.text}>
-                  <Text style={styles.label}>Author: </Text>{item.authors.name}
-                </Text>
-                <Text style={styles.text}>
-                  <Text style={styles.label}>Language: </Text>{item.languages.name}
-                </Text>
-                <Text style={styles.text}>
-                  <Text style={styles.label}>Category: </Text>{item.categories.name}
-                </Text>
-                <Text style={styles.text}>
-                  <Text style={styles.label}>Category: </Text>{item.status}
-                </Text>
+        renderItem={({ item }) => {
+          let bookBadgeStatus
+          switch (item.status) {
+            case 'available':
+              bookBadgeStatus = 'success'
+              break;
+            case 'ordered':
+              bookBadgeStatus = 'primary'
+              break;
+            case 'rented':
+              bookBadgeStatus = 'warning'
+              break;
+            case 'sold':
+              bookBadgeStatus = 'error'
+              break;
+            default:
+              break;
+          }
+          return (
+            // implemented with Text and Button as children
+            <Card style={styles.card}>
+              <Card.Title>{item.title}</Card.Title>
+              <Text style={styles.type}>{item.type}</Text>
+              <Card.Divider />
+              <Card.Image source={{ uri: item.cover_url }} />
+              <View style={styles.bookInfoPriceContainer}>
+                <View>
+                  <Text style={styles.text}>
+                    <Text style={styles.label}>Author: </Text>{item.authors.name}
+                  </Text>
+                  <Text style={styles.text}>
+                    <Text style={styles.label}>Language: </Text>{item.languages.name}
+                  </Text>
+                  <Text style={styles.text}>
+                    <Text style={styles.label}>Category: </Text>{item.categories.name}
+                  </Text>
+                  <Text style={styles.text}>
+                    <Text style={styles.label}>Status: </Text><Badge
+                      status={bookBadgeStatus}
+                      value={item.status}
+                      containerStyle={{ marginTop: -4 }}
+                    />
+                  </Text>
+                </View>
+                <View style={styles.priceContainer}>
+                  <Text style={styles.price}>
+                    {item.price}
+                  </Text>
+                  <Text style={styles.currency}>ETB</Text>
+                </View>
               </View>
-              <View style={styles.priceContainer}>
-                <Text style={styles.price}>
-                  {item.price}
-                </Text>
-                <Text style={styles.currency}>ETB</Text>
-              </View>
-            </View>
-            <Text style={styles.text}>
-              {item.description}
-            </Text>
+              <Text style={styles.text}>
+                {item.description}
+              </Text>
 
-            <Divider style={styles.divider} />
-            <Text style={styles.rating}>
-              {item.rating}
-              <Icon id='1' name='star' style={styles.star} />
-              <Icon id='2' name='star' style={styles.star} />
-              <Icon id='3' name='star' style={styles.star} />
-              <Icon id='4' name='star' style={styles.star} />
-              <Icon id='5' name='star' style={styles.star} />
-            </Text>
+              <Divider style={styles.divider} />
+              <Text style={styles.rating}>
+                {item.rating}
+                <Icon id='1' name='star' style={styles.star} />
+                <Icon id='2' name='star' style={styles.star} />
+                <Icon id='3' name='star' style={styles.star} />
+                <Icon id='4' name='star' style={styles.star} />
+                <Icon id='5' name='star' style={styles.star} />
+              </Text>
 
-            <Divider style={styles.divider} />
+              <Divider style={styles.divider} />
 
-            <Button
-              title="View"
-              icon={
-                <Icon
-                  name="plus-circle"
-                  size={20}
-                  style={{ marginRight: 10 }}
-                  color={colors.white}
-                />
-              }
-              onPress={() => { navigation.push('ViewBook', { name: 'View book', id: item.id }) }}
-            />
-          </Card>
-        )}
+              <Button
+                title="View"
+                icon={
+                  <Icon
+                    name="plus-circle"
+                    size={20}
+                    style={{ marginRight: 10 }}
+                    color={colors.white}
+                  />
+                }
+                onPress={() => { navigation.push('ViewBook', { name: 'View book', id: item.id }) }}
+              />
+            </Card>
+          )
+        }}
       />
     </View>)
 }
@@ -176,6 +177,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  type: {
+    textTransform: 'uppercase',
+    position: 'absolute',
+    right: 0,
+    padding: 2,
+    borderWidth: 1,
+    borderColor: colors.greyOutline,
   },
   price: {
     fontSize: 24,

@@ -1,0 +1,24 @@
+  query {
+  getAvailableBooks {
+    id
+    title
+    authors {
+      id
+      name
+    }
+    price
+    type
+    status
+    cover_url
+    languages {
+      id
+      name
+    }
+    categories {
+      id
+      name
+    }
+    description
+    rating
+  }
+} 

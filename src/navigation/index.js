@@ -19,11 +19,13 @@ import AddBook from "../book/addBook";
 import ViewBook from "../book/viewBook";
 import EditBook from "../book/editBook";
 import User from "../user";
-import UsersOrders from "../orders/usersOrders";
-import UsersOrdersAdmin from "../orders/usersOrdersAdmin";
-import ViewUserOrdersAdmin from "../orders/viewUserOrdersAdmin";
-import Checkouts from "../checkout/chekcouts";
-import ViewCheckout from "../checkout/viewCheckout";
+import UserOrders from "../orders/userOrders";
+import AllOrdersAdmin from "../orders/admin/allOrders";
+import ViewUserOrdersAdmin from "../orders/admin/viewUserOrders";
+import UserCheckouts from "../checkout/userCheckouts";
+import AllCheckoutsAdmin from "../checkout/admin/allChekcouts";
+import FormCheckoutAdmin from "../checkout/admin/formCheckout";
+import EditCheckoutAdmin from "../checkout/admin/editCheckout";
 import Settings from "../settings";
 import Authors from "../author/authors";
 import { colors } from "react-native-elements";
@@ -64,15 +66,14 @@ const BookStackScreen = () => (
 const OrderStack = createStackNavigator();
 const OrderStackScreen = () => (
   <OrderStack.Navigator>
-    <OrderStack.Screen name='UsersOrders' component={UsersOrders} />
-    {/* <OrderStack.Screen name='ViewUserOrders' component={ViewUserOrders} /> */}
+    <OrderStack.Screen name='UserOrders' component={UserOrders} options={{ title: "My orders" }} />
   </OrderStack.Navigator>
 )
 
 const OrderAdminStack = createStackNavigator();
 const OrderAdminStackScreen = () => (
   <OrderAdminStack.Navigator>
-    <OrderAdminStack.Screen name='UsersOrdersAdmin' component={UsersOrdersAdmin} options={{ title: "Users orders (Admin view)" }} />
+    <OrderAdminStack.Screen name='AllOrdersAdmin' component={AllOrdersAdmin} options={{ title: "All orders (Admin view)" }} />
     <OrderAdminStack.Screen name='ViewUserOrdersAdmin' component={ViewUserOrdersAdmin} options={{ title: "User orders (Admin view)" }} />
   </OrderAdminStack.Navigator>
 )
@@ -80,9 +81,17 @@ const OrderAdminStackScreen = () => (
 const CheckoutStack = createStackNavigator();
 const CheckoutStackScreen = () => (
   <CheckoutStack.Navigator>
-    <CheckoutStack.Screen name='Checkouts' component={Checkouts} />
-    <CheckoutStack.Screen name='ViewCheckout' component={ViewCheckout} />
+    <CheckoutStack.Screen name='UserCheckouts' component={UserCheckouts} options={{ title: "My checkouts" }} />
   </CheckoutStack.Navigator>
+)
+
+const CheckoutAdminStack = createStackNavigator();
+const CheckoutAdminStackScreen = () => (
+  <CheckoutAdminStack.Navigator>
+    <CheckoutAdminStack.Screen name='AllCheckoutsAdmin' component={AllCheckoutsAdmin} options={{ title: "All Checkouts (Admin view)" }} />
+    <CheckoutAdminStack.Screen name='FormCheckoutAdmin' component={FormCheckoutAdmin} options={{ title: "Checkout Form (Admin view)" }} />
+    <CheckoutAdminStack.Screen name='EditCheckoutAdmin' component={EditCheckoutAdmin} options={{ title: "Checkout Edit (Admin view)" }} />
+  </CheckoutAdminStack.Navigator>
 )
 
 const SettingsStack = createStackNavigator();
@@ -108,7 +117,7 @@ const TabsScreen = () => {
         iconColor = focused
           ? color
           : colors.grey3;
-      } else if (route.name === 'UsersOrders') {
+      } else if (route.name === 'Orders') {
         iconName = 'shopping-bag';
         iconColor = focused
           ? color
@@ -133,8 +142,9 @@ const TabsScreen = () => {
       inactiveTintColor: colors.grey3,
     }}>
     <Tabs.Screen name="Books" component={BookStackScreen} />
-    <Tabs.Screen name="UsersOrders" component={me.is_admin ? OrderAdminStackScreen : OrderStackScreen} />
-    <Tabs.Screen name={me.is_admin ? 'Checkouts' : 'Settings'} component={me.is_admin ? CheckoutStackScreen : SettingsStackScreen} />
+    <Tabs.Screen name="Orders" component={me.is_admin ? OrderAdminStackScreen : OrderStackScreen} options={{ title: me.is_admin ? "Users orders" : "My orders" }} />
+    <Tabs.Screen name="Checkouts" component={me.is_admin ? CheckoutAdminStackScreen : CheckoutStackScreen} options={{ title: me.is_admin ? "Users checkouts" : 'My checkouts' }} />
+    <Tabs.Screen name={'Settings'} component={SettingsStackScreen} />
   </Tabs.Navigator>
   );
 }
@@ -150,8 +160,13 @@ const UnAuthTabsScreen = () => (<UnAuthTabs.Navigator screenOptions={({ route })
       iconColor = focused
         ? color
         : colors.grey3;
-    } else if (route.name === 'UsersOrders') {
+    } else if (route.name === 'Orders') {
       iconName = 'shopping-bag';
+      iconColor = focused
+        ? color
+        : colors.grey3;
+    } else if (route.name === 'Checkouts') {
+      iconName = 'credit-card-alt';
       iconColor = focused
         ? color
         : colors.grey3;
@@ -170,7 +185,8 @@ const UnAuthTabsScreen = () => (<UnAuthTabs.Navigator screenOptions={({ route })
     inactiveTintColor: colors.grey3,
   }}>
   <UnAuthTabs.Screen name="Books" component={BookStackScreen} />
-  <UnAuthTabs.Screen name="UsersOrders" component={AuthStackScreen} />
+  <UnAuthTabs.Screen name="Orders" component={AuthStackScreen} />
+  <UnAuthTabs.Screen name="Checkouts" component={AuthStackScreen} />
   <UnAuthTabs.Screen name="CreateAccount" component={AuthStackScreen} />
 </UnAuthTabs.Navigator>
 );

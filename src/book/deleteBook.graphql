@@ -1,0 +1,11 @@
+mutation($id: Int!) {
+  deleteBook(id: $id) {
+    book {
+      id
+    }
+    errors {
+      path
+      message
+    }
+  }
+} 

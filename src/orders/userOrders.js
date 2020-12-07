@@ -2,30 +2,13 @@ import React from 'react';
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
 import { Text, ListItem, Avatar, Button, Badge, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useQuery, gql } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import { colorsLocal } from '../theme';
 import moment from "moment";
+import GET_USER_ORDERS_QUERY from './userOrders.graphql';
 
-const GET_ORDERS_QUERY = gql`
-  query {
-    getUsersOrders {
-      id
-      order_date
-      status
-      user_id
-      book_id
-      books {
-        id
-        title
-        cover_url
-        price
-      }
-    }
-  } 
-`
-
-const Orders = ({ navigation }) => {
-  const { data, loading, error } = useQuery(GET_ORDERS_QUERY);
+const UserOrders = ({ navigation }) => {
+  const { data, loading, error } = useQuery(GET_USER_ORDERS_QUERY);
 
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
@@ -43,26 +26,21 @@ const Orders = ({ navigation }) => {
     }
   }
 
-  const renderSeprator = () => (
-    <View style={{ height: 1, width: '86%', backgroundColor: colors.divider, marginLeft: '14%' }} />
-  )
-
-  const { getUsersOrders } = !!data && data;
+  const { getUserOrders } = !!data && data;
 
   return (
     <View style={styles.container}>
-      { getUsersOrders && getUsersOrders.length === 0 && <><View style={styles.infoMsgContainer}>
+      { getUserOrders && getUserOrders.length === 0 && <><View style={styles.infoMsgContainer}>
         <Text style={styles.info}>You don't haver orders placed yet. Go to Books screen, select the Book you wish like to order and place your order by clicking the 'Order' button.</Text>
       </View>
         <Button
           icon={<Icon name='book' color='#ffffff' size={15}
             style={{ marginRight: 10 }} />}
           buttonStyle={styles.button}
-          title='Books' onPress={() => { navigation.navigate('Books', { screen: 'Books' }) }} /></>}
+          title='Go to Books' onPress={() => { navigation.navigate('Books', { screen: 'Books' }) }} /></>}
       <FlatList
-        data={getUsersOrders}
+        data={getUserOrders}
         keyExtractor={(item) => item.id.toString()}
-        ItemSeparatorComponent={renderSeprator}
         renderItem={({ item }) => {
           let badgeStatus
           switch (item.status) {
@@ -70,26 +48,27 @@ const Orders = ({ navigation }) => {
               badgeStatus = 'primary'
               break;
             case 'pending':
-              badgeStatus = 'warnning'
+              badgeStatus = 'warning'
               break;
-            case 'resolved':
-              badgeStatus = 'sucess'
+            case 'closed':
+              badgeStatus = 'success'
               break;
             default:
               break;
           }
           return (<ListItem
-            containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0 }}
-            onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: item.books.id } }) }}>
-            <Avatar source={{ uri: item.books.cover_url }} />
+            containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0, marginBottom: 10 }}>
+            <Avatar source={{ uri: item.books.cover_url }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: item.books.id } }) }} />
             <ListItem.Content>
-              <ListItem.Title>{item.books.title}</ListItem.Title>
-              <ListItem.Subtitle>{item.books.price} <Text style={styles.currency + '\u0020'}>ETB</Text></ListItem.Subtitle>
+              <ListItem.Title style={{ color: colors.primary }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: item.books.id } }) }}>{item.books.title}</ListItem.Title>
+              <ListItem.Subtitle>{item.books.price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Subtitle>
             </ListItem.Content>
             <ListItem.Content>
+              <ListItem.Subtitle>Order placed date</ListItem.Subtitle>
               <ListItem.Subtitle>{moment(item.order_date).format('ll')}</ListItem.Subtitle>
             </ListItem.Content>
             <ListItem.Content>
+              <ListItem.Subtitle>Status</ListItem.Subtitle>
               <Badge
                 status={badgeStatus}
                 value={item.status}
@@ -97,8 +76,7 @@ const Orders = ({ navigation }) => {
             </ListItem.Content>
           </ListItem>
           )
-        }
-        } />
+        }} />
     </View>)
 }
 
@@ -136,4 +114,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Orders
+export default UserOrders

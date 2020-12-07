@@ -1,0 +1,14 @@
+mutation($name: String!, $email: String!, $password: String!, $phone: String) {
+  createAccount(name: $name, email: $email, password: $password, phone: $phone) {
+    token
+    user {
+      name
+      email
+      phone
+    }
+    errors {
+      path
+      message
+    }
+  }
+} 

@@ -3,9 +3,10 @@ import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Card, Divider, colors } from 'react-native-elements';
-import { graphql, gql } from '@apollo/react-hoc';
+import { graphql } from '@apollo/react-hoc';
 import { createAccountSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
+import CREATE_ACCOUNT_MUTATION from './createAccount.graphql'
 
 class CreateAccount extends React.PureComponent {
   state = {
@@ -45,7 +46,7 @@ class CreateAccount extends React.PureComponent {
       } else {
         AsyncStorage.setItem('@kemetsehaftalem/token', token)
         console.log("Resp: ", user, token)
-        this.props.navigation.push('Books')
+        this.props.navigation.navigate('Books')
       }
     }
   }
@@ -157,21 +158,4 @@ const styles = StyleSheet.create({
   }
 });
 
-const SIGNUP_MUTATION = gql`
-  mutation($name: String!, $email: String!, $password: String!, $phone: String) {
-    createAccount(name: $name, email: $email, password: $password, phone: $phone) {
-      token
-      user {
-        name
-        email
-        phone
-      }
-      errors {
-        path
-        message
-      }
-    }
-  } 
-`;
-
-export default graphql(SIGNUP_MUTATION)(CreateAccount);
+export default graphql(CREATE_ACCOUNT_MUTATION)(CreateAccount);
