@@ -9,22 +9,17 @@ import moment from "moment";
 const GET_USER_CHECKOUTS = gql`
   query {
     getUserCheckouts {
-      name
-      email
+      id
+      total_price
+      status
+      return_date
       orders {
         id
-        checkouts {
+        books {
           id
-          status
-          return_date
-          orders {
-            books {
-              title
-              cover_url
-              status
-              price
-            }
-          }
+          title
+          cover_url
+          price
         }
       }
     }
@@ -54,51 +49,51 @@ const UserCheckouts = () => {
 
   return (
     <View style={styles.container}>
-      { getUserCheckouts && getUserCheckouts.orders.length === 0 && <><View style={styles.infoMsgContainer}>
-        <Text style={styles.info}>You don't haver checkouts yet. Go to Books screen, select the Book you wish like to order and place your order. Then the Admin will decide when to checkout the book for you.</Text>
+      { getUserCheckouts && getUserCheckouts.length === 0 && <><View style={styles.infoMsgContainer}>
+        <Text style={styles.info}>You don't have checkouts yet. Go to Books screen, select the Book you wish like to order and place your order. Then the Admin will decide when to checkout the book for you.</Text>
       </View>
         <Button
           icon={<Icon name='book' color='#ffffff' size={15}
             style={{ marginRight: 10 }} />}
           buttonStyle={styles.button}
           title='Go to Books' onPress={() => { navigation.navigate('Books', { screen: 'Books' }) }} /></>}
-      {getUserCheckouts && getUserCheckouts.orders.length > 0 &&
-        <FlatList
-          data={getUserCheckouts.orders}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => item.checkouts.map(checkout => {
-            let badgeStatus
-            switch (checkout.status) {
-              case 'open':
-                badgeStatus = 'success'
-                break;
-              case 'closed':
-                badgeStatus = 'error'
-                break;
-              default:
-                break;
-            }
-            return (<ListItem
-              containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0, marginBottom: 10 }}>
-              <Avatar source={{ uri: checkout.orders.books.cover_url }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: checkout.orders.books.id } }) }} />
-              <ListItem.Content>
-                <ListItem.Title style={{ color: colors.primary }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: checkout.orders.books.id } }) }}>{checkout.orders.books.title}</ListItem.Title>
-                <ListItem.Subtitle>{checkout.orders.books.price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Subtitle>
-              </ListItem.Content>
-              {checkout.status === 'open' && <ListItem.Content>
-                <ListItem.Subtitle>Return date</ListItem.Subtitle>
-                <ListItem.Subtitle>{moment(checkout.return_date).format('ll')}</ListItem.Subtitle>
-              </ListItem.Content>}
-              <ListItem.Content>
-                <ListItem.Subtitle>Status</ListItem.Subtitle>
-                <Badge
-                  status={badgeStatus}
-                  value={checkout.status}
-                />
-              </ListItem.Content>
-            </ListItem>)
-          })
-          } />}
+
+      <FlatList
+        data={getUserCheckouts && getUserCheckouts}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => {
+          let badgeStatus
+          switch (item.status) {
+            case 'open':
+              badgeStatus = 'primary'
+              break;
+            case 'closed':
+              badgeStatus = 'success'
+              break;
+            default:
+              break;
+          }
+          return (<ListItem
+            containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0, marginBottom: 10 }}>
+            <Avatar source={{ uri: item.orders.books.cover_url }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: item.orders.books.id } }) }} />
+            <ListItem.Content>
+              <ListItem.Title style={{ color: colors.primary }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: item.orders.books.id } }) }}>{item.orders.books.title}</ListItem.Title>
+              <ListItem.Subtitle>{item.orders.books.price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Subtitle>
+            </ListItem.Content>
+            {item.status === 'open' && <ListItem.Content>
+              <ListItem.Subtitle>Return date</ListItem.Subtitle>
+              <ListItem.Subtitle>{moment(item.return_date).format('ll')}</ListItem.Subtitle>
+            </ListItem.Content>}
+            <ListItem.Content>
+              <ListItem.Subtitle>Status</ListItem.Subtitle>
+              <Badge
+                status={badgeStatus}
+                value={item.status}
+              />
+            </ListItem.Content>
+          </ListItem>)
+        }
+        } />
     </View>)
 }
 
