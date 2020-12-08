@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
-import { Text, Badge, Card, Divider, colors, Button, SearchBar } from 'react-native-elements';
+import { Text, Badge, Card, Divider, colors, Button, ButtonGroup, SearchBar } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery } from '@apollo/client';
 import GET_AVAILABLE_BOOKS from './availableBooks.graphql';
 
 const Books = ({ route, navigation }) => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [searchString, setSearchString] = useState('');
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const { loading, error, data } = useQuery(GET_AVAILABLE_BOOKS);
+  const { loading, data, error } = useQuery(GET_AVAILABLE_BOOKS, {
+    variables: {
+      searchString,
+      typeCode: selectedIndex
+    }
+  });
 
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
@@ -28,9 +35,13 @@ const Books = ({ route, navigation }) => {
     }
   }
 
-  const renderHeader = () => (
-    <SearchBar placeholder='Search...' lightTheme round />
-  )
+  const updateSearch = (search) => {
+    setSearchString(search);
+  };
+
+  const updateIndex = (selectedIndex) => {
+    setSelectedIndex(selectedIndex)
+  }
 
   const renderFooter = () => {
     if (loading) {
@@ -51,7 +62,16 @@ const Books = ({ route, navigation }) => {
       <FlatList
         data={getAvailableBooks}
         keyExtractor={(item) => item.id.toString()}
-        ListHeaderComponent={renderHeader}
+        ListHeaderComponent={<>
+          <SearchBar placeholder='Search...' lightTheme round containerStyle={{ position: 'fixed' }} onChangeText={updateSearch} value={searchString} />
+
+          <ButtonGroup
+            onPress={updateIndex}
+            selectedIndex={selectedIndex}
+            buttons={['Rent', 'Sell']}
+            containerStyle={{ textTransform: 'uppercase' }}
+          />
+        </>}
         ListFooterComponent={renderFooter}
         refreshing={isLoadingMore}
         onRefresh={handleLoadMore}

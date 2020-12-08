@@ -133,7 +133,7 @@ const ViewBook = ({ navigation, getBookQuery, deleteBookMutation, createOrderMut
         createOrder(bookId);
       }
     } else {
-      navigation.push('SignIn')
+      navigation.navigate('SignIn', { screen: 'CreateAccount' })
     }
   }
 
