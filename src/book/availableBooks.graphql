@@ -1,5 +1,5 @@
-query($searchString: String, $typeCode: Int) {
- getAvailableBooks(searchString: $searchString, typeCode: $typeCode) {
+query($searchString: String, $typeCode: Int, $limit: Int, $offset: Int) {
+  getAvailableBooks(searchString: $searchString, limit: $limit, typeCode: $typeCode, offset: $offset) {
     id
     title
     authors {

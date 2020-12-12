@@ -6,14 +6,13 @@ import { useQuery } from '@apollo/client';
 import GET_AVAILABLE_BOOKS from './availableBooks.graphql';
 
 const Books = ({ route, navigation }) => {
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [searchString, setSearchString] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const { loading, data, error } = useQuery(GET_AVAILABLE_BOOKS, {
+  const { loading, data, error, fetchMore, variables } = useQuery(GET_AVAILABLE_BOOKS, {
     variables: {
       searchString,
-      typeCode: selectedIndex
+      typeCode: selectedIndex,
     }
   });
 
@@ -22,17 +21,25 @@ const Books = ({ route, navigation }) => {
   }
 
   const handleLoadMore = async () => {
-    if (data.getAvailableBooks && data.getAvailableBooks.hasMore) {
-      setIsLoadingMore(true);
+    fetchMore({
+      variables: {
+        ...variables,
+        offset: data.getAvailableBooks.length,
+        limit: 2
+      },
+      // updateQuery: (prev, { fetchMoreResult }) => {
+      //   if (!fetchMoreResult) {
+      //     return prev;
+      //   }
 
-      await fetchMore({
-        variables: {
-          after: data.getAvailableBooks.cursor,
-        },
-      });
-
-      setIsLoadingMore(false);
-    }
+      //   return {
+      //     getAvailableBooks: [
+      //       ...prev.getAvailableBooks,
+      //       ...fetchMoreResult.getAvailableBooks
+      //     ]
+      //   };
+      // },
+    });
   }
 
   const updateSearch = (search) => {
@@ -55,6 +62,7 @@ const Books = ({ route, navigation }) => {
     }
   }
 
+
   const { getAvailableBooks } = !!data && data
 
   return (
@@ -73,8 +81,9 @@ const Books = ({ route, navigation }) => {
           />
         </>}
         ListFooterComponent={renderFooter}
-        refreshing={isLoadingMore}
-        onRefresh={handleLoadMore}
+        refreshing={loading}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0}
         renderItem={({ item }) => {
           let bookBadgeStatus
           switch (item.status) {

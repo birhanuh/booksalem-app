@@ -41,8 +41,28 @@ const uploadLink = new createUploadLink({
   uri: GRAPHQL_API_URL
 });
 
+const cache = new InMemoryCache({
+  typePolicies: {
+    Query: {
+      fields: {
+        getAvailableBooks: {
+          // Don't cache separate results based on
+          // any of this field's arguments set this to false.
+          keyArgs: ["searchString", "typeCode"],
+          // Concatenate the incoming list items with
+          // the existing list items.
+          merge(existing = [], incoming) {
+            return [...existing, ...incoming];
+          },
+        }
+      }
+    }
+  }
+})
+
 export const apolloClient = new ApolloClient({
-  cache: new InMemoryCache(),
+  cache,
   // link: uploadLink,
   link: asyncAuthLink.concat(uploadLink),
 });
+
