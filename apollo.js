@@ -1,10 +1,13 @@
-import { ApolloClient, InMemoryCache } from '@apollo/client';
+import { ApolloClient, InMemoryCache, split } from '@apollo/client';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { WebSocketLink } from '@apollo/client/link/ws';
+import { setContext } from '@apollo/link-context';
 import { createUploadLink } from "apollo-upload-client";
 // import { onError } from "@apollo/client/link/error";
-import { setContext } from '@apollo/link-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GRAPHQL_API_URL = 'http://localhost:4000/';
+const GRAPHQL_WS_URL = 'ws://localhost:4000/';
 
 /**
 uncomment the code below in case you are using a GraphQL API that requires some form of
@@ -20,6 +23,18 @@ const asyncAuthLink = setContext(async () => {
       Authorization: TOKEN ? `Bearer ${TOKEN}` : '',
     },
   };
+});
+
+// Create a WebSocket link:
+const wsLink = new WebSocketLink({
+  uri: GRAPHQL_WS_URL,
+  options: {
+    reconnect: true,
+    lazy: true,
+    connectionParams: {
+      authToken: AsyncStorage.getItem('@kemetsehaftalem/token'),
+    },
+  },
 });
 
 // const link = onError(({ graphQLErrors, networkError }) => {
@@ -59,10 +74,21 @@ const cache = new InMemoryCache({
     }
   }
 })
+const splitLink = split(
+  ({ query }) => {
+    const definition = getMainDefinition(query);
+    return (
+      definition.kind === 'OperationDefinition' &&
+      definition.operation === 'subscription'
+    );
+  },
+  wsLink,
+  uploadLink,
+);
 
 export const apolloClient = new ApolloClient({
   cache,
   // link: uploadLink,
-  link: asyncAuthLink.concat(uploadLink),
+  link: asyncAuthLink.concat(splitLink),
 });
 

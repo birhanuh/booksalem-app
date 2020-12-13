@@ -1,0 +1,17 @@
+subscription {
+  latestCheckout {
+    id
+    total_price
+    status
+    return_date
+    orders {
+      id
+      books {
+        id
+        title
+        cover_url
+        price
+      }
+    }
+  }
+}
