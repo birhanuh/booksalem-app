@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
 import { Text, ListItem, Avatar, Card, Button, Badge, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
 import { colorsLocal } from '../../theme';
 import moment from "moment";
+import NEW_ORDER_SUBSCRIPTION from './latestOrder.graphql';
 
 const GET_ORDERS_ADMIN_QUERY = gql`
   query {
@@ -38,6 +39,30 @@ const AllOrders = ({ navigation }) => {
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
   }
+
+  // Similar to componentDidMount and componentDidUpdate:
+  useEffect(() => {
+    // Update getAllOrders
+    subscribeToMore({
+      document: NEW_ORDER_SUBSCRIPTION,
+      updateQuery: (prev, { subscriptionData }) => {
+        console.log("prev", prev);
+        console.log("subscriptionData", subscriptionData);
+
+        if (!subscriptionData.data) {
+          return prev;
+        }
+
+        // update prev with new data
+        return {
+          getAllOrders: [
+            ...prev.getAllOrders,
+            subscriptionData.data.latestOrder.order,
+          ],
+        };
+      },
+    })
+  }, []);
 
   const renderFooter = () => {
     if (loading) {

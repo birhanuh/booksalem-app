@@ -1,17 +1,23 @@
 subscription {
   latestCheckout {
-    id
-    total_price
-    status
-    return_date
-    orders {
+    checkout {
       id
-      books {
+      total_price
+      status
+      return_date
+      orders {
         id
-        title
-        cover_url
-        price
+        books {
+          id
+          title
+          cover_url
+          price
+        }
       }
+    }
+    errors {
+      path
+      message
     }
   }
 }

@@ -1,0 +1,20 @@
+subscription {
+  latestOrder {
+    order {
+      id
+      user_id
+      status
+      book_id
+      books {
+        id
+        title
+        cover_url
+        price
+      }
+    }
+    errors {
+      path
+      message
+    }
+  }
+}

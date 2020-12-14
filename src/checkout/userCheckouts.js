@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Button, ListItem, Avatar, Badge, colors } from 'react-native-elements';
 import { useQuery, gql } from '@apollo/client';
 import { colorsLocal } from '../theme';
 import moment from "moment";
+import NEW_USER_CHECKOUT_SUBSCRIPTION from './latestCheckout.graphql';
 
 const GET_USER_CHECKOUTS = gql`
   query {
@@ -27,11 +28,35 @@ const GET_USER_CHECKOUTS = gql`
 `
 
 const UserCheckouts = () => {
-  const { data, loading, error } = useQuery(GET_USER_CHECKOUTS);
+  const { data, loading, error, subscribeToMore } = useQuery(GET_USER_CHECKOUTS);
 
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
   }
+
+  // Similar to componentDidMount and componentDidUpdate:
+  useEffect(() => {
+    // Update getUserCheckouts
+    subscribeToMore({
+      document: NEW_USER_CHECKOUT_SUBSCRIPTION,
+      updateQuery: (prev, { subscriptionData }) => {
+        console.log("prev", prev);
+        console.log("subscriptionData", subscriptionData);
+
+        if (!subscriptionData.data) {
+          return prev;
+        }
+
+        // update prev with new data
+        return {
+          getUserCheckouts: [
+            ...prev.getUserCheckouts,
+            subscriptionData.data.latestCheckout.checkout,
+          ],
+        };
+      },
+    })
+  }, []);
 
   const renderFooter = () => {
     if (loading) {

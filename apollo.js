@@ -31,8 +31,8 @@ const wsLink = new WebSocketLink({
   options: {
     reconnect: true,
     lazy: true,
-    connectionParams: {
-      authToken: AsyncStorage.getItem('@kemetsehaftalem/token'),
+    connectionParams: async () => {
+      authToken: await AsyncStorage.getItem('@kemetsehaftalem/token')
     },
   },
 });
@@ -83,12 +83,12 @@ const splitLink = split(
     );
   },
   wsLink,
-  uploadLink,
+  asyncAuthLink.concat(uploadLink),
 );
 
 export const apolloClient = new ApolloClient({
   cache,
   // link: uploadLink,
-  link: asyncAuthLink.concat(splitLink),
+  link: splitLink,
 });
 
