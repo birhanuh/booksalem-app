@@ -34,7 +34,7 @@ const GET_ORDERS_ADMIN_QUERY = gql`
 `
 
 const AllOrders = ({ navigation }) => {
-  const { data, loading, error } = useQuery(GET_ORDERS_ADMIN_QUERY);
+  const { data, loading, error, subscribeToMore } = useQuery(GET_ORDERS_ADMIN_QUERY);
 
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);

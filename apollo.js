@@ -5,9 +5,11 @@ import { setContext } from '@apollo/link-context';
 import { createUploadLink } from "apollo-upload-client";
 // import { onError } from "@apollo/client/link/error";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
-const GRAPHQL_API_URL = 'http://localhost:4000/';
-const GRAPHQL_WS_URL = 'ws://localhost:4000/';
+const HOST = Platform.OS === 'ios' ? 'localhost' : '10.0.2.2'
+const GRAPHQL_API_URL = `http://${HOST}:4000/`;
+const GRAPHQL_WS_URL = `ws://${HOST}:4000/`;
 
 /**
 uncomment the code below in case you are using a GraphQL API that requires some form of
@@ -74,6 +76,7 @@ const cache = new InMemoryCache({
     }
   }
 })
+
 const splitLink = split(
   ({ query }) => {
     const definition = getMainDefinition(query);

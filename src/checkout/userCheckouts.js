@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Button, ListItem, Avatar, Badge, colors } from 'react-native-elements';
@@ -6,6 +6,8 @@ import { useQuery, gql } from '@apollo/client';
 import { colorsLocal } from '../theme';
 import moment from "moment";
 import NEW_USER_CHECKOUT_SUBSCRIPTION from './latestCheckout.graphql';
+
+import { UserCheckoutNotificationContext } from "../context";
 
 const GET_USER_CHECKOUTS = gql`
   query {
@@ -36,7 +38,7 @@ const UserCheckouts = () => {
 
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
-    // Update getUserCheckouts
+    // Update getUserCheckouts 
     subscribeToMore({
       document: NEW_USER_CHECKOUT_SUBSCRIPTION,
       updateQuery: (prev, { subscriptionData }) => {
@@ -70,56 +72,59 @@ const UserCheckouts = () => {
     }
   }
 
+  const count = useContext(UserCheckoutNotificationContext)
+
   const { getUserCheckouts } = !!data && data
 
   return (
-    <View style={styles.container}>
-      { getUserCheckouts && getUserCheckouts.length === 0 && <><View style={styles.infoMsgContainer}>
-        <Text style={styles.info}>You don't have checkouts yet. Go to Books screen, select the Book you wish like to order and place your order. Then the Admin will decide when to checkout the book for you.</Text>
-      </View>
-        <Button
-          icon={<Icon name='book' color='#ffffff' size={15}
-            style={{ marginRight: 10 }} />}
-          buttonStyle={styles.button}
-          title='Go to Books' onPress={() => { navigation.navigate('Books', { screen: 'Books' }) }} /></>}
+    <UserCheckoutNotificationContext.Provider value={0}>
+      <View style={styles.container}>
+        {getUserCheckouts && getUserCheckouts.length === 0 && <><View style={styles.infoMsgContainer}>
+          <Text style={styles.info}>You don't have checkouts yet. Go to Books screen, select the Book you wish like to order and place your order. Then the Admin will decide when to checkout the book for you.</Text>
+        </View>
+          <Button
+            icon={<Icon name='book' color='#ffffff' size={15}
+              style={{ marginRight: 10 }} />}
+            buttonStyle={styles.button}
+            title='Go to Books' onPress={() => { navigation.navigate('Books', { screen: 'Books' }) }} /></>}
 
-      <FlatList
-        data={getUserCheckouts && getUserCheckouts}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => {
-          let badgeStatus
-          switch (item.status) {
-            case 'open':
-              badgeStatus = 'primary'
-              break;
-            case 'closed':
-              badgeStatus = 'success'
-              break;
-            default:
-              break;
+        <FlatList
+          data={getUserCheckouts && getUserCheckouts}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => {
+            let badgeStatus
+            switch (item.status) {
+              case 'open':
+                badgeStatus = 'primary'
+                break;
+              case 'closed':
+                badgeStatus = 'success'
+                break;
+              default:
+                break;
+            }
+            return (<ListItem
+              containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0, marginBottom: 10 }}>
+              <Avatar source={{ uri: item.orders.books.cover_url }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: item.orders.books.id } }) }} />
+              <ListItem.Content>
+                <ListItem.Title style={{ color: colors.primary }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: item.orders.books.id } }) }}>{item.orders.books.title}</ListItem.Title>
+                <ListItem.Subtitle>{item.orders.books.price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Subtitle>
+              </ListItem.Content>
+              {item.status === 'open' && <ListItem.Content>
+                <ListItem.Subtitle>Return date</ListItem.Subtitle>
+                <ListItem.Subtitle>{moment(item.return_date).format('ll')}</ListItem.Subtitle>
+              </ListItem.Content>}
+              <ListItem.Content>
+                <ListItem.Subtitle>Status</ListItem.Subtitle>
+                <Badge
+                  status={badgeStatus}
+                  value={item.status}
+                />
+              </ListItem.Content>
+            </ListItem>)
           }
-          return (<ListItem
-            containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0, marginBottom: 10 }}>
-            <Avatar source={{ uri: item.orders.books.cover_url }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: item.orders.books.id } }) }} />
-            <ListItem.Content>
-              <ListItem.Title style={{ color: colors.primary }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: item.orders.books.id } }) }}>{item.orders.books.title}</ListItem.Title>
-              <ListItem.Subtitle>{item.orders.books.price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Subtitle>
-            </ListItem.Content>
-            {item.status === 'open' && <ListItem.Content>
-              <ListItem.Subtitle>Return date</ListItem.Subtitle>
-              <ListItem.Subtitle>{moment(item.return_date).format('ll')}</ListItem.Subtitle>
-            </ListItem.Content>}
-            <ListItem.Content>
-              <ListItem.Subtitle>Status</ListItem.Subtitle>
-              <Badge
-                status={badgeStatus}
-                value={item.status}
-              />
-            </ListItem.Content>
-          </ListItem>)
-        }
-        } />
-    </View>)
+          } />
+      </View></UserCheckoutNotificationContext.Provider>)
 }
 
 const styles = StyleSheet.create({

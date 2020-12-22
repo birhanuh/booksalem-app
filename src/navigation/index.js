@@ -30,6 +30,8 @@ import Settings from "../settings";
 import Authors from "../author/authors";
 import { colors } from "react-native-elements";
 
+import UserCheckoutNotification from "./userCheckoutNotification";
+
 const AuthStack = createStackNavigator();
 const AuthStackScreen = () => (
   <AuthStack.Navigator headerMode='none'>
@@ -127,7 +129,14 @@ const TabsScreen = () => {
         iconColor = focused
           ? color
           : colors.grey3;
-      } else if (route.name === 'Checkouts') {
+      } else if (route.name === 'Checkouts' && !me.is_admin) {
+        iconName = 'credit-card-alt';
+        iconColor = focused
+          ? color
+          : colors.grey3;
+        // Icon with mini badge
+        return <UserCheckoutNotification iconName={iconName} iconColor={iconColor} size={size} />
+      } else if (route.name === 'Checkouts' && me.is_admin) {
         iconName = 'credit-card-alt';
         iconColor = focused
           ? color

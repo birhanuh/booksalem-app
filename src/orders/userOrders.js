@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
 import { Text, ListItem, Avatar, Button, Badge, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -6,13 +6,41 @@ import { useQuery } from '@apollo/client';
 import { colorsLocal } from '../theme';
 import moment from "moment";
 import GET_USER_ORDERS_QUERY from './userOrders.graphql';
+import UPDATED_ORDER_SUBSCRIPTION from './updatedOrder.graphql';
 
 const UserOrders = ({ navigation }) => {
-  const { data, loading, error } = useQuery(GET_USER_ORDERS_QUERY);
+  const { data, loading, error, subscribeToMore } = useQuery(GET_USER_ORDERS_QUERY);
 
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
   }
+
+  // Similar to componentDidMount and componentDidUpdate:
+  useEffect(() => {
+    // Update getUserCheckouts
+    subscribeToMore({
+      document: UPDATED_ORDER_SUBSCRIPTION,
+      updateQuery: (prev, { subscriptionData }) => {
+        console.log("prev", prev);
+        console.log("subscriptionData", subscriptionData);
+
+        if (!subscriptionData.data) {
+          return prev;
+        }
+
+        // update prev with new data
+        return {
+          getUserOrders: prev.getUserOrders.map(order => {
+            if (order.id === subscriptionData.data.updatedOrder.order.id) {
+              return subscriptionData.data.updatedOrder.order
+            }
+            return order
+          })
+
+        };
+      },
+    })
+  }, []);
 
   const renderFooter = () => {
     if (loading) {
