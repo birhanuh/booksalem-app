@@ -53,14 +53,14 @@ const BookStackScreen = () => (
   <BookStack.Navigator>
     <BookStack.Screen name='Books' component={Books} />
     <BookStack.Screen name='AddBook' component={AddBook} />
-    <BookStack.Screen name='ViewBook' component={ViewBook} options={({ route }) => ({
-      title: route.params.name
+    <BookStack.Screen name='ViewBook' component={ViewBook} options={(opt: any) => ({
+      title: opt.route.params.name
     })} />
-    <BookStack.Screen name='EditBook' component={EditBook} options={({ route }) => ({
-      title: route.params.name
+    <BookStack.Screen name='EditBook' component={EditBook} options={(opt: any) => ({
+      title: opt.route.params.name
     })} />
-    <BookStack.Screen name='Authors' component={Authors} options={({ route }) => ({
-      title: route.params.name
+    <BookStack.Screen name='Authors' component={Authors} options={(opt: any) => ({
+      title: opt.route.params.name
     })} />
   </BookStack.Navigator>
 )

@@ -5,8 +5,13 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { MeContext } from "../context";
+import { NavigationScreenProp } from 'react-navigation';
 
-const Settings = ({ navigation }) => {
+interface Props {
+  navigation: NavigationScreenProp<any, any> | any;
+}
+
+const Settings: React.SFC<Props> = ({ navigation }) => {
   const me = React.useContext(MeContext);
 
   const signOut = () => {

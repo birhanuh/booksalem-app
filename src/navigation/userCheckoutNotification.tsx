@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { Badge, colors } from 'react-native-elements';
+import { Badge, Text, colors } from 'react-native-elements';
 import { useQuery, gql } from '@apollo/client';
 import NEW_USER_CHECKOUT_SUBSCRIPTION from '../checkout/latestCheckout.graphql';
 
@@ -27,7 +27,13 @@ const GET_USER_CHECKOUTS = gql`
   }
 `
 
-const UserCheckoutNotification = ({ iconName, iconColor, size }) => {
+interface Props {
+  iconName: string;
+  iconColor: string;
+  size: number;
+}
+
+const UserCheckoutNotification: React.SFC<Props> = ({ iconName, iconColor, size }) => {
   const { loading, error, subscribeToMore } = useQuery(GET_USER_CHECKOUTS);
   const [count, setCount] = useState(useContext(UserCheckoutNotificationContext));
 

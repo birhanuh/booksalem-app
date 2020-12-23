@@ -6,54 +6,76 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Divider, Card, ListItem, Avatar, colors } from 'react-native-elements';
 import { graphql, gql } from '@apollo/react-hoc';
 import compose from "lodash.flowright";
-import { createCheckoutSchema } from '../../utils/validationSchema';
+import { updateCheckoutSchema } from '../../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../../utils/formatError';
 import { colorsLocal } from '../../theme';
 import moment from "moment";
 import GET_ALL_CHECKOUTS from './allCheckouts.graphql';
 
-class FormCheckout extends PureComponent {
+import { NavigationScreenProp } from 'react-navigation';
+
+interface State {
+  values: object;
+  orders: object;
+  users: object;
+  showReturnDate: boolean,
+  errors: { [key: string]: string } | {};
+  isSubmitting: boolean;
+  loading: boolean;
+}
+
+
+interface Props {
+  updateCheckoutMutation: (variables: any) => Promise<any | null>;
+  navigation: NavigationScreenProp<any, any> | any;
+  getCheckoutByIdQuery: any;
+}
+
+class EditCheckout extends PureComponent<Props, State> {
   state = {
     values: {
-      orderId: null,
+      checkoutId: null,
       returnDate: null,
       totalPrice: '',
       note: '',
-      orderStatus: 'closed',
       bookStatus: '',
-      status: 'open'
+      status: ''
     },
-    order_date: null,
-    books: null,
+    users: null,
     orders: null,
     showReturnDate: false,
-    errors: {},
+    errors: {
+      updateCheckout: '',
+      orderStatus: '',
+      status: '',
+      totalPrice: '',
+      returnDate: '',
+      bookStatus: ''
+    },
     isSubmitting: false,
     loading: false
   }
 
   componentDidMount() {
-    if (this.props.getOrderByIdQuery.getOrderById) {
-      const { loading, getOrderById: { id, order_date, books, users } } = this.props.getOrderByIdQuery
+    if (this.props.getCheckoutByIdQuery.getCheckoutById) {
+      const { loading, getCheckoutById: { id, total_price, return_date, note, orders, users } } = this.props.getCheckoutByIdQuery
       this.setState({
         values: {
-          ...this.state.values, orderId: id, totalPrice: books.price,
-          bookStatus: books.type === 'rent' ? 'rented' : 'sold', returnDate: books.type === 'rent' ? new Date() : null,
-          status: books.type === 'rent' ? 'open' : 'closed'
-        }, order_date, books, users, loading
+          ...this.state.values, checkoutId: id, totalPrice: total_price,
+          bookStatus: orders.books.status, returnDate: new Date(return_date), status, note
+        }, orders, users, loading
       })
     }
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.getOrderByIdQuery.getOrderById) {
-      const { loading, getOrderById: { id, order_date, books, users } } = nextProps.getOrderByIdQuery
+    if (nextProps.getCheckoutByIdQuery.getCheckoutById) {
+      const { loading, getCheckoutById: { id, total_price, return_date, status, note, orders, users } } = nextProps.getCheckoutByIdQuery
       this.setState({
         values: {
-          ...this.state.values, orderId: id, totalPrice: books.price,
-          bookStatus: books.type === 'rent' ? 'rented' : 'sold', returnDate: books.type === 'rent' ? new Date() : null,
-          status: books.type === 'rent' ? 'open' : 'closed'
-        }, order_date, books, users, loading
+          ...this.state.values, checkoutId: id, totalPrice: total_price,
+          bookStatus: orders.books.status, returnDate: return_date, status, note
+        }, orders, users, loading
       })
     }
   }
@@ -65,54 +87,49 @@ class FormCheckout extends PureComponent {
 
     // Validation
     try {
-      await createCheckoutSchema.validate(this.state.values, { abortEarly: false })
+      await updateCheckoutSchema.validate(this.state.values, { abortEarly: false })
     } catch (err) {
       this.setState({ errors: formatYupErrors(err) })
     }
 
-    const { values: { orderId, returnDate, totalPrice, orderStatus, bookStatus, status, note }, errors } = this.state
+    const { values: { checkoutId, returnDate, totalPrice, bookStatus, status, note }, errors } = this.state
 
     if (Object.keys(errors).length === 0) {
       this.setState({ isSubmitting: true })
 
-      this.props.createCheckoutMutation({
-        variables: { orderId, returnDate, totalPrice: parseInt(totalPrice), orderStatus, bookStatus, status, note },
-        update: (store, { data: { createCheckout } }) => {
-          const { checkout, errors } = createCheckout;
+      this.props.updateCheckoutMutation({
+        variables: { checkoutId, returnDate, totalPrice: parseInt(totalPrice), bookStatus, status, note },
+        update: (store, { data: { updateCheckout } }) => {
+          const { checkout, errors } = updateCheckout;
 
           if (errors) {
             return;
           }
 
-          if (store.data.data.ROOT_QUERY.getAllCheckouts) {
-            // Read the data from cache for this query.
-            const data = store.readQuery({ query: GET_ALL_CHECKOUTS });
+          // Read the data from cache for this query.
+          const data = store.readQuery({ query: GET_ALL_CHECKOUTS });
 
-            // Add checkout from the mutation to the end.         
-            const getAllCheckoutsUpdated = [checkout, ...data.getAllCheckouts];
+          // Add checkout from the mutation to the end.  
+          data.getAllCheckouts.map(item => {
+            if (item.id === checkout.id) {
+              return checkout;
+            }
+          });
 
-            // Write data back to the cache.
-            store.writeQuery({ query: GET_ALL_CHECKOUTS, data: { getAllCheckouts: getAllCheckoutsUpdated } });
-          }
+          // Write data back to the cache.
+          store.writeQuery({ query: GET_ALL_CHECKOUTS, data });
         }
       }).then(res => {
-        const { checkout, errors } = res.data.createCheckout;
+        const { checkout, errors } = res.data.updateCheckout;
 
         console.log("Resp data: ", checkout, errors)
 
         if (errors) {
           this.setState({ errors: formatServerErrors(errors) })
         } else {
-          this.setState({
-            values: {
-              orderId: null, returnDate: null, totalPrice: '', note: '',
-              orderStatus: 'closed', bookStatus: ''
-            }, isSubmitting: false
-          })
           this.props.navigation.navigate('Checkouts', { screen: 'AllCheckoutsAdmin' })
         }
       })
-
     }
   }
 
@@ -147,7 +164,7 @@ class FormCheckout extends PureComponent {
   };
 
   render() {
-    const { values: { orderId, bookStatus, orderStatus, returnDate, totalPrice, status, note }, order_date, books, users, showReturnDate, loading, isSubmitting, errors } = this.state
+    const { values: { bookStatus, returnDate, totalPrice, status, note }, orders, users, showReturnDate, isSubmitting, errors, loading } = this.state
 
     if (loading) {
       return (
@@ -160,7 +177,7 @@ class FormCheckout extends PureComponent {
     return (
       <ScrollView>
         {/* Error message */}
-        {errors.createCheckout && <View style={{ backgroundColor: colors.error }}><Text color="white">{errors.createCheckout}</Text></View>}
+        {errors.updateCheckout && <View style={{ backgroundColor: colors.error }}><Text style={{ color: "white" }}>{errors.updateCheckout}</Text></View>}
         <Card>
           <Card.Title style={styles.cardTitle}>User details</Card.Title>
           <Card.Divider />
@@ -177,81 +194,72 @@ class FormCheckout extends PureComponent {
           </View>
           <Card.Title style={styles.cardTitle}>Book details</Card.Title>
           <Card.Divider />
-          <View style={styles.bookDetailsContainer}>
+          <View>
             <View style={styles.bookInfoContainer}>
               <ListItem containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0 }}>
-                <Avatar source={{ uri: books && books.cover_url }} />
+                <Avatar source={{ uri: orders && orders.books.cover_url }} />
                 <ListItem.Content>
-                  <ListItem.Title>{books && books.title}</ListItem.Title>
-                  <ListItem.Subtitle>{books && books.price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Subtitle>
+                  <ListItem.Title>{orders && orders.books.title}</ListItem.Title>
+                  <ListItem.Subtitle>{orders && orders.books.price + '\u0020'}<Text style={styles.currency}>ETB</Text></ListItem.Subtitle>
                 </ListItem.Content>
                 <ListItem.Content>
                   <ListItem.Title>Status</ListItem.Title>
-                  <ListItem.Subtitle>{books && books.status}</ListItem.Subtitle>
+                  <ListItem.Subtitle>{orders && orders.books.status}</ListItem.Subtitle>
                 </ListItem.Content>
                 <ListItem.Content>
                   <ListItem.Title>Book type</ListItem.Title>
-                  <ListItem.Subtitle style={styles.type}>{books && books.type}</ListItem.Subtitle>
+                  <ListItem.Subtitle style={styles.type}>{orders && orders.books.type}</ListItem.Subtitle>
                 </ListItem.Content>
               </ListItem>
               {/* <Text style={styles.text}>
-                <Text style={styles.label}>Author: </Text>{books && books.authors.name}
+                <Text style={styles.label}>Author: </Text>{orders && orders.books.authors.name}
               </Text>
               <Text style={styles.text}>
-                <Text style={styles.label}>Language: </Text>{books && books.languages.name}
+                <Text style={styles.label}>Language: </Text>{orders && orders.books.languages.name}
               </Text>
               <Text style={styles.text}>
-                <Text style={styles.label}>Category: </Text>{books && books.categories.name}
+                <Text style={styles.label}>Category: </Text>{orders && orders.books.categories.name}
               </Text> */}
             </View>
             <View style={styles.infoMsgContainer}>
-              <Text style={styles.info}>Book status is prefilld according to Book type. If you want to change it, change it from Book's type.</Text></View>
-            <Input label="Book status" value={bookStatus} disabled errorStyle={{ color: colors.error }}
-              errorMessage={errors.bookStatus} />
-          </View>
-
-          <Card.Title style={styles.cardTitle}>Order details</Card.Title>
-          <Card.Divider />
-          <View>
-            <View style={styles.orderInfoContainer}>
-              <Text style={styles.text}>
-                <Text style={styles.label}>Order Id: </Text>{orderId}
-              </Text>
-              <Text style={styles.text}>
-                <Text style={styles.label}>Order date: </Text>{moment(order_date).format('ll')}
-              </Text>
-            </View>
-            <Text style={styles.pickerTitle}>Change Order Status</Text>
+              <Text style={styles.info}>Current Book status is Rented. You can change it from here.</Text></View>
             <Picker
               itemStyle={styles.picker}
-              selectedValue={orderStatus}
-              prompt='Select Order status'
-              onValueChange={(itemValue, itemIndex) => {
-                let errors = Object.assign({}, this.state.errors);
-                delete errors['orderStatus'];
-
-                this.setState({ values: { ...this.state.values, orderStatus: itemValue }, errors })
-              }
+              selectedValue={bookStatus}
+              prompt='Select Book status'
+              onValueChange={(itemValue, itemIndex) =>
+                this.setState({ values: { ...this.state.values, bookStatus: itemValue } })
               }>
-              <Picker.Item label="Closed" value="closed" />
-              <Picker.Item label="Pending" value="pending" />
+              <Picker.Item label="Available" value="available" />
+              <Picker.Item label="Rented" value="rented" />
             </Picker>
-            {errors.orderStatus && <Text style={styles.customTextError}>{errors.orderStatus}</Text>}
+            {errors.bookStatus && <Text style={styles.customTextError}>{errors.bookStatus}</Text>}
           </View>
 
           <Card.Title style={styles.cardTitle}>Checkout details</Card.Title>
           <Card.Divider />
           <View>
             <View style={styles.infoMsgContainer}>
-              <Text style={styles.info}>Checkout status is prefilld according to Book's type. If you want to make a change to it, do the change from Book's type.</Text></View>
-            <Input label="Checkout status" value={status} disabled errorStyle={{ color: colors.error }}
-              errorMessage={errors.status} />
+              <Text style={styles.info}>Current Checkout status is open. You can change it from here.</Text></View>
+            <Picker
+              itemStyle={styles.picker}
+              selectedValue={status}
+              prompt='Select Book status'
+              onValueChange={(itemValue, itemIndex) =>
+                this.setState({ values: { ...this.state.values, status: itemValue } })
+              }>
+              <Picker.Item label="Open" value="open" />
+              <Picker.Item label="Close" value="closed" />
+            </Picker>
+            {errors.status && <Text style={styles.customTextError}>{errors.status}</Text>}
             <View style={styles.infoMsgContainer}>
               <Text style={styles.info}>Total price is prefilled stright from Book's price. If you want to make a change, do the change from Book's price.</Text></View>
             <Input label="Total price" value={totalPrice.toString()} disabled errorStyle={{ color: colors.error }}
               errorMessage={errors.totalPrice} />
             {bookStatus === 'rented' && <View style={styles.returnDateContainer}>
-              <Text h5 style={styles.label}>Return date</Text>
+              <Text style={styles.label}>Return date</Text>
+              <View style={styles.infoMsgContainer}>
+                <Text style={styles.info}>Current Return date is as shown bellow. You can modify it from here.</Text></View>
               <View style={styles.buttonTextContainer}>
                 <Text style={styles.dateText}>{moment(returnDate).format('ll')}</Text>
                 <Button type='outline' onPress={this.showReturnDate} icon={
@@ -277,17 +285,17 @@ class FormCheckout extends PureComponent {
               value={note}
               multiline={true}
               numberOfLines={4}
-              onChangeText={text => this.onChangeText('note', text)} placeholder="Write a note..." errorStyle={{ color: colors.error }} />
+              onChangeText={text => this.onChangeText('note', text)} placeholder="Write a note..." />
             <Divider style={styles.divider} />
 
             <Button
-              title="Checkout book"
+              title="Update checkout"
               icon={
                 <Icon
                   name="check-circle"
                   size={20}
                   style={{ marginRight: 10 }}
-                  color={colors.white}
+                  color='white'
                 />
               }
               onPress={this.submit}
@@ -386,9 +394,9 @@ const styles = StyleSheet.create({
   }
 });
 
-const CREATE_CHECKOUT_MUTATION = gql`
-  mutation($orderId: Int!, $totalPrice: Float!, $returnDate: DateTime, $orderStatus: String!, $bookStatus: String!, $status: String!, $note: String) {
-    createCheckout(orderId: $orderId, totalPrice: $totalPrice, returnDate: $returnDate, orderStatus: $orderStatus, bookStatus: $bookStatus, status: $status, note: $note) {
+const UPDATE_CHECKOUT_MUTATION = gql`
+  mutation($checkoutId: Int!, $totalPrice: Float, $returnDate: DateTime, $bookStatus: String, $status: String!, $note: String) {
+    updateCheckout(checkoutId: $checkoutId, totalPrice: $totalPrice, returnDate: $returnDate, bookStatus: $bookStatus, status: $status, note: $note) {
       checkout {
         id
         total_price
@@ -416,19 +424,22 @@ const CREATE_CHECKOUT_MUTATION = gql`
   }
 `;
 
-const GET_ORDER_BY_ID_QUERY = gql`
+const GET_CHECKOUT_BY_ID_QUERY = gql`
   query($id: Int!) {
-    getOrderById(id: $id) {
+    getCheckoutById(id: $id) {
       id
-      order_date
-      status
-      books {
+      total_price
+      return_date
+      note
+      orders {
         id
-        title
-        cover_url
-        status
-        price
-        type
+        books {
+          title
+          cover_url
+          status
+          price
+          type
+        }
       }
       users {
         name
@@ -440,17 +451,17 @@ const GET_ORDER_BY_ID_QUERY = gql`
 `
 
 const MutationQueries = compose(
-  graphql(CREATE_CHECKOUT_MUTATION, {
-    name: "createCheckoutMutation"
+  graphql(UPDATE_CHECKOUT_MUTATION, {
+    name: "updateCheckoutMutation"
   }),
-  graphql(GET_ORDER_BY_ID_QUERY, {
-    name: "getOrderByIdQuery",
-    options: props => ({
+  graphql(GET_CHECKOUT_BY_ID_QUERY, {
+    name: "getCheckoutByIdQuery",
+    options: (props: any) => ({
       variables: {
         id: props.route.params.id
       }
     })
   })
-)(FormCheckout);
+)(EditCheckout);
 
 export default MutationQueries;

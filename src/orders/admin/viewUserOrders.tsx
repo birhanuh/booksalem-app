@@ -5,6 +5,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
 import moment from "moment";
 
+import { NavigationScreenProp } from 'react-navigation';
+
 const GET_USER_ORDERS_BY_ID_QUERY = gql`
   query($userId: Int!) {
     getUserOrdersById(userId: $userId) {
@@ -28,7 +30,12 @@ const GET_USER_ORDERS_BY_ID_QUERY = gql`
   }
 `
 
-const ViewUserOrders = ({ route, navigation }) => {
+interface Props {
+  route: NavigationScreenProp<any, any> | any;
+  navigation: NavigationScreenProp<any, any> | any;
+}
+
+const ViewUserOrders: React.SFC<Props> = ({ route, navigation }) => {
   const { loading, error, data } = useQuery(GET_USER_ORDERS_BY_ID_QUERY, { variables: { userId: route.params.id } });
 
   if (error) {
@@ -54,7 +61,7 @@ const ViewUserOrders = ({ route, navigation }) => {
       <Text>
         <Text style={styles.label}>Email: </Text>{email}
       </Text>
-      <Text style={styles.text, { marginBottom: 8 }} >
+      <Text style={styles.textPhone} >
         <Text style={styles.label}>Phone: </Text>{phone}
       </Text>
       <Card.Divider />
@@ -131,6 +138,16 @@ const ViewUserOrders = ({ route, navigation }) => {
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  error: {
+    color: colors.error,
+    fontSize: 18,
+    paddingHorizontal: 20
+  },
   card: {
     shadowColor: colors.divider,
     shadowOffset: {
@@ -143,6 +160,10 @@ const styles = StyleSheet.create({
   },
   text: {
     textTransform: 'capitalize'
+  },
+  textPhone: {
+    textTransform: 'capitalize',
+    marginBottom: 8
   },
   label: {
     fontWeight: '600',

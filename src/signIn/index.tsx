@@ -3,18 +3,36 @@ import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Card, Divider, colors } from 'react-native-elements';
-import { graphql, gql } from '@apollo/react-hoc';
+import { graphql } from '@apollo/react-hoc';
 import { signInSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 import SIGN_IN_MUTATION from './signIn.graphql'
+import { NavigationScreenProp } from 'react-navigation';
 
-class SignIn extends React.PureComponent {
+interface State {
+  values: object;
+  errors: { [key: string]: string } | {};
+  isSubmitting: boolean;
+  loading: boolean;
+}
+
+
+interface Props {
+  mutate: (variables: any) => Promise<any | null>;
+  navigation: NavigationScreenProp<any, any> | any;
+}
+
+
+class SignIn extends React.PureComponent<Props, State> {
   state = {
     values: {
       email: '',
       password: '',
     },
-    errors: {},
+    errors: {
+      email: '',
+      password: ''
+    },
     isSubmitting: false,
     loading: false
   }
@@ -76,11 +94,11 @@ class SignIn extends React.PureComponent {
     return (
       <View style={styles.container}>
         <Text style={styles.title} h2>Sign In</Text>
-        <Card style={styles.card}>
+        <Card containerStyle={styles.card}>
           <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: colors.error }}
-            errorMessage={errors.email} leftIcon={{ type: 'font-awesome', name: 'envelope', size: 15, marginRight: 10 }} />
+            errorMessage={errors.email} leftIcon={{ type: 'font-awesome', name: 'envelope', size: 15 }} style={{ marginRight: 10 }} />
           <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: colors.error }}
-            errorMessage={errors.password} leftIcon={{ type: 'font-awesome', name: 'lock', size: 20, marginRight: 10 }} />
+            errorMessage={errors.password} leftIcon={{ type: 'font-awesome', name: 'lock', size: 20 }} style={{ marginRight: 10 }} />
           <Button
             style={{ marginTop: 20 }}
             icon={

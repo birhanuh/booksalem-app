@@ -14,8 +14,25 @@ import GET_LANGUAGES_QUERY from './languages.graphql';
 import GET_CATEGORIES_QUERY from './categories.graphql';
 import GET_AUTHORS_QUERY from '../author/authors.graphql';
 import GET_AVAILABLE_BOOKS from './availableBooks.graphql';
+import { NavigationScreenProp } from 'react-navigation';
 
-class AddBook extends PureComponent {
+interface State {
+  values: object;
+  errors: { [key: string]: string } | {};
+  isSubmitting: boolean;
+  loading: boolean;
+}
+
+
+interface Props {
+  addBookMutation: (variables: any) => Promise<any | null>;
+  navigation: NavigationScreenProp<any, any> | any;
+  getAuthorsQuery: any;
+  getCategoriesQuery: any;
+  getLanguagesQuery: any;
+}
+
+class AddBook extends PureComponent<Props, State> {
   state = {
     values: {
       title: '',
@@ -31,7 +48,17 @@ class AddBook extends PureComponent {
       description: '',
       coverFile: null
     },
-    errors: {},
+    errors: {
+      addBook: '',
+      title: '',
+      authorId: null,
+      publishedDate: '',
+      categoryId: null,
+      isbn: null,
+      languageId: null,
+      price: '',
+      coverFile: null
+    },
     isSubmitting: false,
     loading: false
   }
@@ -146,7 +173,7 @@ class AddBook extends PureComponent {
       <ScrollView>
         <View style={styles.container}>
           {/* Error message */}
-          {errors.addBook && <View style={{ backgroundColor: colors.error }}><Text color="white">{errors.addBook}</Text></View>}
+          {errors.addBook && <View style={{ backgroundColor: colors.error }}><Text style={{ color: "white" }}>{errors.addBook}</Text></View>}
 
           <Input value={title} onChangeText={text => this.onChangeText('title', text)} placeholder="Title" errorStyle={{ color: colors.error }}
             errorMessage={errors.title} />
@@ -180,7 +207,7 @@ class AddBook extends PureComponent {
             <Text style={styles.pickerTitle}>Type (Is is to for Sell or Rent)</Text>
             <Picker
               itemStyle={styles.picker}
-              selectedValue={type || book.type}
+              selectedValue={type}
               onValueChange={(itemValue, itemIndex) =>
                 this.setState({ values: { ...this.state.values, status: itemValue } })
               }>
@@ -271,7 +298,7 @@ class AddBook extends PureComponent {
             value={description}
             multiline={true}
             numberOfLines={4}
-            onChangeText={text => this.onChangeText('description', text)} placeholder="Description" errorStyle={{ color: colors.error }} />
+            onChangeText={text => this.onChangeText('description', text)} placeholder="Description" />
 
           <Divider style={{ marginTop: 20, marginBottom: 20 }} />
 
@@ -282,7 +309,7 @@ class AddBook extends PureComponent {
                 name="plus-circle"
                 size={20}
                 style={{ marginRight: 10 }}
-                color={colors.white}
+                color='white'
               />
             }
             onPress={this.submit}
@@ -302,7 +329,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: 'white',
     paddingHorizontal: 10,
     paddingVertical: 20,
     marginVertical: 16,

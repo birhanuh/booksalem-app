@@ -17,7 +17,7 @@ authentication. asyncAuthLink will run every time your request is made and use t
 you provide while making the request.
 */
 
-const asyncAuthLink = setContext(async () => {
+const asyncAuthLink: any = setContext(async () => {
   const TOKEN = await AsyncStorage.getItem('@kemetsehaftalem/token');
 
   return {

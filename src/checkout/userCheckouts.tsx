@@ -6,8 +6,8 @@ import { useQuery, gql } from '@apollo/client';
 import { colorsLocal } from '../theme';
 import moment from "moment";
 import NEW_USER_CHECKOUT_SUBSCRIPTION from './latestCheckout.graphql';
-
 import { UserCheckoutNotificationContext } from "../context";
+import { NavigationScreenProp } from 'react-navigation';
 
 const GET_USER_CHECKOUTS = gql`
   query {
@@ -29,7 +29,11 @@ const GET_USER_CHECKOUTS = gql`
   }
 `
 
-const UserCheckouts = () => {
+interface Props {
+  navigation: NavigationScreenProp<any, any> | any;
+}
+
+const UserCheckouts: React.SFC<Props> = ({ navigation }) => {
   const { data, loading, error, subscribeToMore } = useQuery(GET_USER_CHECKOUTS);
 
   if (error) {
@@ -161,6 +165,11 @@ const styles = StyleSheet.create({
     color: colors.success,
     fontWeight: '600',
     textTransform: 'uppercase'
+  },
+  button: {
+    marginVertical: 10,
+    paddingHorizontal: 5,
+    width: '50%'
   },
 });
 

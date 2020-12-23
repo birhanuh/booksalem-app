@@ -5,7 +5,14 @@ import { useQuery } from '@apollo/client';
 import AddAuthor from './addAuthor';
 import GET_AUTHORS from './authors.graphql';
 
-const Authors = ({ route, navigation }) => {
+import { NavigationScreenProp } from 'react-navigation';
+
+interface Props {
+  route: NavigationScreenProp<any, any> | any;
+  navigation: NavigationScreenProp<any, any> | any;
+}
+
+const Authors: React.SFC<Props> = ({ route, navigation }) => {
   const { data, loading, error } = useQuery(GET_AUTHORS, { fetchPolicy: "network-only" });
 
   if (error) {
@@ -23,10 +30,10 @@ const Authors = ({ route, navigation }) => {
   const { getAuthors } = data;
 
   return (
-    <View style={styles.container}>
+    <View>
       <AddAuthor route={route} navigation={navigation} />
 
-      <Card style={styles.card}>
+      <Card containerStyle={styles.card}>
         <Card.Title>Authors</Card.Title>
         <Card.Divider />
         <FlatList

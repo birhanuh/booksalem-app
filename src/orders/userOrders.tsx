@@ -7,8 +7,13 @@ import { colorsLocal } from '../theme';
 import moment from "moment";
 import GET_USER_ORDERS_QUERY from './userOrders.graphql';
 import UPDATED_ORDER_SUBSCRIPTION from './updatedOrder.graphql';
+import { NavigationScreenProp } from 'react-navigation';
 
-const UserOrders = ({ navigation }) => {
+interface Props {
+  navigation: NavigationScreenProp<any, any> | any;
+}
+
+const UserOrders: React.SFC<Props> = ({ navigation }) => {
   const { data, loading, error, subscribeToMore } = useQuery(GET_USER_ORDERS_QUERY);
 
   if (error) {
@@ -68,6 +73,7 @@ const UserOrders = ({ navigation }) => {
           title='Go to Books' onPress={() => { navigation.navigate('Books', { screen: 'Books' }) }} /></>}
       <FlatList
         data={getUserOrders}
+        ListFooterComponent={renderFooter}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => {
           let badgeStatus
@@ -130,6 +136,12 @@ const styles = StyleSheet.create({
     marginBottom: 26,
     paddingHorizontal: 12,
     paddingVertical: 12
+  },
+  button: {
+    borderRadius: 0,
+    marginLeft: 0,
+    marginRight: 0,
+    marginBottom: 0
   },
   info: {
     color: colorsLocal.info,
