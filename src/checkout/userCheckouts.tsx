@@ -94,6 +94,7 @@ const UserCheckouts: React.SFC<Props> = ({ navigation }) => {
 
         <FlatList
           data={getUserCheckouts && getUserCheckouts}
+          ListFooterComponent={renderFooter}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => {
             let badgeStatus

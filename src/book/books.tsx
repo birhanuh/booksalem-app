@@ -78,7 +78,7 @@ const Books: React.SFC<Props> = ({ navigation }) => {
         data={getAvailableBooks}
         keyExtractor={(item) => item.id.toString()}
         ListHeaderComponent={<>
-          <SearchBar placeholder='Search...' lightTheme round containerStyle={{ position: 'absolute' }} onChangeText={updateSearch} value={searchString} />
+          <SearchBar placeholder='Search...' lightTheme round onChangeText={updateSearch} value={searchString} />
 
           <ButtonGroup
             onPress={updateIndex}
