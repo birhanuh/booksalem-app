@@ -269,10 +269,7 @@ export default () => {
     </SafeAreaView>);
   }
 
-  let me
-  if (data) {
-    me = data.me;
-  }
+  let me = data && data.me
 
   return (
     <MeContext.Provider value={me}>

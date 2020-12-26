@@ -8,14 +8,24 @@ import { signInSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 import SIGN_IN_MUTATION from './signIn.graphql'
 import { NavigationScreenProp } from 'react-navigation';
+import { MeContext } from "../context";
 
 interface State {
   values: object;
   errors: { [key: string]: string } | {};
+  user: User,
   isSubmitting: boolean;
   loading: boolean;
 }
 
+interface User {
+  __typename: string;
+  id: string;
+  email: string;
+  is_admin: boolean,
+  name: string;
+  phone: string;
+}
 
 interface Props {
   mutate: (variables: any) => Promise<any | null>;
@@ -24,6 +34,8 @@ interface Props {
 
 
 class SignIn extends React.PureComponent<Props, State> {
+  static contextType = MeContext
+
   state = {
     values: {
       email: '',
@@ -33,6 +45,7 @@ class SignIn extends React.PureComponent<Props, State> {
       email: '',
       password: ''
     },
+    user: null,
     isSubmitting: false,
     loading: false
   }
@@ -60,6 +73,10 @@ class SignIn extends React.PureComponent<Props, State> {
       } else {
         AsyncStorage.setItem('@kemetsehaftalem/token', token)
         console.log("Resp: ", user, token)
+
+        // Provide user to Context
+        this.setState({ user });
+
         this.props.navigation.navigate('Books', { screen: 'Books', params: { me: user } })
       }
     }
@@ -81,7 +98,7 @@ class SignIn extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { values: { email, password }, loading, isSubmitting, errors } = this.state
+    const { values: { email, password }, user, loading, isSubmitting, errors } = this.state
 
     if (loading) {
       return (
@@ -92,46 +109,48 @@ class SignIn extends React.PureComponent<Props, State> {
     };
 
     return (
-      <View style={styles.container}>
-        <Text style={styles.title} h2>Sign In</Text>
-        <Card containerStyle={styles.card}>
-          <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: colors.error }}
-            errorMessage={errors.email} leftIcon={{ type: 'font-awesome', name: 'envelope', size: 15 }} style={{ marginRight: 10 }} />
-          <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: colors.error }}
-            errorMessage={errors.password} leftIcon={{ type: 'font-awesome', name: 'lock', size: 20 }} style={{ marginRight: 10 }} />
-          <Button
-            style={{ marginTop: 20 }}
-            icon={
-              <Icon
-                name="sign-in"
-                size={20}
-                color="white"
-                style={{ marginRight: 10 }}
-              />
-            }
-            onPress={this.submit} disabled={isSubmitting}
-            title="Sign in"
-          />
-        </Card>
+      <MeContext.Provider value={user}>
+        <View style={styles.container}>
+          <Text style={styles.title} h2>Sign In</Text>
+          <Card containerStyle={styles.card}>
+            <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: colors.error }}
+              errorMessage={errors.email} leftIcon={{ type: 'font-awesome', name: 'envelope', size: 15 }} style={{ marginRight: 10 }} />
+            <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: colors.error }}
+              errorMessage={errors.password} leftIcon={{ type: 'font-awesome', name: 'lock', size: 20 }} style={{ marginRight: 10 }} />
+            <Button
+              style={{ marginTop: 20 }}
+              icon={
+                <Icon
+                  name="sign-in"
+                  size={20}
+                  color="white"
+                  style={{ marginRight: 10 }}
+                />
+              }
+              onPress={this.submit} disabled={isSubmitting}
+              title="Sign in"
+            />
+          </Card>
 
-        <Divider style={{ marginTop: 30, marginBottom: 30 }} />
+          <Divider style={{ marginTop: 30, marginBottom: 30 }} />
 
-        <View style={styles.btnContainer} >
-          <Button
-            type="outline"
-            icon={
-              <Icon
-                name="user-plus"
-                size={20}
-                style={{ marginRight: 10 }}
-                color={colors.primary}
-              />
-            }
-            onPress={() => { this.props.navigation.push('CreateAccount') }}
-            title="Don't have an account?"
-          />
+          <View style={styles.btnContainer} >
+            <Button
+              type="outline"
+              icon={
+                <Icon
+                  name="user-plus"
+                  size={20}
+                  style={{ marginRight: 10 }}
+                  color={colors.primary}
+                />
+              }
+              onPress={() => { this.props.navigation.push('CreateAccount') }}
+              title="Don't have an account?"
+            />
+          </View>
         </View>
-      </View>
+      </MeContext.Provider>
     )
   }
 }

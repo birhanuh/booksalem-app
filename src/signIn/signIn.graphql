@@ -2,9 +2,11 @@ mutation($email: String!, $password: String!) {
   signIn(email: $email, password: $password) {
     token
     user {
+      id
       name
       email
       phone
+      is_admin
     }
     errors {
       path

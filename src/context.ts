@@ -1,8 +1,12 @@
 import React from "react";
 
 interface Me {
-  id: number;
-  is_admin: boolean
+  __typename: string;
+  id: string;
+  email: string;
+  is_admin: boolean,
+  name: string;
+  phone: string;
 }
 
 export const MeContext = React.createContext({} as Me);

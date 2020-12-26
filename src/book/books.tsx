@@ -4,13 +4,11 @@ import { Text, Badge, Card, Divider, colors, Button, ButtonGroup, SearchBar } fr
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery } from '@apollo/client';
 import GET_AVAILABLE_BOOKS from './availableBooks.graphql';
-
 import { NavigationScreenProp } from 'react-navigation';
 
 interface Props {
   navigation: NavigationScreenProp<any, any> | any;
 }
-
 
 const Books: React.SFC<Props> = ({ navigation }) => {
   const [searchString, setSearchString] = useState('');
