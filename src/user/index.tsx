@@ -7,7 +7,35 @@ import compose from "lodash.flowright";
 import { profileSchema, passwordSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 
-class User extends React.PureComponent {
+interface Profile {
+  name: string;
+  email: string;
+  phone: string;
+}
+
+interface Password {
+  password: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
+interface State {
+  profile: Profile;
+  password: Password;
+  disablePasswordChange: boolean;
+  errors: { [key: string]: string } | {};
+  isSubmitting: boolean;
+  loading: boolean;
+}
+
+interface Props {
+  updateProfileMutation: any;
+  getMeQuery: any;
+  updatePasswordMutation: any;
+  checkPasswordMutation: any;
+}
+
+class User extends React.PureComponent<Props, State> {
   state = {
     profile: {
       name: '',
@@ -20,7 +48,14 @@ class User extends React.PureComponent {
       confirmNewPassword: '',
     },
     disablePasswordChange: true,
-    errors: {},
+    errors: {
+      name: '',
+      email: '',
+      phone: '',
+      password: '',
+      newPassword: '',
+      confirmNewPassword: ''
+    },
     isSubmitting: false,
     loading: false
   }
@@ -86,7 +121,7 @@ class User extends React.PureComponent {
       if (errors) {
         this.setState({ errors: formatServerErrors(errors) })
       } else {
-        console.log("Resp: ", user, token)
+        console.log("Resp: ", user)
       }
     }
   }
@@ -158,7 +193,7 @@ class User extends React.PureComponent {
 
     return (
       <ScrollView>
-        <Card style={styles.card}>
+        <Card containerStyle={styles.card}>
           <Text style={styles.titleSecondary} h4>Profile</Text>
           <Input value={name} onChangeText={text => this.onChangeProfile('name', text)} placeholder="Name" errorStyle={{ color: colors.error }}
             errorMessage={errors.name} />
@@ -182,7 +217,7 @@ class User extends React.PureComponent {
           />
         </Card>
 
-        <Card style={styles.card}>
+        <Card containerStyle={styles.card}>
           <Text style={styles.titleSecondary} h4>Password</Text>
           <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangePasword('password', text)} placeholder="Current password" errorStyle={{ color: colors.error }}
             errorMessage={errors.password} />

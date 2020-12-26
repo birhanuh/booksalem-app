@@ -2,16 +2,35 @@ import React, { PureComponent } from 'react'
 import { View } from 'react-native';
 import { Card, Text, Input, Button, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { graphql, gql } from '@apollo/react-hoc';
+import { graphql, gql, ChildProps } from '@apollo/react-hoc';
 import { addAuthorSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 import GET_AUTHORS from './authors.graphql';
+import { NavigationScreenProp } from 'react-navigation';
 
-class AddAuthor extends PureComponent {
+interface Props {
+  route: NavigationScreenProp<any, any> | any;
+  navigation: NavigationScreenProp<any, any> | any;
+}
+
+interface Mutate {
+  mutate: (variables: any) => Promise<any | null>;
+}
+
+interface State {
+  name: string;
+  errors: { [key: string]: string } | {};
+  isSubmitting: boolean;
+}
+
+class AddAuthor extends PureComponent<ChildProps<Props & Mutate>, State> {
   state = {
     name: '',
     isSubmitting: false,
-    errors: {}
+    errors: {
+      addAuthor: '',
+      name: ''
+    }
   }
 
   submit = async () => {
@@ -66,7 +85,7 @@ class AddAuthor extends PureComponent {
 
   onChangeText = (key, value) => {
     // Clone errors form state to local variable
-    let errors = Object.assign({}, errors);
+    let errors = Object.assign({}, this.state.errors);
     delete errors[key];
 
     this.setState({ name: value, errors, isSubmitting: false })
@@ -78,7 +97,7 @@ class AddAuthor extends PureComponent {
     return (
       <Card>
         {/* Error message */}
-        {errors.addAuthor && <View style={{ backgroundColor: colors.error }}><Text color="white">{errors.addAuthor}</Text></View>}
+        {errors.addAuthor && <View style={{ backgroundColor: colors.error }}><Text style={{ color: 'white' }}>{errors.addAuthor}</Text></View>}
 
         <Input value={name} onChangeText={text => this.onChangeText('name', text)} placeholder="Author" errorStyle={{ color: colors.error }}
           errorMessage={errors.name} />
@@ -90,7 +109,7 @@ class AddAuthor extends PureComponent {
               name="plus-circle"
               size={20}
               style={{ marginRight: 10 }}
-              color={colors.white}
+              color='white'
             />
           }
           onPress={this.submit}
@@ -115,5 +134,5 @@ const ADD_AUTHOR_MUTATION = gql`
   }
 `;
 
-export default graphql(ADD_AUTHOR_MUTATION)(AddAuthor);
+export default graphql<ChildProps<Props>>(ADD_AUTHOR_MUTATION)(AddAuthor);
 

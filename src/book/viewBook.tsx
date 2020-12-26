@@ -13,10 +13,11 @@ import GET_BOOK_QUERY from './book.graphql';
 import DELETE_BOOK_MUTATION from './deleteBook.graphql';
 import CREATE_ORDER_MUTATION from './createOrder.graphql';
 import CANCEL_ORDER_MUTATION from './cancelOrder.graphql';
+import { formatServerErrors } from '../utils/formatError';
 
 const ViewBook = ({ navigation, getBookQuery, deleteBookMutation, createOrderMutation, getUsersOrdersQuery, cancelOrderMutation }) => {
   const me = React.useContext(MeContext);
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({ message: '' } || {});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [visible, setVisible] = useState(false);
 
@@ -185,7 +186,7 @@ const ViewBook = ({ navigation, getBookQuery, deleteBookMutation, createOrderMut
         {Object.keys(errors).length !== 0 && <View style={styles.errorMsgContainer}>
           <Text style={styles.error}>{errors.message}</Text>
         </View>}
-        <Card style={styles.card}>
+        <Card containerStyle={styles.card}>
           <Card.Title>{title}</Card.Title>
           <Text style={styles.type}>{type}</Text>
           <Card.Divider />
@@ -234,11 +235,11 @@ const ViewBook = ({ navigation, getBookQuery, deleteBookMutation, createOrderMut
           <Divider style={styles.divider} />
           <Text style={styles.rating}>
             {rating}
-            <Icon id='1' name='star' style={styles.star} />
-            <Icon id='2' name='star' style={styles.star} />
-            <Icon id='3' name='star' style={styles.star} />
-            <Icon id='4' name='star' style={styles.star} />
-            <Icon id='5' name='star' style={styles.star} />
+            <Icon name='star' style={styles.star} />
+            <Icon name='star' style={styles.star} />
+            <Icon name='star' style={styles.star} />
+            <Icon name='star' style={styles.star} />
+            <Icon name='star' style={styles.star} />
           </Text>
 
           <Divider style={styles.divider} />
@@ -298,14 +299,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  error: {
-    color: colors.error,
-    fontSize: 18,
-    paddingHorizontal: 20
-  },
   container: {
     flex: 1,
     justifyContent: 'center'
+  },
+  bookInfoContainer: {
+    marginBottom: 10
   },
   errorMsgContainer: {
     backgroundColor: colorsLocal.errorBg,
@@ -331,12 +330,6 @@ const styles = StyleSheet.create({
     padding: 2,
     borderWidth: 1,
     borderColor: colors.greyOutline,
-  },
-  priceContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignSelf: 'flex-end',
-    justifyContent: 'flex-end'
   },
   priceContainer: {
     flex: 1,
@@ -403,7 +396,7 @@ const styles = StyleSheet.create({
 const MutationsQueries = compose(
   graphql(GET_BOOK_QUERY, {
     name: "getBookQuery",
-    options: props => ({
+    options: (props: any) => ({
       variables: {
         id: props.route.params.id
       }

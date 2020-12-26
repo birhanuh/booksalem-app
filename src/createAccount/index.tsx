@@ -7,8 +7,22 @@ import { graphql } from '@apollo/react-hoc';
 import { createAccountSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 import CREATE_ACCOUNT_MUTATION from './createAccount.graphql'
+import { NavigationScreenProp } from 'react-navigation';
 
-class CreateAccount extends React.PureComponent {
+interface State {
+  values: object;
+  errors: { [key: string]: string } | {};
+  isSubmitting: boolean;
+  loading: boolean;
+}
+
+
+interface Props {
+  mutate: (variables: any) => Promise<any | null>;
+  navigation: NavigationScreenProp<any, any> | any;
+}
+
+class CreateAccount extends React.PureComponent<Props, State> {
   state = {
     values: {
       name: '',
@@ -17,7 +31,13 @@ class CreateAccount extends React.PureComponent {
       confirmPassword: '',
       phone: ''
     },
-    errors: {},
+    errors: {
+      name: '',
+      email: '',
+      phone: '',
+      password: '',
+      confirmPassword: ''
+    },
     isSubmitting: false,
     loading: false
   }
@@ -80,7 +100,7 @@ class CreateAccount extends React.PureComponent {
     return (
       <View style={styles.container}>
         <Text style={styles.title} h2>Create account</Text>
-        <Card style={styles.card}>
+        <Card containerStyle={styles.card}>
           <Input value={name} onChangeText={text => this.onChangeText('name', text)} placeholder="Name" errorStyle={{ color: 'red' }}
             errorMessage={errors.name} />
           <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: 'red' }}

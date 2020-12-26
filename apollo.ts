@@ -1,10 +1,15 @@
-import { ApolloClient, InMemoryCache } from '@apollo/client';
+import { ApolloClient, InMemoryCache, split } from '@apollo/client';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { WebSocketLink } from '@apollo/client/link/ws';
+import { setContext } from '@apollo/link-context';
 import { createUploadLink } from "apollo-upload-client";
 // import { onError } from "@apollo/client/link/error";
-import { setContext } from '@apollo/link-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
-const GRAPHQL_API_URL = 'http://localhost:4000/';
+const HOST = Platform.OS === 'ios' ? 'localhost' : '10.0.2.2'
+const GRAPHQL_API_URL = `http://${HOST}:4000/`;
+const GRAPHQL_WS_URL = `ws://${HOST}:4000/`;
 
 /**
 uncomment the code below in case you are using a GraphQL API that requires some form of
@@ -12,7 +17,7 @@ authentication. asyncAuthLink will run every time your request is made and use t
 you provide while making the request.
 */
 
-const asyncAuthLink = setContext(async () => {
+const asyncAuthLink: any = setContext(async () => {
   const TOKEN = await AsyncStorage.getItem('@kemetsehaftalem/token');
 
   return {
@@ -20,6 +25,18 @@ const asyncAuthLink = setContext(async () => {
       Authorization: TOKEN ? `Bearer ${TOKEN}` : '',
     },
   };
+});
+
+// Create a WebSocket link:
+const wsLink = new WebSocketLink({
+  uri: GRAPHQL_WS_URL,
+  options: {
+    reconnect: true,
+    lazy: true,
+    connectionParams: async () => {
+      authToken: await AsyncStorage.getItem('@kemetsehaftalem/token')
+    },
+  },
 });
 
 // const link = onError(({ graphQLErrors, networkError }) => {
@@ -60,9 +77,21 @@ const cache = new InMemoryCache({
   }
 })
 
+const splitLink = split(
+  ({ query }) => {
+    const definition = getMainDefinition(query);
+    return (
+      definition.kind === 'OperationDefinition' &&
+      definition.operation === 'subscription'
+    );
+  },
+  wsLink,
+  asyncAuthLink.concat(uploadLink),
+);
+
 export const apolloClient = new ApolloClient({
   cache,
   // link: uploadLink,
-  link: asyncAuthLink.concat(uploadLink),
+  link: splitLink,
 });
 

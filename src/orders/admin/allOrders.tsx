@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
 import { Text, ListItem, Avatar, Card, Button, Badge, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
 import { colorsLocal } from '../../theme';
 import moment from "moment";
+import NEW_ORDER_SUBSCRIPTION from './latestOrder.graphql';
+import { NavigationScreenProp } from 'react-navigation';
 
 const GET_ORDERS_ADMIN_QUERY = gql`
   query {
@@ -32,12 +34,40 @@ const GET_ORDERS_ADMIN_QUERY = gql`
   } 
 `
 
-const AllOrders = ({ navigation }) => {
-  const { data, loading, error } = useQuery(GET_ORDERS_ADMIN_QUERY);
+interface Props {
+  navigation: NavigationScreenProp<any, any> | any;
+}
+
+const AllOrders: React.SFC<Props> = ({ navigation }) => {
+  const { data, loading, error, subscribeToMore } = useQuery(GET_ORDERS_ADMIN_QUERY);
 
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
   }
+
+  // Similar to componentDidMount and componentDidUpdate:
+  useEffect(() => {
+    // Update getAllOrders
+    subscribeToMore({
+      document: NEW_ORDER_SUBSCRIPTION,
+      updateQuery: (prev, { subscriptionData }) => {
+        console.log("prev", prev);
+        console.log("subscriptionData", subscriptionData);
+
+        if (!subscriptionData.data) {
+          return prev;
+        }
+
+        // update prev with new data
+        return {
+          getAllOrders: [
+            ...prev.getAllOrders,
+            subscriptionData.data.latestOrder.order,
+          ],
+        };
+      },
+    })
+  }, []);
 
   const renderFooter = () => {
     if (loading) {
@@ -67,14 +97,14 @@ const AllOrders = ({ navigation }) => {
         keyExtractor={(item) => item.id.toString()}
         ItemSeparatorComponent={renderSeprator}
         renderItem={({ item }) => (
-          <Card style={styles.card}>
+          <Card containerStyle={styles.card}>
             <Text style={styles.text}>
               <Text style={styles.label}>Name: </Text>{item.name}
             </Text>
             <Text>
               <Text style={styles.label}>Email: </Text>{item.email}
             </Text>
-            <Text style={styles.text, { marginBottom: 8 }}>
+            <Text style={styles.textPhone}>
               <Text style={styles.label}>Phone: </Text>{item.phone}
             </Text>
             <Card.Divider />
@@ -146,7 +176,7 @@ const AllOrders = ({ navigation }) => {
                   name="eye"
                   size={20}
                   style={{ marginRight: 10 }}
-                  color={colors.white}
+                  color='white'
                 />
               }
               onPress={() => { navigation.push('ViewUserOrdersAdmin', { name: 'View user orders (Admin view)', id: item.id }) }}
@@ -200,6 +230,10 @@ const styles = StyleSheet.create({
   },
   text: {
     textTransform: 'capitalize'
+  },
+  textPhone: {
+    textTransform: 'capitalize',
+    marginBottom: 8
   },
   currency: {
     fontSize: 12,

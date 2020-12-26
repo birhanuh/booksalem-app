@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, SafeAreaView, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
 import { Text, ListItem, Avatar, Button, Badge, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -6,13 +6,46 @@ import { useQuery } from '@apollo/client';
 import { colorsLocal } from '../theme';
 import moment from "moment";
 import GET_USER_ORDERS_QUERY from './userOrders.graphql';
+import UPDATED_ORDER_SUBSCRIPTION from './updatedOrder.graphql';
+import { NavigationScreenProp } from 'react-navigation';
 
-const UserOrders = ({ navigation }) => {
-  const { data, loading, error } = useQuery(GET_USER_ORDERS_QUERY);
+interface Props {
+  navigation: NavigationScreenProp<any, any> | any;
+}
+
+const UserOrders: React.SFC<Props> = ({ navigation }) => {
+  const { data, loading, error, subscribeToMore } = useQuery(GET_USER_ORDERS_QUERY);
 
   if (error) {
     return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
   }
+
+  // Similar to componentDidMount and componentDidUpdate:
+  useEffect(() => {
+    // Update getUserCheckouts
+    subscribeToMore({
+      document: UPDATED_ORDER_SUBSCRIPTION,
+      updateQuery: (prev, { subscriptionData }) => {
+        console.log("prev", prev);
+        console.log("subscriptionData", subscriptionData);
+
+        if (!subscriptionData.data) {
+          return prev;
+        }
+
+        // update prev with new data
+        return {
+          getUserOrders: prev.getUserOrders.map(order => {
+            if (order.id === subscriptionData.data.updatedOrder.order.id) {
+              return subscriptionData.data.updatedOrder.order
+            }
+            return order
+          })
+
+        };
+      },
+    })
+  }, []);
 
   const renderFooter = () => {
     if (loading) {
@@ -40,6 +73,7 @@ const UserOrders = ({ navigation }) => {
           title='Go to Books' onPress={() => { navigation.navigate('Books', { screen: 'Books' }) }} /></>}
       <FlatList
         data={getUserOrders}
+        ListFooterComponent={renderFooter}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => {
           let badgeStatus
@@ -102,6 +136,12 @@ const styles = StyleSheet.create({
     marginBottom: 26,
     paddingHorizontal: 12,
     paddingVertical: 12
+  },
+  button: {
+    borderRadius: 0,
+    marginLeft: 0,
+    marginRight: 0,
+    marginBottom: 0
   },
   info: {
     color: colorsLocal.info,

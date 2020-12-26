@@ -30,6 +30,8 @@ import Settings from "../settings";
 import Authors from "../author/authors";
 import { colors } from "react-native-elements";
 
+import UserCheckoutNotification from "./userCheckoutNotification";
+
 const AuthStack = createStackNavigator();
 const AuthStackScreen = () => (
   <AuthStack.Navigator headerMode='none'>
@@ -51,14 +53,14 @@ const BookStackScreen = () => (
   <BookStack.Navigator>
     <BookStack.Screen name='Books' component={Books} />
     <BookStack.Screen name='AddBook' component={AddBook} />
-    <BookStack.Screen name='ViewBook' component={ViewBook} options={({ route }) => ({
-      title: route.params.name
+    <BookStack.Screen name='ViewBook' component={ViewBook} options={(opt: any) => ({
+      title: opt.route.params.name
     })} />
-    <BookStack.Screen name='EditBook' component={EditBook} options={({ route }) => ({
-      title: route.params.name
+    <BookStack.Screen name='EditBook' component={EditBook} options={(opt: any) => ({
+      title: opt.route.params.name
     })} />
-    <BookStack.Screen name='Authors' component={Authors} options={({ route }) => ({
-      title: route.params.name
+    <BookStack.Screen name='Authors' component={Authors} options={(opt: any) => ({
+      title: opt.route.params.name
     })} />
   </BookStack.Navigator>
 )
@@ -127,7 +129,14 @@ const TabsScreen = () => {
         iconColor = focused
           ? color
           : colors.grey3;
-      } else if (route.name === 'Checkouts') {
+      } else if (route.name === 'Checkouts' && !me.is_admin) {
+        iconName = 'credit-card-alt';
+        iconColor = focused
+          ? color
+          : colors.grey3;
+        // Icon with mini badge
+        return <UserCheckoutNotification iconName={iconName} iconColor={iconColor} size={size} />
+      } else if (route.name === 'Checkouts' && me.is_admin) {
         iconName = 'credit-card-alt';
         iconColor = focused
           ? color
@@ -260,10 +269,7 @@ export default () => {
     </SafeAreaView>);
   }
 
-  let me
-  if (data) {
-    me = data.me;
-  }
+  let me = data && data.me
 
   return (
     <MeContext.Provider value={me}>

@@ -4,8 +4,13 @@ import { Text, Badge, Card, Divider, colors, Button, ButtonGroup, SearchBar } fr
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery } from '@apollo/client';
 import GET_AVAILABLE_BOOKS from './availableBooks.graphql';
+import { NavigationScreenProp } from 'react-navigation';
 
-const Books = ({ route, navigation }) => {
+interface Props {
+  navigation: NavigationScreenProp<any, any> | any;
+}
+
+const Books: React.SFC<Props> = ({ navigation }) => {
   const [searchString, setSearchString] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -71,13 +76,13 @@ const Books = ({ route, navigation }) => {
         data={getAvailableBooks}
         keyExtractor={(item) => item.id.toString()}
         ListHeaderComponent={<>
-          <SearchBar placeholder='Search...' lightTheme round containerStyle={{ position: 'fixed' }} onChangeText={updateSearch} value={searchString} />
+          <SearchBar placeholder='Search...' lightTheme round onChangeText={updateSearch} value={searchString} />
 
           <ButtonGroup
             onPress={updateIndex}
             selectedIndex={selectedIndex}
             buttons={['Rent', 'Sell']}
-            containerStyle={{ textTransform: 'uppercase' }}
+            containerStyle={{ textTransform: 'uppercase' } as any}
           />
         </>}
         ListFooterComponent={renderFooter}
@@ -104,7 +109,7 @@ const Books = ({ route, navigation }) => {
           }
           return (
             // implemented with Text and Button as children
-            <Card style={styles.card}>
+            <Card containerStyle={styles.card}>
               <Card.Title>{item.title}</Card.Title>
               <Text style={styles.type}>{item.type}</Text>
               <Card.Divider />
@@ -142,11 +147,11 @@ const Books = ({ route, navigation }) => {
               <Divider style={styles.divider} />
               <Text style={styles.rating}>
                 {item.rating}
-                <Icon id='1' name='star' style={styles.star} />
-                <Icon id='2' name='star' style={styles.star} />
-                <Icon id='3' name='star' style={styles.star} />
-                <Icon id='4' name='star' style={styles.star} />
-                <Icon id='5' name='star' style={styles.star} />
+                <Icon name='star' style={styles.star} />
+                <Icon name='star' style={styles.star} />
+                <Icon name='star' style={styles.star} />
+                <Icon name='star' style={styles.star} />
+                <Icon name='star' style={styles.star} />
               </Text>
 
               <Divider style={styles.divider} />
@@ -158,7 +163,7 @@ const Books = ({ route, navigation }) => {
                     name="plus-circle"
                     size={20}
                     style={{ marginRight: 10 }}
-                    color={colors.white}
+                    color="white"
                   />
                 }
                 onPress={() => { navigation.push('ViewBook', { name: 'View book', id: item.id }) }}

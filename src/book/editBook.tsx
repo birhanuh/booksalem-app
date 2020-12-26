@@ -14,8 +14,26 @@ import GET_LANGUAGES_QUERY from './languages.graphql';
 import GET_CATEGORIES_QUERY from './categories.graphql';
 import GET_AUTHORS_QUERY from '../author/authors.graphql';
 import GET_AVAILABLE_BOOKS from './availableBooks.graphql';
+import { NavigationScreenProp } from 'react-navigation';
 
-class EditBook extends React.PureComponent {
+interface State {
+  values: object;
+  errors: { [key: string]: string } | {};
+  isSubmitting: boolean;
+  loading: boolean;
+}
+
+
+interface Props {
+  updateBookMutation: (variables: any) => Promise<any | null>;
+  navigation: NavigationScreenProp<any, any> | any;
+  route: any;
+  getAuthorsQuery: any;
+  getCategoriesQuery: any;
+  getLanguagesQuery: any;
+}
+
+class EditBook extends React.PureComponent<Props, State> {
   state = {
     values: {
       id: this.props.route.params.book.id,
@@ -30,9 +48,19 @@ class EditBook extends React.PureComponent {
       languageId: null,
       price: '',
       description: '',
-      coverFile: ''
+      coverFile: { uri: '', type: '' }
     },
-    errors: {},
+    errors: {
+      updateBook: '',
+      title: '',
+      authorId: null,
+      publishedDate: '',
+      categoryId: null,
+      isbn: null,
+      languageId: null,
+      price: '',
+      coverFile: null
+    },
     isSubmitting: false,
     loading: false
   }
@@ -153,7 +181,7 @@ class EditBook extends React.PureComponent {
       <ScrollView>
         <View style={styles.container}>
           {/* Error message */}
-          {errors.updateBook && <View style={{ backgroundColor: colors.error }}><Text color="white">{errors.updateBook}</Text></View>}
+          {errors.updateBook && <View style={{ backgroundColor: colors.error }}><Text style={{ color: "white" }}>{errors.updateBook}</Text></View>}
 
           <Input value={title || book.title} onChangeText={text => this.onChangeText('title', text)} placeholder="Title" errorStyle={{ color: colors.error }}
             errorMessage={errors.title} />
@@ -278,7 +306,7 @@ class EditBook extends React.PureComponent {
             value={description || book.description}
             multiline={true}
             numberOfLines={4}
-            onChangeText={text => this.onChangeText('description', text)} placeholder="Description" errorStyle={{ color: colors.error }} />
+            onChangeText={text => this.onChangeText('description', text)} placeholder="Description" />
 
           <Divider style={{ marginTop: 20, marginBottom: 20 }} />
 
@@ -289,7 +317,7 @@ class EditBook extends React.PureComponent {
                 name="pencil-square-o"
                 size={20}
                 style={{ marginRight: 10 }}
-                color={colors.white}
+                color='white'
               />
             }
             onPress={this.submit}
@@ -309,7 +337,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: 'white',
     paddingHorizontal: 10,
     paddingVertical: 20,
     marginVertical: 16,
