@@ -62,16 +62,13 @@ const UserCheckoutNotification: React.SFC<Props> = ({ iconName, iconColor, size 
     })
   }, []);
 
-  const renderFooter = () => {
-    if (loading) {
-      return (
-        <SafeAreaView style={styles.loadingContainer}>
-          <ActivityIndicator size='large' />
-        </SafeAreaView>
-      );
-    } else {
-      return null
-    }
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size='large' />
+      </SafeAreaView>
+    );
   }
 
   return (

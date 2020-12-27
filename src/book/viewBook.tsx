@@ -4,8 +4,8 @@ import { Card, Button, Text, colors, Divider, Badge, Overlay } from 'react-nativ
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { graphql } from '@apollo/react-hoc';
 import compose from "lodash.flowright";
+import { connect } from "react-redux";
 
-import { MeContext } from "../context";
 import { colorsLocal } from '../theme';
 import GET_USERS_ORDERS_QUERY from '../orders/userOrders.graphql';
 import GET_AVAILABLE_BOOKS from './availableBooks.graphql';
@@ -14,9 +14,29 @@ import DELETE_BOOK_MUTATION from './deleteBook.graphql';
 import CREATE_ORDER_MUTATION from './createOrder.graphql';
 import CANCEL_ORDER_MUTATION from './cancelOrder.graphql';
 import { formatServerErrors } from '../utils/formatError';
+import { NavigationScreenProp } from 'react-navigation';
 
-const ViewBook = ({ navigation, getBookQuery, deleteBookMutation, createOrderMutation, getUsersOrdersQuery, cancelOrderMutation }) => {
-  const me = React.useContext(MeContext);
+interface Me {
+  __typename: string;
+  id: string;
+  email: string;
+  is_admin: boolean,
+  name: string;
+  phone: string;
+}
+
+interface Props {
+  me: Me;
+  navigation: NavigationScreenProp<any, any> | any;
+  getBookQuery: any;
+  deleteBookMutation: any;
+  createOrderMutation: any;
+  getUsersOrdersQuery: any;
+  cancelOrderMutation: any;
+}
+
+const ViewBook: React.SFC<Props> = ({ me, navigation, getBookQuery, deleteBookMutation, createOrderMutation, getUsersOrdersQuery, cancelOrderMutation }) => {
+
   const [errors, setErrors] = useState({ message: '' } || {});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -180,7 +200,7 @@ const ViewBook = ({ navigation, getBookQuery, deleteBookMutation, createOrderMut
       break;
   }
 
-  return [
+  return (<>
     <ScrollView key='scrollview'>
       <View style={styles.container}>
         {Object.keys(errors).length !== 0 && <View style={styles.errorMsgContainer}>
@@ -270,7 +290,7 @@ const ViewBook = ({ navigation, getBookQuery, deleteBookMutation, createOrderMut
           title="Delete book"
         /></View>}
       </View>
-    </ScrollView>,
+    </ScrollView>
     <Overlay key='overlay' isVisible={visible} onBackdropPress={toggleOverlay}>
       <View style={styles.deleteBtnContainer}>
         <Text style={styles.errorModal}>Are you sure you want to delete this Book?!</Text>
@@ -290,7 +310,7 @@ const ViewBook = ({ navigation, getBookQuery, deleteBookMutation, createOrderMut
           title="Delete book"
         /></View>
     </Overlay>
-  ]
+  </>)
 }
 
 const styles = StyleSheet.create({
@@ -416,4 +436,4 @@ const MutationsQueries = compose(
   })
 )(ViewBook);
 
-export default MutationsQueries;
+export default connect(state => ({ me: state.me }))(MutationsQueries)

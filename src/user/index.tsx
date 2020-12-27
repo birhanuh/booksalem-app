@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, SafeAreaView, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
+import { SafeAreaView, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Card, colors } from 'react-native-elements';
 import { graphql, gql } from '@apollo/react-hoc';
@@ -169,7 +169,7 @@ class User extends React.PureComponent<Props, State> {
       errors: errorsCloned
     }))
 
-    const { data: { checkPassword: { user, errors } } } = await this.props.checkPasswordMutation({ variables: { password: value } })
+    const { data: { checkPassword: { errors } } } = await this.props.checkPasswordMutation({ variables: { password: value } })
 
     if (errors) {
       this.setState({ errors: formatServerErrors(errors) })

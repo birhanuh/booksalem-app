@@ -3,21 +3,39 @@ import { View, StyleSheet } from 'react-native';
 import { ListItem, Button, Divider, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
 
-import { MeContext } from "../context";
 import { NavigationScreenProp } from 'react-navigation';
+import { removeMe } from "../actions/meActions";
+import { removeToken } from '../actions/tokenActions';
 
-interface Props {
-  navigation: NavigationScreenProp<any, any> | any;
+interface Me {
+  __typename: string;
+  id: string;
+  email: string;
+  is_admin: boolean,
+  name: string;
+  phone: string;
 }
 
-const Settings: React.SFC<Props> = ({ navigation }) => {
-  const me = React.useContext(MeContext);
+interface Props {
+  me: Me;
+  navigation: NavigationScreenProp<any, any> | any;
+  removeMeAction: (me: {}) => void;
+  removeTokenAction: (token: string) => void;
+}
 
-  const signOut = () => {
+const Settings: React.SFC<Props> = ({ me, navigation, removeMeAction, removeTokenAction }) => {
+
+  const signOut = async () => {
     // Remove token from async storage
     try {
-      AsyncStorage.removeItem('@kemetsehaftalem/token')
+      await AsyncStorage.removeItem('@kemetsehaftalem/token')
+
+      await removeMeAction(null);
+      await removeTokenAction('removed');
+
       navigation.navigate('Books', { screen: 'Books' })
     }
     catch (exception) {
@@ -98,4 +116,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Settings
+export default connect(null, dispacth => bindActionCreators({ removeMeAction: removeMe, removeTokenAction: removeToken }, dispacth))(Settings)

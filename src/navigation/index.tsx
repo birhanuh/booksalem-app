@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import { SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
 import { Avatar } from 'react-native-elements';
 import { NavigationContainer } from '@react-navigation/native';
@@ -7,8 +7,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useQuery, gql } from '@apollo/client';
-
-import { MeContext } from "../context";
+import { connect } from "react-redux";
 
 import { reactNavigationTheme } from '../theme';
 
@@ -31,7 +30,6 @@ import Authors from "../author/authors";
 import { colors } from "react-native-elements";
 
 import UserCheckoutNotification from "./userCheckoutNotification";
-
 const AuthStack = createStackNavigator();
 const AuthStackScreen = () => (
   <AuthStack.Navigator headerMode='none'>
@@ -97,18 +95,15 @@ const CheckoutAdminStackScreen = () => (
 )
 
 const SettingsStack = createStackNavigator();
-const SettingsStackScreen = () => (
+const SettingsStackScreen = (me) => (
   <SettingsStack.Navigator>
-    <SettingsStack.Screen name='Settings' component={Settings} />
+    <SettingsStack.Screen name='Settings' children={({ navigation }) => (<Settings me={me} navigation={navigation} />)} />
     <SettingsStack.Screen name='User' component={User} />
   </SettingsStack.Navigator>
 )
 
 const Tabs = createBottomTabNavigator();
-const TabsScreen = () => {
-  const me = useContext(MeContext);
-  console.log('Tabs: ', me)
-
+const TabsScreen = (me) => {
   return (<Tabs.Navigator screenOptions={({ route }) => ({
     tabBarIcon: ({ focused, color, size }) => {
       let iconName;
@@ -153,7 +148,7 @@ const TabsScreen = () => {
     <Tabs.Screen name="Books" component={BookStackScreen} />
     <Tabs.Screen name="Orders" component={me.is_admin ? OrderAdminStackScreen : OrderStackScreen} options={{ title: me.is_admin ? "Users orders" : "My orders" }} />
     <Tabs.Screen name="Checkouts" component={me.is_admin ? CheckoutAdminStackScreen : CheckoutStackScreen} options={{ title: me.is_admin ? "Users checkouts" : 'My checkouts' }} />
-    <Tabs.Screen name={'Settings'} component={SettingsStackScreen} />
+    <Tabs.Screen name={'Settings'} children={(me) => SettingsStackScreen(me)} />
   </Tabs.Navigator>
   );
 }
@@ -208,9 +203,9 @@ const DrawerScreen = () => (
   </Drawer.Navigator>);
 
 const DrawerAdmin = createDrawerNavigator();
-const DrawerAdminScreen = () => (
+const DrawerAdminScreen = (me) => (
   <DrawerAdmin.Navigator initialRouteName="Books">
-    <DrawerAdmin.Screen name="Books" component={TabsScreen} />
+    <DrawerAdmin.Screen name="Books" component={(me) => TabsScreen(me)} />
     <DrawerAdmin.Screen name='AddBook' component={AddBook} options={{ title: "Add book" }} />
     <DrawerAdmin.Screen name='Authors' component={Authors} options={{ title: "Add author" }} />
     <DrawerAdmin.Screen name="Settings" component={SettingsStackScreen} />
@@ -221,7 +216,7 @@ const RootStackScreen = ({ me }) => (
   <RootStack.Navigator>
     {me ? (<RootStack.Screen
       name="Kemetsehaft alem"
-      component={me.is_admin ? DrawerAdminScreen : DrawerScreen}
+      component={me.is_admin ? (me) => DrawerAdminScreen(me) : DrawerScreen}
       options={({ navigation }) => ({
         animationEnabled: false,
         headerRight: () => {
@@ -260,8 +255,22 @@ const GET_ME_QUERY = gql`
   }
 `
 
-export default () => {
-  const { loading, data } = useQuery(GET_ME_QUERY);
+interface Me {
+  __typename: string;
+  id: string;
+  email: string;
+  is_admin: boolean,
+  name: string;
+  phone: string;
+}
+
+interface Props {
+  me: Me;
+  token: string;
+}
+
+const navigation: React.SFC<Props> = ({ me, token }) => {
+  const { loading, data } = useQuery(GET_ME_QUERY, { fetchPolicy: "network-only" });
 
   if (loading) {
     return (<SafeAreaView style={styles.loadingContainer}>
@@ -269,16 +278,23 @@ export default () => {
     </SafeAreaView>);
   }
 
-  let me = data && data.me
+  console.log('ME: ', me, data, token)
+  let meStateOrQuery = null;
+
+  if (me) {
+    meStateOrQuery = me;
+  } else if (data && token !== 'removed') {
+    meStateOrQuery = data.me;
+  }
 
   return (
-    <MeContext.Provider value={me}>
-      <NavigationContainer theme={reactNavigationTheme}>
-        <RootStackScreen me={me} />
-      </NavigationContainer>
-    </MeContext.Provider >
+    <NavigationContainer theme={reactNavigationTheme}>
+      <RootStackScreen me={meStateOrQuery} />
+    </NavigationContainer>
   )
 }
+
+export default connect(state => ({ me: state.me, token: state.token }))(navigation)
 
 const styles = StyleSheet.create({
   loadingContainer: {
