@@ -95,6 +95,7 @@ const AllOrders: React.SFC<Props> = ({ navigation }) => {
       <FlatList
         data={getAllOrders}
         keyExtractor={(item) => item.id.toString()}
+        ListFooterComponent={renderFooter}
         ItemSeparatorComponent={renderSeprator}
         renderItem={({ item }) => (
           <Card containerStyle={styles.card}>

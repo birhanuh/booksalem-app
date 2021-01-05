@@ -4,21 +4,23 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Card, Divider, colors } from 'react-native-elements';
 import { graphql } from '@apollo/react-hoc';
+import { NavigationScreenProp } from 'react-navigation';
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
 import { signInSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 import SIGN_IN_MUTATION from './signIn.graphql'
-import { NavigationScreenProp } from 'react-navigation';
-import { MeContext } from "../context";
+import { setMe } from "../actions/meActions";
+import { setToken } from '../actions/tokenActions';
 
 interface State {
   values: object;
   errors: { [key: string]: string } | {};
-  user: User,
   isSubmitting: boolean;
   loading: boolean;
 }
 
-interface User {
+interface Me {
   __typename: string;
   id: string;
   email: string;
@@ -30,12 +32,12 @@ interface User {
 interface Props {
   mutate: (variables: any) => Promise<any | null>;
   navigation: NavigationScreenProp<any, any> | any;
+  setMeAction: (me: Me) => void;
+  setTokenAction: (token: string) => void;
 }
 
 
 class SignIn extends React.PureComponent<Props, State> {
-  static contextType = MeContext
-
   state = {
     values: {
       email: '',
@@ -45,7 +47,6 @@ class SignIn extends React.PureComponent<Props, State> {
       email: '',
       password: ''
     },
-    user: null,
     isSubmitting: false,
     loading: false
   }
@@ -74,8 +75,9 @@ class SignIn extends React.PureComponent<Props, State> {
         AsyncStorage.setItem('@kemetsehaftalem/token', token)
         console.log("Resp: ", user, token)
 
-        // Provide user to Context
-        this.setState({ user });
+        // Set user to State
+        this.props.setMeAction(user);
+        this.props.setTokenAction(token);
 
         this.props.navigation.navigate('Books', { screen: 'Books', params: { me: user } })
       }
@@ -98,7 +100,7 @@ class SignIn extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { values: { email, password }, user, loading, isSubmitting, errors } = this.state
+    const { values: { email, password }, loading, isSubmitting, errors } = this.state
 
     if (loading) {
       return (
@@ -109,48 +111,46 @@ class SignIn extends React.PureComponent<Props, State> {
     };
 
     return (
-      <MeContext.Provider value={user}>
-        <View style={styles.container}>
-          <Text style={styles.title} h2>Sign In</Text>
-          <Card containerStyle={styles.card}>
-            <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: colors.error }}
-              errorMessage={errors.email} leftIcon={{ type: 'font-awesome', name: 'envelope', size: 15 }} style={{ marginRight: 10 }} />
-            <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: colors.error }}
-              errorMessage={errors.password} leftIcon={{ type: 'font-awesome', name: 'lock', size: 20 }} style={{ marginRight: 10 }} />
-            <Button
-              style={{ marginTop: 20 }}
-              icon={
-                <Icon
-                  name="sign-in"
-                  size={20}
-                  color="white"
-                  style={{ marginRight: 10 }}
-                />
-              }
-              onPress={this.submit} disabled={isSubmitting}
-              title="Sign in"
-            />
-          </Card>
+      <View style={styles.container}>
+        <Text style={styles.title} h2>Sign In</Text>
+        <Card containerStyle={styles.card}>
+          <Input value={email} onChangeText={text => this.onChangeText('email', text)} autoCapitalize="none" placeholder="Email" errorStyle={{ color: colors.error }}
+            errorMessage={errors.email} leftIcon={{ type: 'font-awesome', name: 'envelope', size: 15 }} style={{ marginRight: 10 }} />
+          <Input secureTextEntry={true} value={password} onChangeText={text => this.onChangeText('password', text)} placeholder="Password" errorStyle={{ color: colors.error }}
+            errorMessage={errors.password} leftIcon={{ type: 'font-awesome', name: 'lock', size: 20 }} style={{ marginRight: 10 }} />
+          <Button
+            style={{ marginTop: 20 }}
+            icon={
+              <Icon
+                name="sign-in"
+                size={20}
+                color="white"
+                style={{ marginRight: 10 }}
+              />
+            }
+            onPress={this.submit} disabled={isSubmitting}
+            title="Sign in"
+          />
+        </Card>
 
-          <Divider style={{ marginTop: 30, marginBottom: 30 }} />
+        <Divider style={{ marginTop: 30, marginBottom: 30 }} />
 
-          <View style={styles.btnContainer} >
-            <Button
-              type="outline"
-              icon={
-                <Icon
-                  name="user-plus"
-                  size={20}
-                  style={{ marginRight: 10 }}
-                  color={colors.primary}
-                />
-              }
-              onPress={() => { this.props.navigation.push('CreateAccount') }}
-              title="Don't have an account?"
-            />
-          </View>
+        <View style={styles.btnContainer} >
+          <Button
+            type="outline"
+            icon={
+              <Icon
+                name="user-plus"
+                size={20}
+                style={{ marginRight: 10 }}
+                color={colors.primary}
+              />
+            }
+            onPress={() => { this.props.navigation.push('CreateAccount') }}
+            title="Don't have an account?"
+          />
         </View>
-      </MeContext.Provider>
+      </View>
     )
   }
 }
@@ -184,4 +184,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default graphql(SIGN_IN_MUTATION)(SignIn);
+export default connect(null, dispacth => bindActionCreators({ setMeAction: setMe, setTokenAction: setToken }, dispacth))(graphql(SIGN_IN_MUTATION)(SignIn));
