@@ -65,7 +65,7 @@ const ViewBook: React.SFC<Props> = ({ me, navigation, getBookQuery, deleteBookMu
   };
 
   const createOrder = async (bookId) => {
-    if (!!isSubmitting) {
+    if (isSubmitting) {
       setIsSubmitting(true)
     }
 
@@ -81,7 +81,7 @@ const ViewBook: React.SFC<Props> = ({ me, navigation, getBookQuery, deleteBookMu
   }
 
   const cancelOrder = async (bookId) => {
-    if (!!isSubmitting) {
+    if (isSubmitting) {
       setIsSubmitting(true)
     }
 
@@ -98,7 +98,7 @@ const ViewBook: React.SFC<Props> = ({ me, navigation, getBookQuery, deleteBookMu
 
   const deleteBook = (id) => {
     console.log('Delete book...')
-    if (!!isSubmitting) {
+    if (isSubmitting) {
       setIsSubmitting(true)
     }
 

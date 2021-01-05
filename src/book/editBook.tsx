@@ -17,8 +17,8 @@ import GET_AVAILABLE_BOOKS from './availableBooks.graphql';
 import { NavigationScreenProp } from 'react-navigation';
 
 interface State {
-  values: object;
-  errors: { [key: string]: string } | {};
+  values: Record<string, unknown>;
+  errors: { [key: string]: string } | Record<string, unknown>;
   isSubmitting: boolean;
   loading: boolean;
 }
@@ -80,7 +80,7 @@ class EditBook extends React.PureComponent<Props, State> {
     const { values: { id, title, authorId, publishedDate, type, status, condition, isbn, categoryId, languageId, price, description, coverFile }, errors } = this.state
 
     let coverFileWraped
-    if (!!coverFile) {
+    if (coverFile) {
       const tokens = coverFile.uri.split('/');
       const name = tokens[tokens.length - 1];
 
@@ -135,7 +135,7 @@ class EditBook extends React.PureComponent<Props, State> {
 
   onChangeText = (key, value) => {
     // Clone errors form state to local variable
-    let errors = Object.assign({}, this.state.errors);
+    const errors = Object.assign({}, this.state.errors);
     delete errors[key];
 
     this.setState(state => ({
@@ -153,12 +153,12 @@ class EditBook extends React.PureComponent<Props, State> {
   }
 
   pickImage = async () => {
-    let result = await launchImageLibraryAsync({ allowsEditing: true, aspect: [4, 3] });
+    const result = await launchImageLibraryAsync({ allowsEditing: true, aspect: [4, 3] });
 
     if (!result.cancelled) {
       // Clone errors form state to local variable
-      let errors = Object.assign({}, this.state.errors);
-      delete errors["coverFile"];
+      const errors = Object.assign({}, this.state.errors);
+      delete errors.coverFile;
 
       this.setState({ values: { ...this.state.values, coverFile: result }, errors })
     }
@@ -299,7 +299,7 @@ class EditBook extends React.PureComponent<Props, State> {
               style={{ alignSelf: 'center', marginBottom: 10 }}
             />
             {errors.coverFile && <Text style={styles.cutomeTextError}>{errors.coverFile}</Text>}
-            {<Image source={{ uri: coverFile ? coverFile.uri : book.cover_url }} style={styles.image} PlaceholderContent={<ActivityIndicator />} />}
+            {<Image source={{ uri: coverFile ? coverFile.uri : book.cover_url }} style={styles.image} PlaceholderContent={<ActivityIndicator />} accessibilityIgnoresInvertColors />}
           </View>
           <TextInput
             style={styles.description}

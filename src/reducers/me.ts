@@ -15,16 +15,13 @@ interface Me {
   phone: string;
 }
 
-export default (state: {} = null, action: Action = { id: '', type: '', me: null }) => {
+export default (state: Record<string, unknown> = null, action: Action = { id: '', type: '', me: null }) => {
   switch (action.type) {
     case SET_ME:
       return action.me;
 
     case REMOVE_ME:
-      let me = Object.assign({}, state);
-      me = null;
-
-      return me;
+      return null;
 
     default:
       return state;

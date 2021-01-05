@@ -1,6 +1,6 @@
 import React from "react";
 import { SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
-import { Avatar } from 'react-native-elements';
+import { Avatar, colors } from 'react-native-elements';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -27,9 +27,10 @@ import FormCheckoutAdmin from "../checkout/admin/formCheckout";
 import EditCheckoutAdmin from "../checkout/admin/editCheckout";
 import Settings from "../settings";
 import Authors from "../author/authors";
-import { colors } from "react-native-elements";
+
 
 import UserCheckoutNotification from "./userCheckoutNotification";
+
 const AuthStack = createStackNavigator();
 const AuthStackScreen = () => (
   <AuthStack.Navigator headerMode='none'>
@@ -97,7 +98,7 @@ const CheckoutAdminStackScreen = () => (
 const SettingsStack = createStackNavigator();
 const SettingsStackScreen = (me) => (
   <SettingsStack.Navigator>
-    <SettingsStack.Screen name='Settings' children={({ navigation }) => (<Settings me={me} navigation={navigation} />)} />
+    <SettingsStack.Screen name='Settings'>{({ navigation }) => (<Settings me={me} navigation={navigation} />)}</SettingsStack.Screen>
     <SettingsStack.Screen name='User' component={User} />
   </SettingsStack.Navigator>
 )
@@ -106,8 +107,8 @@ const Tabs = createBottomTabNavigator();
 const TabsScreen = (me) => {
   return (<Tabs.Navigator screenOptions={({ route }) => ({
     tabBarIcon: ({ focused, color, size }) => {
-      let iconName;
-      let iconColor;
+      let iconName: string;
+      let iconColor: string;
 
       if (route.name === 'Books') {
         iconName = 'book';
@@ -148,7 +149,7 @@ const TabsScreen = (me) => {
     <Tabs.Screen name="Books" component={BookStackScreen} />
     <Tabs.Screen name="Orders" component={me.is_admin ? OrderAdminStackScreen : OrderStackScreen} options={{ title: me.is_admin ? "Users orders" : "My orders" }} />
     <Tabs.Screen name="Checkouts" component={me.is_admin ? CheckoutAdminStackScreen : CheckoutStackScreen} options={{ title: me.is_admin ? "Users checkouts" : 'My checkouts' }} />
-    <Tabs.Screen name={'Settings'} children={(me) => SettingsStackScreen(me)} />
+    <Tabs.Screen name={'Settings'}>{(me) => SettingsStackScreen(me)}</Tabs.Screen>
   </Tabs.Navigator>
   );
 }
@@ -225,7 +226,7 @@ const RootStackScreen = ({ me }) => (
           const tokens = me.name.split(' ');
           name = tokens[0].charAt(0);
 
-          if (!!tokens[1]) {
+          if (tokens[1]) {
             name += tokens[1].charAt(0).toUpperCase();
           }
           // Avatar with Title
@@ -269,7 +270,7 @@ interface Props {
   token: string;
 }
 
-const navigation: React.SFC<Props> = ({ me, token }) => {
+const NavigationKA: React.SFC<Props> = ({ me, token }) => {
   const { loading, data } = useQuery(GET_ME_QUERY, { fetchPolicy: "network-only" });
 
   if (loading) {
@@ -294,7 +295,7 @@ const navigation: React.SFC<Props> = ({ me, token }) => {
   )
 }
 
-export default connect(state => ({ me: state.me, token: state.token }))(navigation)
+export default connect(state => ({ me: state.me, token: state.token }))(NavigationKA)
 
 const styles = StyleSheet.create({
   loadingContainer: {

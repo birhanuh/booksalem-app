@@ -36,10 +36,6 @@ interface Props {
 const UserCheckouts: React.SFC<Props> = ({ navigation }) => {
   const { data, loading, error, subscribeToMore } = useQuery(GET_USER_CHECKOUTS);
 
-  if (error) {
-    return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
-  }
-
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
     // Update getUserCheckouts 
@@ -62,7 +58,13 @@ const UserCheckouts: React.SFC<Props> = ({ navigation }) => {
         };
       },
     })
-  }, []);
+  }, [subscribeToMore]);
+
+  const count = useContext(UserCheckoutNotificationContext)
+
+  if (error) {
+    return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
+  }
 
   const renderFooter = () => {
     if (loading) {
@@ -76,15 +78,13 @@ const UserCheckouts: React.SFC<Props> = ({ navigation }) => {
     }
   }
 
-  const count = useContext(UserCheckoutNotificationContext)
-
   const { getUserCheckouts } = !!data && data
 
   return (
     <UserCheckoutNotificationContext.Provider value={0}>
       <View style={styles.container}>
         {getUserCheckouts && getUserCheckouts.length === 0 && <><View style={styles.infoMsgContainer}>
-          <Text style={styles.info}>You don't have checkouts yet. Go to Books screen, select the Book you wish like to order and place your order. Then the Admin will decide when to checkout the book for you.</Text>
+          <Text style={styles.info}>You don&apos;t have checkouts yet. Go to Books screen, select the Book you wish like to order and place your order. Then the Admin will decide when to checkout the book for you.</Text>
         </View>
           <Button
             icon={<Icon name='book' color='#ffffff' size={15}

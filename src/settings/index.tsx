@@ -22,7 +22,7 @@ interface Me {
 interface Props {
   me: Me;
   navigation: NavigationScreenProp<any, any> | any;
-  removeMeAction: (me: {}) => void;
+  removeMeAction: (me: Record<string, unknown>) => void;
   removeTokenAction: (token: string) => void;
 }
 

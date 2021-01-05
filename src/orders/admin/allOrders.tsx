@@ -41,10 +41,6 @@ interface Props {
 const AllOrders: React.SFC<Props> = ({ navigation }) => {
   const { data, loading, error, subscribeToMore } = useQuery(GET_ORDERS_ADMIN_QUERY);
 
-  if (error) {
-    return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
-  }
-
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
     // Update getAllOrders
@@ -67,7 +63,11 @@ const AllOrders: React.SFC<Props> = ({ navigation }) => {
         };
       },
     })
-  }, []);
+  }, [subscribeToMore]);
+
+  if (error) {
+    return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
+  }
 
   const renderFooter = () => {
     if (loading) {

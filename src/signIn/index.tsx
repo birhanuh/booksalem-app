@@ -14,7 +14,8 @@ import { setMe } from "../actions/meActions";
 import { setToken } from '../actions/tokenActions';
 
 interface State {
-  values: object;
+  values: Record<string, unknown>;
+  // eslint-disable-next-line @typescript-eslint/ban-types
   errors: { [key: string]: string } | {};
   isSubmitting: boolean;
   loading: boolean;
@@ -86,7 +87,7 @@ class SignIn extends React.PureComponent<Props, State> {
 
   onChangeText = (key, value) => {
     // Clone errors form state to local variable
-    let errors = Object.assign({}, this.state.errors);
+    const errors = Object.assign({}, this.state.errors);
     delete errors[key];
 
     this.setState(state => ({

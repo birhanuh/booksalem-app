@@ -6,7 +6,7 @@ interface Action {
   token: string
 }
 
-export default (state: string = '', action: Action = { id: '', type: '', token: null }) => {
+export default (state = '', action: Action = { id: '', type: '', token: null }) => {
   switch (action.type) {
     case SET_TOKEN:
       return action.token;

@@ -23,7 +23,7 @@ interface State {
   profile: Profile;
   password: Password;
   disablePasswordChange: boolean;
-  errors: { [key: string]: string } | {};
+  errors: { [key: string]: string } | Record<string, unknown>;
   isSubmitting: boolean;
   loading: boolean;
 }
@@ -128,7 +128,7 @@ class User extends React.PureComponent<Props, State> {
 
   onChangeProfile = (key, value) => {
     // Clone errors form state to local variable
-    let errors = Object.assign({}, this.state.errors);
+    const errors = Object.assign({}, this.state.errors);
     delete errors[key];
 
     this.setState(state => ({
@@ -143,7 +143,7 @@ class User extends React.PureComponent<Props, State> {
 
   onChangeNewPasword = (key, value) => {
     // Clone errors form state to local variable
-    let errors = Object.assign({}, this.state.errors);
+    const errors = Object.assign({}, this.state.errors);
     delete errors[key];
 
     this.setState(state => ({
@@ -158,7 +158,7 @@ class User extends React.PureComponent<Props, State> {
 
   onChangePasword = async (key, value) => {
     // Clone errors form state to local variable
-    let errorsCloned = Object.assign({}, this.state.errors);
+    const errorsCloned = Object.assign({}, this.state.errors);
     delete errorsCloned[key];
 
     this.setState(state => ({

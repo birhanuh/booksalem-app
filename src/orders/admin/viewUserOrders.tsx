@@ -148,16 +148,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     paddingHorizontal: 20
   },
-  card: {
-    shadowColor: colors.divider,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
   text: {
     textTransform: 'capitalize'
   },

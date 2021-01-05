@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { View, TextInput, Image, SafeAreaView, ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
+import { View, TextInput, SafeAreaView, ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -15,11 +15,11 @@ import GET_ALL_CHECKOUTS from './allCheckouts.graphql';
 import { NavigationScreenProp } from 'react-navigation';
 
 interface State {
-  values: object;
-  orders: object;
-  users: object;
+  values: Record<string, unknown>;
+  orders: Record<string, unknown>;
+  users: Record<string, unknown>;
   showReturnDate: boolean,
-  errors: { [key: string]: string } | {};
+  errors: { [key: string]: string } | Record<string, unknown>;
   isSubmitting: boolean;
   loading: boolean;
 }
@@ -29,6 +29,7 @@ interface Props {
   updateCheckoutMutation: (variables: any) => Promise<any | null>;
   navigation: NavigationScreenProp<any, any> | any;
   getCheckoutByIdQuery: any;
+  route: any;
 }
 
 class EditCheckout extends PureComponent<Props, State> {
@@ -135,7 +136,7 @@ class EditCheckout extends PureComponent<Props, State> {
 
   onChangeText = (key, value) => {
     // Clone errors form state to local variable
-    let errors = Object.assign({}, this.state.errors);
+    const errors = Object.assign({}, this.state.errors);
     delete errors[key];
 
     this.setState(state => ({
@@ -149,7 +150,7 @@ class EditCheckout extends PureComponent<Props, State> {
   }
 
   onReturnDateChange = (event, selectedDate) => {
-    let errors = Object.assign({}, this.state.errors);
+    const errors = Object.assign({}, this.state.errors);
     delete errors['returnDate'];
 
     this.setState(state => ({
@@ -253,7 +254,7 @@ class EditCheckout extends PureComponent<Props, State> {
             </Picker>
             {errors.status && <Text style={styles.customTextError}>{errors.status}</Text>}
             <View style={styles.infoMsgContainer}>
-              <Text style={styles.info}>Total price is prefilled stright from Book's price. If you want to make a change, do the change from Book's price.</Text></View>
+              <Text style={styles.info}>Total price is prefilled stright from Book&apos;s price. If you want to make a change, do the change from Book&apos;s price.</Text></View>
             <Input label="Total price" value={totalPrice.toString()} disabled errorStyle={{ color: colors.error }}
               errorMessage={errors.totalPrice} />
             {bookStatus === 'rented' && <View style={styles.returnDateContainer}>
@@ -328,18 +329,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center'
   },
-  orderInfoContainer: {
-    marginBottom: 30,
-  },
   cardTitle: {
     textAlign: 'left',
     fontSize: 18
-  },
-  pickerTitle: {
-    fontSize: 18,
-    color: colors.grey3,
-    marginLeft: 10,
-    marginRight: 10
   },
   infoMsgContainer: {
     backgroundColor: colorsLocal.infoBg,
@@ -377,9 +369,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   currency: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#49BD78',
+    marginTop: 10,
     textTransform: 'uppercase'
   },
   text: {
@@ -456,7 +446,7 @@ const MutationQueries = compose(
   }),
   graphql(GET_CHECKOUT_BY_ID_QUERY, {
     name: "getCheckoutByIdQuery",
-    options: (props: any) => ({
+    options: (props: Props) => ({
       variables: {
         id: props.route.params.id
       }

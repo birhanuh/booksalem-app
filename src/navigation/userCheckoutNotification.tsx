@@ -37,10 +37,6 @@ const UserCheckoutNotification: React.SFC<Props> = ({ iconName, iconColor, size 
   const { loading, error, subscribeToMore } = useQuery(GET_USER_CHECKOUTS);
   const [count, setCount] = useState(useContext(UserCheckoutNotificationContext));
 
-  if (error) {
-    return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
-  }
-
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
     // Update getUserCheckouts
@@ -60,8 +56,11 @@ const UserCheckoutNotification: React.SFC<Props> = ({ iconName, iconColor, size 
         setCount(countIncrement)
       },
     })
-  }, []);
+  }, [subscribeToMore, count]);
 
+  if (error) {
+    return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
+  }
 
   if (loading) {
     return (
@@ -94,12 +93,7 @@ const styles = StyleSheet.create({
     color: colors.error,
     fontSize: 18,
     paddingHorizontal: 20
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 20
-  },
+  }
 });
 
 export default UserCheckoutNotification

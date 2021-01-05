@@ -19,7 +19,7 @@ interface Mutate {
 
 interface State {
   name: string;
-  errors: { [key: string]: string } | {};
+  errors: { [key: string]: string } | Record<string, unknown>;
   isSubmitting: boolean;
 }
 
@@ -85,7 +85,7 @@ class AddAuthor extends PureComponent<ChildProps<Props & Mutate>, State> {
 
   onChangeText = (key, value) => {
     // Clone errors form state to local variable
-    let errors = Object.assign({}, this.state.errors);
+    const errors = Object.assign({}, this.state.errors);
     delete errors[key];
 
     this.setState({ name: value, errors, isSubmitting: false })

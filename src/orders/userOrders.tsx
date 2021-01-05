@@ -16,10 +16,6 @@ interface Props {
 const UserOrders: React.SFC<Props> = ({ navigation }) => {
   const { data, loading, error, subscribeToMore } = useQuery(GET_USER_ORDERS_QUERY);
 
-  if (error) {
-    return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
-  }
-
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
     // Update getUserCheckouts
@@ -45,7 +41,11 @@ const UserOrders: React.SFC<Props> = ({ navigation }) => {
         };
       },
     })
-  }, []);
+  }, [subscribeToMore]);
+
+  if (error) {
+    return (<SafeAreaView style={styles.loadingContainer}><Text style={styles.error}>{error.message}</Text></SafeAreaView>);
+  }
 
   const renderFooter = () => {
     if (loading) {
@@ -64,7 +64,7 @@ const UserOrders: React.SFC<Props> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       { getUserOrders && getUserOrders.length === 0 && <><View style={styles.infoMsgContainer}>
-        <Text style={styles.info}>You don't haver orders placed yet. Go to Books screen, select the Book you wish like to order and place your order by clicking the 'Order' button.</Text>
+        <Text style={styles.info}>You don&apos;t haver orders placed yet. Go to Books screen, select the Book you wish like to order and place your order by clicking the &apos;Order&apos; button.</Text>
       </View>
         <Button
           icon={<Icon name='book' color='#ffffff' size={15}
