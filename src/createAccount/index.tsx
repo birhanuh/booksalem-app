@@ -3,15 +3,15 @@ import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Card, Divider, colors } from 'react-native-elements';
-import { graphql } from '@apollo/react-hoc';
+import { graphql } from '@apollo/client/react/hoc';
 import { createAccountSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 import CREATE_ACCOUNT_MUTATION from './createAccount.graphql'
 import { NavigationScreenProp } from 'react-navigation';
 
 interface State {
-  values: object;
-  errors: { [key: string]: string } | {};
+  values: Record<string, unknown>;
+  errors: { [key: string]: string } | Record<string, unknown>;
   isSubmitting: boolean;
   loading: boolean;
 }
@@ -73,7 +73,7 @@ class CreateAccount extends React.PureComponent<Props, State> {
 
   onChangeText = (key, value) => {
     // Clone errors form state to local variable
-    let errors = Object.assign({}, this.state.errors);
+    const errors = Object.assign({}, this.state.errors);
     delete errors[key];
 
     this.setState(state => ({

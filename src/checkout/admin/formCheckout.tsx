@@ -1,10 +1,11 @@
 import React, { PureComponent } from 'react';
-import { View, TextInput, Image, SafeAreaView, ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
+import { View, TextInput, SafeAreaView, ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Divider, Card, ListItem, Avatar, colors } from 'react-native-elements';
-import { graphql, gql } from '@apollo/react-hoc';
+import { graphql } from '@apollo/client/react/hoc';
+import { gql } from '@apollo/client';
 import compose from "lodash.flowright";
 import { createCheckoutSchema } from '../../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../../utils/formatError';
@@ -15,12 +16,12 @@ import GET_ALL_CHECKOUTS from './allCheckouts.graphql';
 import { NavigationScreenProp } from 'react-navigation';
 
 interface State {
-  values: object;
-  books: object;
-  users: object;
+  values: Record<string, unknown>;
+  books: Record<string, unknown>;
+  users: Record<string, unknown>;
   order_date: string,
   showReturnDate: boolean,
-  errors: { [key: string]: string } | {};
+  errors: { [key: string]: string } | Record<string, unknown>;
   isSubmitting: boolean;
   loading: boolean;
 }
@@ -30,6 +31,7 @@ interface Props {
   createCheckoutMutation: (variables: any) => Promise<any | null>;
   navigation: NavigationScreenProp<any, any> | any;
   getOrderByIdQuery: any;
+  route: any;
 }
 
 class FormCheckout extends PureComponent<Props, State> {
@@ -104,7 +106,7 @@ class FormCheckout extends PureComponent<Props, State> {
       this.setState({ isSubmitting: true })
 
       this.props.createCheckoutMutation({
-        variables: { orderId, returnDate, totalPrice: parseInt(totalPrice), orderStatus, bookStatus, status, note },
+        variables: { orderId, returnDate, totalPrice: parseInt(totalPrice, 10), orderStatus, bookStatus, status, note },
         update: (store, { data: { createCheckout } }) => {
           const { checkout, errors } = createCheckout;
 
@@ -146,7 +148,7 @@ class FormCheckout extends PureComponent<Props, State> {
 
   onChangeText = (key, value) => {
     // Clone errors form state to local variable
-    let errors = Object.assign({}, this.state.errors);
+    const errors = Object.assign({}, this.state.errors);
     delete errors[key];
 
     this.setState(state => ({
@@ -160,8 +162,8 @@ class FormCheckout extends PureComponent<Props, State> {
   }
 
   onReturnDateChange = (event, selectedDate) => {
-    let errors = Object.assign({}, this.state.errors);
-    delete errors['returnDate'];
+    const errors = Object.assign({}, this.state.errors);
+    delete errors.returnDate;
 
     this.setState(state => ({
       values: { ...state.values, returnDate: selectedDate }, errors
@@ -188,7 +190,7 @@ class FormCheckout extends PureComponent<Props, State> {
     return (
       <ScrollView>
         {/* Error message */}
-        {errors.createCheckout && <View style={{ backgroundColor: colors.error }}><Text style={{ color: "white" }}>{errors.createCheckout}</Text></View>}
+        {errors.createCheckout && <View style={{ backgroundColor: colors.error }}><Text style={styles.errorText}>{errors.createCheckout}</Text></View>}
         <Card>
           <Card.Title style={styles.cardTitle}>User details</Card.Title>
           <Card.Divider />
@@ -207,7 +209,7 @@ class FormCheckout extends PureComponent<Props, State> {
           <Card.Divider />
           <View>
             <View style={styles.bookInfoContainer}>
-              <ListItem containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0 }}>
+              <ListItem containerStyle={styles.listItem}>
                 <Avatar source={{ uri: books && books.cover_url }} />
                 <ListItem.Content>
                   <ListItem.Title>{books && books.title}</ListItem.Title>
@@ -233,7 +235,7 @@ class FormCheckout extends PureComponent<Props, State> {
               </Text> */}
             </View>
             <View style={styles.infoMsgContainer}>
-              <Text style={styles.info}>Book status is prefilld according to Book type. If you want to change it, change it from Book's type.</Text></View>
+              <Text style={styles.info}>Book status is prefilld according to Book type. If you want to change it, change it from Book&apos;s type.</Text></View>
             <Input label="Book status" value={bookStatus} disabled errorStyle={{ color: colors.error }}
               errorMessage={errors.bookStatus} />
           </View>
@@ -254,9 +256,9 @@ class FormCheckout extends PureComponent<Props, State> {
               itemStyle={styles.picker}
               selectedValue={orderStatus}
               prompt='Select Order status'
-              onValueChange={(itemValue, itemIndex) => {
-                let errors = Object.assign({}, this.state.errors);
-                delete errors['orderStatus'];
+              onValueChange={(itemValue, _itemIndex) => {
+                const errors = Object.assign({}, this.state.errors);
+                delete errors.orderStatus;
 
                 this.setState({ values: { ...this.state.values, orderStatus: itemValue }, errors })
               }
@@ -271,11 +273,11 @@ class FormCheckout extends PureComponent<Props, State> {
           <Card.Divider />
           <View>
             <View style={styles.infoMsgContainer}>
-              <Text style={styles.info}>Checkout status is prefilld according to Book's type. If you want to make a change to it, do the change from Book's type.</Text></View>
+              <Text style={styles.info}>Checkout status is prefilld according to Book&apos;s type. If you want to make a change to it, do the change from Book&apos;s type.</Text></View>
             <Input label="Checkout status" value={status} disabled errorStyle={{ color: colors.error }}
               errorMessage={errors.status} />
             <View style={styles.infoMsgContainer}>
-              <Text style={styles.info}>Total price is prefilled stright from Book's price. If you want to make a change, do the change from Book's price.</Text></View>
+              <Text style={styles.info}>Total price is prefilled stright from Book&apos;s price. If you want to make a change, do the change from Book&apos;s price.</Text></View>
             <Input label="Total price" value={totalPrice.toString()} disabled errorStyle={{ color: colors.error }}
               errorMessage={errors.totalPrice} />
             {bookStatus === 'rented' && <View style={styles.returnDateContainer}>
@@ -314,7 +316,7 @@ class FormCheckout extends PureComponent<Props, State> {
                 <Icon
                   name="check-circle"
                   size={20}
-                  style={{ marginRight: 10 }}
+                  style={styles.icon}
                   color='white'
                 />
               }
@@ -350,6 +352,10 @@ const styles = StyleSheet.create({
   },
   orderInfoContainer: {
     marginBottom: 30,
+  },
+  listItem: {
+    borderTopWidth: 0,
+    borderBottomWidth: 0
   },
   cardTitle: {
     textAlign: 'left',
@@ -410,6 +416,12 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase'
   },
   dateText: {
+    marginRight: 10
+  },
+  errorText: {
+    color: "white"
+  },
+  icon: {
     marginRight: 10
   }
 });
@@ -473,7 +485,7 @@ const MutationQueries = compose(
   }),
   graphql(GET_ORDER_BY_ID_QUERY, {
     name: "getOrderByIdQuery",
-    options: (props: any) => ({
+    options: (props: Props) => ({
       variables: {
         id: props.route.params.id
       }

@@ -3,7 +3,7 @@ import { View, SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Card, Divider, colors } from 'react-native-elements';
-import { graphql } from '@apollo/react-hoc';
+import { graphql } from '@apollo/client/react/hoc';
 import { NavigationScreenProp } from 'react-navigation';
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";

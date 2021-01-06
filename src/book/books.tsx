@@ -129,7 +129,7 @@ const Books: React.SFC<Props> = ({ navigation }) => {
                     <Text style={styles.label}>Status: </Text><Badge
                       status={bookBadgeStatus}
                       value={item.status}
-                      containerStyle={{ marginTop: -4 }}
+                      containerStyle={styles.statusBadge}
                     />
                   </Text>
                 </View>
@@ -162,7 +162,7 @@ const Books: React.SFC<Props> = ({ navigation }) => {
                   <Icon
                     name="plus-circle"
                     size={20}
-                    style={{ marginRight: 10 }}
+                    style={styles.icon}
                     color="white"
                   />
                 }
@@ -247,7 +247,14 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: '600',
+  },
+  statusBadge: {
+    marginTop: -4
+  },
+  icon: {
+    marginRight: 10
   }
+
 });
 
 export default Books

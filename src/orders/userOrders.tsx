@@ -68,7 +68,7 @@ const UserOrders: React.SFC<Props> = ({ navigation }) => {
       </View>
         <Button
           icon={<Icon name='book' color='#ffffff' size={15}
-            style={{ marginRight: 10 }} />}
+            style={styles.icon} />}
           buttonStyle={styles.button}
           title='Go to Books' onPress={() => { navigation.navigate('Books', { screen: 'Books' }) }} /></>}
       <FlatList
@@ -91,7 +91,7 @@ const UserOrders: React.SFC<Props> = ({ navigation }) => {
               break;
           }
           return (<ListItem
-            containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0, marginBottom: 10 }}>
+            containerStyle={styles.listItem}>
             <Avatar source={{ uri: item.books.cover_url }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: item.books.id } }) }} />
             <ListItem.Content>
               <ListItem.Title style={{ color: colors.primary }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: item.books.id } }) }}>{item.books.title}</ListItem.Title>
@@ -149,8 +149,16 @@ const styles = StyleSheet.create({
     lineHeight: 25,
     paddingHorizontal: 20
   },
+  listItem: {
+    borderTopWidth: 0,
+    borderBottomWidth: 0,
+    marginBottom: 10
+  },
   currency: {
     fontSize: 12
+  },
+  icon: {
+    marginRight: 10
   }
 });
 

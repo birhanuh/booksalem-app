@@ -1,8 +1,9 @@
 import React, { PureComponent } from 'react'
-import { View } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Card, Text, Input, Button, colors } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { graphql, gql, ChildProps } from '@apollo/react-hoc';
+import { graphql } from '@apollo/client/react/hoc';
+import { gql } from '@apollo/client';
 import { addAuthorSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
 import GET_AUTHORS from './authors.graphql';
@@ -23,7 +24,7 @@ interface State {
   isSubmitting: boolean;
 }
 
-class AddAuthor extends PureComponent<ChildProps<Props & Mutate>, State> {
+class AddAuthor extends PureComponent<Props & Mutate, State> {
   state = {
     name: '',
     isSubmitting: false,
@@ -97,7 +98,7 @@ class AddAuthor extends PureComponent<ChildProps<Props & Mutate>, State> {
     return (
       <Card>
         {/* Error message */}
-        {errors.addAuthor && <View style={{ backgroundColor: colors.error }}><Text style={{ color: 'white' }}>{errors.addAuthor}</Text></View>}
+        {errors.addAuthor && <View style={{ backgroundColor: colors.error }}><Text style={styles.errorText}>{errors.addAuthor}</Text></View>}
 
         <Input value={name} onChangeText={text => this.onChangeText('name', text)} placeholder="Author" errorStyle={{ color: colors.error }}
           errorMessage={errors.name} />
@@ -108,7 +109,7 @@ class AddAuthor extends PureComponent<ChildProps<Props & Mutate>, State> {
             <Icon
               name="plus-circle"
               size={20}
-              style={{ marginRight: 10 }}
+              style={styles.icon}
               color='white'
             />
           }
@@ -119,6 +120,15 @@ class AddAuthor extends PureComponent<ChildProps<Props & Mutate>, State> {
     )
   }
 }
+
+const styles = StyleSheet.create({
+  errorText: {
+    color: 'white',
+  },
+  icon: {
+    marginRight: 10
+  }
+})
 
 const ADD_AUTHOR_MUTATION = gql`
   mutation($name: String!) {
@@ -134,5 +144,5 @@ const ADD_AUTHOR_MUTATION = gql`
   }
 `;
 
-export default graphql<ChildProps<Props>>(ADD_AUTHOR_MUTATION)(AddAuthor);
+export default graphql<Props & Mutate>(ADD_AUTHOR_MUTATION)(AddAuthor);
 

@@ -4,7 +4,8 @@ import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Divider, Card, ListItem, Avatar, colors } from 'react-native-elements';
-import { graphql, gql } from '@apollo/react-hoc';
+import { graphql } from '@apollo/client/react/hoc';
+import { gql } from '@apollo/client';
 import compose from "lodash.flowright";
 import { updateCheckoutSchema } from '../../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../../utils/formatError';
@@ -99,7 +100,7 @@ class EditCheckout extends PureComponent<Props, State> {
       this.setState({ isSubmitting: true })
 
       this.props.updateCheckoutMutation({
-        variables: { checkoutId, returnDate, totalPrice: parseInt(totalPrice), bookStatus, status, note },
+        variables: { checkoutId, returnDate, totalPrice: parseInt(totalPrice, 10), bookStatus, status, note },
         update: (store, { data: { updateCheckout } }) => {
           const { checkout, errors } = updateCheckout;
 
@@ -149,9 +150,9 @@ class EditCheckout extends PureComponent<Props, State> {
     }))
   }
 
-  onReturnDateChange = (event, selectedDate) => {
+  onReturnDateChange = (_event, selectedDate) => {
     const errors = Object.assign({}, this.state.errors);
-    delete errors['returnDate'];
+    delete errors.returnDate;
 
     this.setState(state => ({
       values: { ...state.values, returnDate: selectedDate }, errors
@@ -178,7 +179,7 @@ class EditCheckout extends PureComponent<Props, State> {
     return (
       <ScrollView>
         {/* Error message */}
-        {errors.updateCheckout && <View style={{ backgroundColor: colors.error }}><Text style={{ color: "white" }}>{errors.updateCheckout}</Text></View>}
+        {errors.updateCheckout && <View style={{ backgroundColor: colors.error }}><Text style={styles.errorText}>{errors.updateCheckout}</Text></View>}
         <Card>
           <Card.Title style={styles.cardTitle}>User details</Card.Title>
           <Card.Divider />
@@ -197,7 +198,7 @@ class EditCheckout extends PureComponent<Props, State> {
           <Card.Divider />
           <View>
             <View style={styles.bookInfoContainer}>
-              <ListItem containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0 }}>
+              <ListItem containerStyle={styles.listItem}>
                 <Avatar source={{ uri: orders && orders.books.cover_url }} />
                 <ListItem.Content>
                   <ListItem.Title>{orders && orders.books.title}</ListItem.Title>
@@ -228,7 +229,7 @@ class EditCheckout extends PureComponent<Props, State> {
               itemStyle={styles.picker}
               selectedValue={bookStatus}
               prompt='Select Book status'
-              onValueChange={(itemValue, itemIndex) =>
+              onValueChange={(itemValue, _itemIndex) =>
                 this.setState({ values: { ...this.state.values, bookStatus: itemValue } })
               }>
               <Picker.Item label="Available" value="available" />
@@ -246,7 +247,7 @@ class EditCheckout extends PureComponent<Props, State> {
               itemStyle={styles.picker}
               selectedValue={status}
               prompt='Select Book status'
-              onValueChange={(itemValue, itemIndex) =>
+              onValueChange={(itemValue, _itemIndex) =>
                 this.setState({ values: { ...this.state.values, status: itemValue } })
               }>
               <Picker.Item label="Open" value="open" />
@@ -295,7 +296,7 @@ class EditCheckout extends PureComponent<Props, State> {
                 <Icon
                   name="check-circle"
                   size={20}
-                  style={{ marginRight: 10 }}
+                  style={styles.icon}
                   color='white'
                 />
               }
@@ -371,6 +372,16 @@ const styles = StyleSheet.create({
   currency: {
     marginTop: 10,
     textTransform: 'uppercase'
+  },
+  errorText: {
+    color: "white"
+  },
+  icon: {
+    marginRight: 10
+  },
+  listItem: {
+    borderTopWidth: 0,
+    borderBottomWidth: 0
   },
   text: {
     textTransform: 'capitalize',

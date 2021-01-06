@@ -34,6 +34,8 @@ const wsLink = new WebSocketLink({
     reconnect: true,
     lazy: true,
     connectionParams: async () => {
+      // eslint-disable-next-line no-labels
+      // eslint-disable-next-line no-unused-labels
       authToken: await AsyncStorage.getItem('@kemetsehaftalem/token')
     },
   },

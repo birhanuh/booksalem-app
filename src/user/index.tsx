@@ -2,7 +2,8 @@ import React from 'react';
 import { SafeAreaView, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Card, colors } from 'react-native-elements';
-import { graphql, gql } from '@apollo/react-hoc';
+import { graphql } from '@apollo/client/react/hoc';
+import { gql } from '@apollo/client';
 import compose from "lodash.flowright";
 import { profileSchema, passwordSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
@@ -63,7 +64,8 @@ class User extends React.PureComponent<Props, State> {
   componentDidMount() {
     const { me: { name, email, phone } } = this.props.getMeQuery;
 
-    this.setState(state => ({
+    // eslint-disable-next-line react/no-did-mount-set-state
+    this.setState(() => ({
       profile: {
         name,
         email,
@@ -174,7 +176,7 @@ class User extends React.PureComponent<Props, State> {
     if (errors) {
       this.setState({ errors: formatServerErrors(errors) })
     } else {
-      this.setState(state => ({
+      this.setState(() => ({
         disablePasswordChange: false
       }))
     }
@@ -203,12 +205,12 @@ class User extends React.PureComponent<Props, State> {
             errorMessage={errors.phone} />
           <Button
             type="outline"
-            style={{ marginTop: 20 }}
+            style={styles.button}
             icon={
               <Icon
                 name="user-plus"
                 size={20}
-                style={{ marginRight: 10 }}
+                style={styles.icon}
                 color='steelblue'
               />
             }
@@ -227,12 +229,12 @@ class User extends React.PureComponent<Props, State> {
             errorMessage={errors.confirmNewPassword} />
           <Button
             type="outline"
-            style={{ marginTop: 20 }}
+            style={styles.button}
             icon={
               <Icon
                 name="user-plus"
                 size={20}
-                style={{ marginRight: 10 }}
+                style={styles.icon}
                 color={isSubmitting || disablePasswordChange ? colors.disabled : 'steelblue'}
               />
             }
@@ -263,6 +265,12 @@ const styles = StyleSheet.create({
   },
   titleSecondary: {
     marginBottom: 10,
+  },
+  button: {
+    marginTop: 20
+  },
+  icon: {
+    marginTop: 20
   }
 });
 

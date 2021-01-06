@@ -1,3 +1,4 @@
+import 'react-native-gesture-handler';
 import React from "react";
 import { SafeAreaView, ActivityIndicator, StyleSheet } from 'react-native';
 import { Avatar, colors } from 'react-native-elements';
@@ -270,7 +271,7 @@ interface Props {
   token: string;
 }
 
-const NavigationKA: React.SFC<Props> = ({ me, token }) => {
+const Navigation: React.SFC<Props> = ({ me, token }) => {
   const { loading, data } = useQuery(GET_ME_QUERY, { fetchPolicy: "network-only" });
 
   if (loading) {
@@ -295,7 +296,7 @@ const NavigationKA: React.SFC<Props> = ({ me, token }) => {
   )
 }
 
-export default connect(state => ({ me: state.me, token: state.token }))(NavigationKA)
+export default connect(state => ({ me: state.me, token: state.token }))(Navigation)
 
 const styles = StyleSheet.create({
   loadingContainer: {

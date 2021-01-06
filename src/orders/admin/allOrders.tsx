@@ -82,7 +82,7 @@ const AllOrders: React.SFC<Props> = ({ navigation }) => {
   }
 
   const renderSeprator = () => (
-    <View style={{ height: 1, width: '86%', backgroundColor: colors.divider, marginLeft: '14%' }} />
+    <View style={styles.renderSeprator} />
   )
 
   const { getAllOrders } = !!data && data;
@@ -144,7 +144,7 @@ const AllOrders: React.SFC<Props> = ({ navigation }) => {
                     break;
                 }
                 return (<ListItem key={order.id}
-                  containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0 }}>
+                  containerStyle={styles.listItem}>
                   <Avatar source={{ uri: order.books.cover_url }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: order.books.id } }) }} />
                   <ListItem.Content>
                     <ListItem.Title style={{ color: colors.primary }} onPress={() => { navigation.navigate('Books', { screen: 'ViewBook', params: { id: order.books.id } }) }}>{order.books.title}</ListItem.Title>
@@ -176,7 +176,7 @@ const AllOrders: React.SFC<Props> = ({ navigation }) => {
                 <Icon
                   name="eye"
                   size={20}
-                  style={{ marginRight: 10 }}
+                  style={styles.icon}
                   color='white'
                 />
               }
@@ -242,9 +242,22 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textTransform: 'uppercase'
   },
+  renderSeprator: {
+    height: 1,
+    width: '86%',
+    backgroundColor: colors.divider,
+    marginLeft: '14%'
+  },
+  listItem: {
+    borderTopWidth: 0,
+    borderBottomWidth: 0
+  },
   label: {
     fontWeight: '600',
   },
+  icon: {
+    marginRight: 10
+  }
 });
 
 export default AllOrders

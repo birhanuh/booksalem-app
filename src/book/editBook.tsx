@@ -5,7 +5,7 @@ import { Picker } from '@react-native-picker/picker';
 import { launchImageLibraryAsync } from 'expo-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Divider, Image, colors } from 'react-native-elements';
-import { graphql } from '@apollo/react-hoc';
+import { graphql } from '@apollo/client/react/hoc';
 import compose from "lodash.flowright";
 import { updateBookSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';

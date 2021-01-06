@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, SafeAreaView, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
 import { Card, Button, Text, colors, Divider, Badge, Overlay } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { graphql } from '@apollo/react-hoc';
+import { graphql } from '@apollo/client/react/hoc';
 import compose from "lodash.flowright";
 import { connect } from "react-redux";
 

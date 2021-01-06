@@ -126,7 +126,7 @@ const ViewUserOrders: React.SFC<Props> = ({ route, navigation }) => {
               <Button
                 title={order.status === 'closed' && order.books.type === 'rented' ? 'Update checkout' : 'Checkout book'}
                 buttonStyle={styles.button}
-                icon={<Icon name='credit-card-alt' color='#ffffff' style={{ marginRight: 10 }} />}
+                icon={<Icon name='credit-card-alt' color='#ffffff' style={styles.icon} />}
                 onPress={() => { navigation.navigate('Checkouts', { screen: 'FormCheckoutAdmin', params: { name: 'Checkout', id: order.id } }) }} />
               <Divider />
             </View>)
@@ -177,6 +177,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.greyOutline,
   },
+  icon: {
+    marginRight: 10
+  }
 });
 
 export default ViewUserOrders

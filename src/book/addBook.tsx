@@ -5,7 +5,7 @@ import { Picker } from '@react-native-picker/picker';
 import { launchImageLibraryAsync } from 'expo-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Text, Input, Button, Divider, Image, colors } from 'react-native-elements';
-import { graphql } from '@apollo/react-hoc';
+import { graphql } from '@apollo/client/react/hoc';
 import compose from "lodash.flowright";
 import { addBookSchema } from '../utils/validationSchema';
 import { formatYupErrors, formatServerErrors } from '../utils/formatError';
@@ -17,8 +17,8 @@ import GET_AVAILABLE_BOOKS from './availableBooks.graphql';
 import { NavigationScreenProp } from 'react-navigation';
 
 interface State {
-  values: object;
-  errors: { [key: string]: string } | {};
+  values: Record<string, unknown>;
+  errors: { [key: string]: string } | Record<string, unknown>;
   isSubmitting: boolean;
   loading: boolean;
 }
@@ -78,7 +78,7 @@ class AddBook extends PureComponent<Props, State> {
     const { values: { title, authorId, publishedDate, type, status, condition, isbn, categoryId, languageId, price, description, coverFile }, errors } = this.state
 
     let coverFileWraped
-    if (!!coverFile) {
+    if (coverFile) {
       const tokens = coverFile.uri.split('/');
       const name = tokens[tokens.length - 1];
 
@@ -94,7 +94,7 @@ class AddBook extends PureComponent<Props, State> {
 
       this.props.addBookMutation({
         variables: {
-          title, authorId, publishedDate, type, status, condition, isbn: parseInt(isbn), categoryId, languageId, price: parseFloat(price),
+          title, authorId, publishedDate, type, status, condition, isbn: parseInt(isbn, 10), categoryId, languageId, price: parseFloat(price),
           description, coverFile: coverFileWraped
         }, update: (store, { data: { addBook } }) => {
           const { book, errors } = addBook;
@@ -128,7 +128,7 @@ class AddBook extends PureComponent<Props, State> {
 
   onChangeText = (key, value) => {
     // Clone errors form state to local variable
-    let errors = Object.assign({}, this.state.errors);
+    const errors = Object.assign({}, this.state.errors);
     delete errors[key];
 
     this.setState(state => ({
@@ -146,12 +146,12 @@ class AddBook extends PureComponent<Props, State> {
   }
 
   pickImage = async () => {
-    let result = await launchImageLibraryAsync({ allowsEditing: true, aspect: [4, 3] });
+    const result = await launchImageLibraryAsync({ allowsEditing: true, aspect: [4, 3] });
 
     if (!result.cancelled) {
       // Clone errors form state to local variable
-      let errors = Object.assign({}, this.state.errors);
-      delete errors["coverFile"];
+      const errors = Object.assign({}, this.state.errors);
+      delete errors.coverFile;
 
       this.setState({ values: { ...this.state.values, coverFile: result }, errors })
     }
@@ -182,7 +182,7 @@ class AddBook extends PureComponent<Props, State> {
             <Picker
               itemStyle={styles.picker}
               selectedValue={authorId}
-              onValueChange={(itemValue, itemIndex) =>
+              onValueChange={(itemValue, _itemIndex) =>
                 this.setState({ values: { ...this.state.values, authorId: itemValue } })
               }>
               {getAuthors && getAuthors.map(author =>
@@ -196,7 +196,7 @@ class AddBook extends PureComponent<Props, State> {
                 <Icon
                   name="plus-circle"
                   size={20}
-                  style={{ marginRight: 10 }}
+                  style={styles.icon}
                   color={colors.primary}
                 />
               }
@@ -208,7 +208,7 @@ class AddBook extends PureComponent<Props, State> {
             <Picker
               itemStyle={styles.picker}
               selectedValue={type}
-              onValueChange={(itemValue, itemIndex) =>
+              onValueChange={(itemValue, _itemIndex) =>
                 this.setState({ values: { ...this.state.values, status: itemValue } })
               }>
               <Picker.Item label="Rent" value="rent" />
@@ -220,7 +220,7 @@ class AddBook extends PureComponent<Props, State> {
             <Picker
               itemStyle={styles.picker}
               selectedValue={status}
-              onValueChange={(itemValue, itemIndex) =>
+              onValueChange={(itemValue, _itemIndex) =>
                 this.setState({ values: { ...this.state.values, status: itemValue } })
               }>
               <Picker.Item label="Available" value="available" />
@@ -234,7 +234,7 @@ class AddBook extends PureComponent<Props, State> {
             <Picker
               itemStyle={styles.picker}
               selectedValue={condition}
-              onValueChange={(itemValue, itemIndex) =>
+              onValueChange={(itemValue, _itemIndex) =>
                 this.setState({ values: { ...this.state.values, condition: itemValue } })
               }>
               <Picker.Item label="New" value="new" />
@@ -251,7 +251,7 @@ class AddBook extends PureComponent<Props, State> {
             <Picker
               itemStyle={styles.picker}
               selectedValue={categoryId}
-              onValueChange={(itemValue, itemIndex) =>
+              onValueChange={(itemValue, _itemIndex) =>
                 this.setState({ values: { ...this.state.values, categoryId: itemValue } })
               }>
               {getCategories && getCategories.map(category =>
@@ -264,7 +264,7 @@ class AddBook extends PureComponent<Props, State> {
             <Picker
               itemStyle={styles.picker}
               selectedValue={languageId}
-              onValueChange={(itemValue, itemIndex) =>
+              onValueChange={(itemValue, _itemIndex) =>
                 this.setState({ values: { ...this.state.values, languageId: itemValue } })
               }>
               {getLanguages && getLanguages.map(language =>
@@ -274,7 +274,7 @@ class AddBook extends PureComponent<Props, State> {
           </View>
           <Input value={price} onChangeText={text => this.onChangeText('price', text)} placeholder="price" errorStyle={{ color: colors.error }}
             errorMessage={errors.price} />
-          <View style={{ flex: 1 }}>
+          <View style={styles.uploadPictureContainer}>
             <Text style={styles.uploadPictureTitle}>Upload picture</Text>
             <Button
               type="outline"
@@ -282,16 +282,16 @@ class AddBook extends PureComponent<Props, State> {
                 <Icon
                   name="picture-o"
                   size={20}
-                  style={{ marginRight: 10 }}
+                  style={styles.icon}
                   color={colors.primary}
                 />
               }
               onPress={this.pickImage}
               title="Choose image"
-              style={{ alignSelf: 'center', marginBottom: 10 }}
+              style={styles.button}
             />
             {errors.coverFile && <Text style={styles.customTextError}>{errors.coverFile}</Text>}
-            {!!coverFile && <Image source={{ uri: coverFile.uri }} style={styles.image} PlaceholderContent={<ActivityIndicator />} />}
+            {!!coverFile && <Image source={{ uri: coverFile.uri }} style={styles.image} PlaceholderContent={<ActivityIndicator />} accessibilityIgnoresInvertColors />}
           </View>
           <TextInput
             style={styles.description}
@@ -300,7 +300,7 @@ class AddBook extends PureComponent<Props, State> {
             numberOfLines={4}
             onChangeText={text => this.onChangeText('description', text)} placeholder="Description" />
 
-          <Divider style={{ marginTop: 20, marginBottom: 20 }} />
+          <Divider style={styles.divider} />
 
           <Button
             title="Add"
@@ -308,7 +308,7 @@ class AddBook extends PureComponent<Props, State> {
               <Icon
                 name="plus-circle"
                 size={20}
-                style={{ marginRight: 10 }}
+                style={styles.icon}
                 color='white'
               />
             }
@@ -344,6 +344,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderLeftWidth: 1,
     borderRightWidth: 1
+  },
+  uploadPictureContainer: {
+    flex: 1
   },
   authorTitle: {
     fontSize: 18,
@@ -388,6 +391,17 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: 10,
     marginTop: -5
+  },
+  button: {
+    alignSelf: 'center',
+    marginBottom: 10
+  },
+  icon: {
+    marginRight: 10
+  },
+  divider: {
+    marginTop: 20,
+    marginBottom: 20
   }
 });
 
